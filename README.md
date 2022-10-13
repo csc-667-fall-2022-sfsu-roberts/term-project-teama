@@ -11,7 +11,7 @@ Will Plachno
 Once you've checked out the repository, make sure you have nodejs and postgresql both installed.
 Then, you'll have to set up the database, migrate, and start the server by doing the following:
 1. createdb csc667teama
-2. npm install
+2. npm install (This should also do migration. If not, run the command "npm run db:migrate"
 3. Then, run the following according to your operating system:
 	a. (Linux) npm run start:dev
 	b. (Windows) npm run start:dev:win
