@@ -3,7 +3,51 @@
     URI: /register
     View: register.handlebars
 -->
+<style>
+    .formItem{
+        width: 100%;
+        display:flex;
+        flex-direction: row;
+        justify-content: end;
+        margin-bottom: 1em;
+    }
+    .formItem > label {
+        margin-right: 1em;
+    }
+    .formItem > input {
+        width: 75%;
+        margin-right: 1em;
+    }
+    .formSubmit {
+        margin-right: 1em;
+        margin-left: auto;
+        padding: 0.5em;
+    }
+</style>
+<form id="registerForm" class="d-flex flex-column justify-space-between">
 
-<h1>Registration Page</h1>
-<h2>/register</h2>
-<h2>register.handlebars</h2>
+    <h1 class="mx-auto my-2">Register to Play!</h1>
+    
+    <div class="formItem">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" placeholder="Please enter a valid email address"/>
+    </div>
+    
+    <div class="formItem">
+        <label for="pw1">Password:</label>
+        <input type="password" id="pw1" placeholder="At least 8 characters, including 1 uppercase, 1 digit, and 1 symbol"/>
+    </div>
+    
+    <div class="formItem">
+        <label for="pw2">Re-enter Password:</label>
+        <input type="password" id="pw2" placeholder="Please re-enter your password"/>
+    </div>
+    
+    <div class="formItem">
+        <label for="username">Username:</label>
+        <input type="text" id="username" placeholder="Please enter a unique username"/>
+    </div>
+
+    <button class="formSubmit">Register</button>
+
+</form>
