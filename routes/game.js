@@ -8,6 +8,11 @@ router.get("/:id", function (req, res, next) {
     res.render("game", { title: "Tock", gameId: req.params.id });
 });
 
+/* PAGE: /game/summary/:id */
+router.get("/summary/:id", function (req, res, next) {
+    res.render("summary", { title: "Tock", gameId: req.params.id });
+});
+
 /* PAGE: /game/create */
 router.get("/create", function (req, res, next) {
     res.render("create", { title: "Create Game" });

@@ -10,6 +10,8 @@
         background-color: grey;
         border: 1px black solid;
         box-shadow: 5px 5px 5px black;
+        margin-bottom:1em;
+        min-width: 20em;
     }
 
     .pageLink:hover {
@@ -25,7 +27,7 @@
 
 <h2>Router: Index</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/">
 <div class="d-flex flex-row justify-content-between">
@@ -51,7 +53,7 @@
 
 <h2>Router: Register</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/register">
 <div class="d-flex flex-row justify-content-between">
@@ -77,7 +79,7 @@
 
 <h2>Router: Login</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/login">
 <div class="d-flex flex-row justify-content-between">
@@ -93,7 +95,7 @@
 
 <h2>Router: Lobby</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/lobby">
 <div class="d-flex flex-row justify-content-between">
@@ -109,7 +111,7 @@
 
 <h2>Router: Profile</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/profile">
 <div class="d-flex flex-row justify-content-between">
@@ -125,7 +127,7 @@
 
 <h2>Router: Game</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/game/0">
 <div class="d-flex flex-row justify-content-between">
@@ -147,11 +149,21 @@
 </div>
 </a>
 
+<a class="btn mx-auto pageLink" href="/game/summary/0">
+<div class="d-flex flex-row justify-content-between">
+    <p class="font-weight-bold mx-2">Game Summary</p>
+    <div class="d-flex flex-column-reverse justify-content-start align-items-end">
+        <p>URl: /game/summary/[id: 0]</p>
+        <p>summary.handlebars</p>
+    </div>
+</div>
+</a>
+
 </div>
 
 <h2>Router: Logout</h2>
 
-<div class="d-flex flex-row mb-2">
+<div class="d-flex flex-row flex-wrap mb-2">
 
 <a class="btn mx-auto pageLink" href="/logout">
 <div class="d-flex flex-row justify-content-between">
