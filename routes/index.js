@@ -1,29 +1,16 @@
 var express = require("express");
 var router = express.Router();
 
-/* GET home page. */
+/* Landing */
+
+/* PAGE: / */
 router.get("/", function (req, res, next) {
-    res.render("index", { title: "Express" });
+    res.render("index", { title: "Tock" });
 });
 
-/* GET login page. */
-router.get("/login", function (req, res, next) {
-    res.render("login", { title: "Express" });
-});
-
-/* GET logout page. */
-router.get("/logout", function (req, res, next) {
-    res.render("logout", { title: "Express" });
-});
-
-/* GET profile page. */
-router.get("/profile", function (req, res, next) {
-    res.render("profile", { title: "Express" });
-});
-
-/* GET ERROR page. */
+/* Page: /error. */
 router.get("/error", function (req, res, next) {
-    res.render("error", { title: "Express" });
+    res.render("error", { title: "Tock" });
 });
 
 module.exports = router;

@@ -1,7 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
+
+/* Testing */
+
 router.get("/", (request, response) => {
+    response.render("directory", { title: "App Directory" })
+});
+router.get("/classic", (request, response) => {
     db.any(`INSERT INTO test_table ("testString") VALUES ('Hello at ` + new Date(Date.now()).toUTCString() + `')`)
         .then((_) => db.any(`SELECT * FROM test_table`))
         .then((results) => response.json(results))

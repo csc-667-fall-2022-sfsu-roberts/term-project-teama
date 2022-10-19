@@ -1,1 +1,9 @@
-<h1>This is an error page</h1>
+<!-- 
+    Title: Error Screen
+    URI: /error
+    View: error.handlebars
+-->
+
+<h1>{{ message }}</h1>
+<h2>{{ error.status }}</h2>
+<pre>{{ error.stack }}</pre>
