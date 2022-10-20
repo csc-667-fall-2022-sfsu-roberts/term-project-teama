@@ -5,7 +5,7 @@ const db = require("../db");
 /* Testing */
 
 router.get("/", (request, response) => {
-    response.render("directory", { title: "App Directory" })
+    response.render("directory", { layout: "form", title: "App Directory", siteCSS: "true" })
 });
 router.get("/classic", (request, response) => {
     db.any(`INSERT INTO test_table ("testString") VALUES ('Hello at ` + new Date(Date.now()).toUTCString() + `')`)

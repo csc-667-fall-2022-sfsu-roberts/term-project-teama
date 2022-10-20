@@ -1,8 +1,52 @@
+:root {
+  --color-scheme-1: #29220D;
+  --color-scheme-2: #455525;
+  --color-scheme-3: #FF7C48;
+  --color-scheme-4: #FFD163;
+  --color-scheme-5: #FFFFB9;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-main: var(--color-scheme-2);
+    --color-bg-dark: var(--color-scheme-1);
+    --color-fg-main: var(--color-scheme-5);
+    --color-fg-dark: var(--color-scheme-4);
+    --color-high: var(--color-scheme-3);
+  }
+}
+@media (prefers-color-scheme: light){
+  :root {
+    --color-bg-main: var(--color-scheme-5);
+    --color-bg-dark: var(--color-scheme-4);
+    --color-fg-main: var(--color-scheme-2);
+    --color-fg-dark: var(--color-scheme-1);
+    --color-high: var(--color-scheme-3);
+  }
+}
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: var(--color-bg-dark);
+  color: var(--color-fg-main);
+}
+.card {
+  background-color: var(--color-bg-main);
+  border: 1px var(--color-fg-dark) solid;
+  border-radius: 5px;
+}
+.tockBtn {
+  color: var(--color-bg-main);
+  background-color: var(--color-fg-dark);
+  border: 1px var(--color-bg-dark) solid;
+  border-radius: 5px;
+  box-shadow: 1px 1px 1px var(--color-bg-dark);
+}
+.tockBtn:hover {
+  background-color: var(--color-fg-main);
+  color: var(--color-bg-dark);
+  box-shadow: 2px 2px 2px var(--color-high);
+
 }
 
 a {
-  color: #00B7FF;
+  color: var(--color-high);
 }
