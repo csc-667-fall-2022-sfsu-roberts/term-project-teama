@@ -1,0 +1,29 @@
+.tockCard {
+    background-image: url("stylesheets/cards.css");
+    background-repeat: no-repeat;
+    width:40px;
+    height: 60px;
+}
+
+.diamond { background-position-y: 0px; }
+.heart { background-position-y: 60px; }
+.spade { background-position-y: 120px; }
+.club { background-position-y: 180px; }
+
+.ace { background-position-x: 0px; }
+.two { background-position-x: 40px; }
+.three { background-position-x: 80px; }
+.four { background-position-x: 120px; }
+.five { background-position-x: 160px; }
+.six { background-position-x: 200px; }
+.seven { background-position-x: 240px; }
+.eight { background-position-x: 280px; }
+.nine { background-position-x: 320px; }
+.ten { background-position-x: 360px; }
+.king { background-position-x: 400px; }
+.queen { background-position-x: 440px; }
+.jack { background-position-x: 480px; }
+
+.joker { background-position: 0px 240px; }
+.deck { background-position: 40px 240px; }
+

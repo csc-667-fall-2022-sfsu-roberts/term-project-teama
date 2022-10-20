@@ -5,7 +5,13 @@ var router = express.Router();
 
 /* PAGE: /game/:id */
 router.get("/:id", function (req, res, next) {
-    res.render("game", { title: "Tock", gameId: req.params.id });
+    res.render("game", { 
+        title: "Tock", 
+        gameId: req.params.id, 
+        siteCSS: true,
+        head: '<link rel="stylesheet" href="/stylesheets/cards.css">\n'
+            + '<link rel="stylesheet" href="/stylesheets/spots.css">'
+     });
 });
 
 /* PAGE: /game/summary/:id */

@@ -1,10 +1,52 @@
 <!-- 
     Title: Game Page
     URI: /game/
-    View: gamee.handlebars
+    View: game.handlebars
 -->
 
-<h1>Game Page</h1>
-<h2>/game/</h2>
-<h2>game.handlebars</h2>
-<h2>Chosen ID: {{ gameId }}</h2>
+<style>
+    .container {
+        align-items: stretch;
+    }
+    .gameContainer {
+        background-color: var(--color-fg-dark);
+    }
+    .chatContainer {
+    }
+    .body {
+        height: 100%;
+        min-height: 100%;
+    }
+    .chatEntry {
+        background-color: var(--color-bg-dark);
+        display:inline-flex;
+    }
+    .chatDisplay {
+        flex-grow: 2;
+        background-color: var(--color-bg-main);
+    }
+    #chatInput {
+        flex-grow:2;
+        width:auto;
+    }
+    #chatSend {
+        width:fit-content;
+    }
+</style>
+
+<div class="container-fluid h-100">
+    <div class="row no-gutters">
+        <div class="col-lg-10 gameContainer">
+
+        </div>
+        <div class="col-lg-2 d-flex flex-column justify-content-end chatContainer">
+            <div class="chatDisplay">
+
+            </div>
+            <div class="chatEntry">
+                <input id="chatInput" class="col-xs-10" type="text" />
+                <input id="chatSend" class="tockBtn col-xs-2" type="button" value="Send">
+            </div>
+        </div>
+    </div>
+</div>

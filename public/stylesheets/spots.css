@@ -1,0 +1,28 @@
+.tockSpot {
+    background-image: url("stylesheets/spots.css");
+    background-repeat: no-repeat;
+    width: 90px;
+    height: 90px;
+}
+empty { background-position: 360px 0px; }
+highlight { background-position: 360px 90px; }
+
+player1 { background-position: 0px 0px; }
+player1High { background-position: 90px 0px; }
+player1CB { background-position: 0px 90px; }
+player1CBHigh { background-position: 90px 90px; }
+
+player2 { background-position: 180px 0px; }
+player2High { background-position: 180px 90px; }
+player2CB { background-position: 0px 180px; }
+player2CBHigh { background-position: 90px 180px; }
+
+player3 { background-position: 0px 270px; }
+player3High { background-position: 90px 270px; }
+player3CB { background-position: 180px 270px; }
+player3CBHigh { background-position: 270px 270px; }
+
+player4 { background-position: 180px 180px; }
+player4High { background-position: 270px 0px; }
+player4CB { background-position: 270px 90px; }
+player4CBHigh { background-position: 270px 180px; }
