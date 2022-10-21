@@ -4,50 +4,61 @@
     View: register.handlebars
 -->
 <style>
-    .formItem{
+    .formItem {
         width: 100%;
-        display:flex;
+        display: flex;
         flex-direction: row;
         justify-content: end;
         margin-bottom: 1em;
     }
-    .formItem > label {
+
+    .formItem>label {
         margin-right: 1em;
     }
-    .formItem > input {
+
+    .formItem>input {
         width: 75%;
         margin-right: 1em;
     }
+
     .formSubmit {
         margin-right: 1em;
         margin-left: auto;
         padding: 0.5em;
     }
 </style>
-<form id="registerForm" class="d-flex flex-column justify-space-between">
+
+{{> navbar}}
+<form action="/users/register" method="post" id="registerForm" class="d-flex flex-column justify-space-between">
 
     <h1 class="mx-auto my-2">Register to Play!</h1>
+
+    {{> messages}}
     
     <div class="formItem">
         <label for="email">Email Address:</label>
-        <input type="email" id="email" placeholder="Please enter a valid email address"/>
+        <input type="email" id="email" name="email" placeholder="Please enter a valid email address" required />
     </div>
-    
+
     <div class="formItem">
         <label for="pw1">Password:</label>
-        <input type="password" id="pw1" placeholder="At least 8 characters, including 1 uppercase, 1 digit, and 1 symbol"/>
+        <input type="password" id="pw1" name="password"
+            placeholder="At least 8 characters, including 1 uppercase, 1 digit, and 1 symbol" required />
     </div>
-    
+
     <div class="formItem">
         <label for="pw2">Re-enter Password:</label>
-        <input type="password" id="pw2" placeholder="Please re-enter your password"/>
+        <input type="password" id="pw2" name="confirmpwd" placeholder="Please re-enter your password" required />
     </div>
-    
+
     <div class="formItem">
         <label for="username">Username:</label>
-        <input type="text" id="username" placeholder="Please enter a unique username"/>
+        <input type="text" id="username" name="username" placeholder="Please enter a unique username" required />
     </div>
 
     <button class="tockBtn formSubmit">Register</button>
 
+    <div class="text-center">
+        <p>Already have an account? <a href="/users/login">Login</a></p>
+    </div>
 </form>

@@ -1,30 +1,31 @@
 const { engine } = require("express-handlebars");
 
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-require("dotenv").config();
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+
 
 if (process.env.NODE_ENV === "development") {
     require("dotenv").config();
 }
 
-var indexRouter = require("./routes/index");
-var testsRouter = require("./routes/tests");
-var gameRouter = require("./routes/game");
-var lobbyRouter = require("./routes/lobby");
-var loginRouter = require("./routes/login");
-var logoutRouter = require("./routes/logout");
-var profileRouter = require("./routes/profile");
-var registerRouter = require("./routes/register");
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users")
+const testsRouter = require("./routes/tests");
+const gameRouter = require("./routes/game");
+const lobbyRouter = require("./routes/lobby");
 
-var app = express();
+const app = express();
 
 // view engine setup
-app.engine("handlebars", engine());
-//app.set("views", path.join(__dirname, "views"));
+app.engine("handlebars", engine({
+    extname: 'handlebars',
+    defaultLayout: 'main',
+    layoutsDir: __dirname + '/views/layouts/',
+    partialsDir: path.join(__dirname, '/views/partials/')
+}));
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 
@@ -34,14 +35,36 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// session setting
+const session = require('express-session');
+app.use(session({
+    secret: 'secretvalue', 
+    resave: false, 
+    saveUninitialized: false
+  })
+);
+
+// flash message
+const flash = require("connect-flash");
+app.use(flash());
+app.use((req, res, next) => {
+    res.locals.successMessage = req.flash('successMessage')
+    res.locals.errorMessage = req.flash('errorMessage')
+    res.locals.error = req.flash('error')
+    next()
+})
+
+const passport = require('passport');
+const initializePassport = require('./config/passport-config');
+initializePassport(passport);
+app.use(passport.initialize());
+app.use(passport.session()); 
+
 app.use("/", indexRouter);
+app.use("/users", usersRouter)
 app.use("/tests", testsRouter);
 app.use("/game", gameRouter);
 app.use("/lobby", lobbyRouter);
-app.use("/login", loginRouter);
-app.use("/logout", logoutRouter);
-app.use("/profile", profileRouter);
-app.use("/register", registerRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
