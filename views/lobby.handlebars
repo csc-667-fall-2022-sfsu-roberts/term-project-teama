@@ -5,3 +5,69 @@
 -->
 
 {{> navbar}}
+
+<main>
+
+    <div class="row mt-5">
+        <div class="col-6 ms-auto">
+            <div class="card">
+                <div class="card-body bg-light">
+                    <h5 class="card-title">Create A New Game</h5>
+                </div>
+                <div class="mx-auto">
+                    <button type="button" class="btn btn-primary my-3">Create New Game</button>
+                </div>
+            </div><br>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">Available Games</h5>
+                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                        additional content. This content is a little bit longer.</p>
+                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+                <div class="ms-2">
+                    <p>List Games Here</p>
+                    <table>
+                        <tr>
+                            <td>
+                                <p>Game #1 .....</p>
+                            </td>
+                            <td><button type="button" class="btn btn-primary my-3">Join</button></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p>Game #2 .....</p>
+                            </td>
+                            <td><button type="button" class="btn btn-primary my-3">Join</button></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 me-auto">
+            <div class="card ">
+                <div class="card-body bg-light">
+                    <h5 class="card-title">Chatting</h5>
+                </div>
+                <div class="display-message ms-2">
+                    <p>List Massages Here</p>
+                    <p>Message #1 .....</p>
+                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                    <p>Message #2 .....</p>
+                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+                <div class="send-message ms-2">
+                    <div class="row">
+                        <div class="col-9">
+                            <textarea id="Message" style="width: 100%;" name="Message" class="message" rows="2"
+                                maxlength="3000" required></textarea>
+                        </div>
+                        <div class="col-2">
+                            <button type="submit" id="send-msg-button" class="btn btn-primary my-3">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+</main>
