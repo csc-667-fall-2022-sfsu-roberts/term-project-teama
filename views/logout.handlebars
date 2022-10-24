@@ -3,7 +3,22 @@
     URI: /logout
     View: logout.handlebars
 -->
+<style>
+.logoutMSG{
+text-align:center;
 
-<h1>Logout Landing</h1>
-<h2>/logout</h2>
-<h2>logout.handlebars</h2>
+}
+
+</style>
+
+{{> navbar}}
+
+<div class="container-fluid">
+    {{> messages}}
+    <div class="offset-md-4 col-md-4" id="logoutBox">
+        <h1 class="logoutMSG">Logging out...</h1>
+        <h2 class="logoutMSG">If you aren't redirected within a few secondss click here...</h2>
+    </div>
+</div>
+
+
