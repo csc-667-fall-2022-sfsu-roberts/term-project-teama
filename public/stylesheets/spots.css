@@ -1,28 +1,40 @@
+:root {
+    --spot_scale: 5;
+    --spot_size_actual: 90px;
+    --spot_size: calc( var(--spot_size_actual) / var(--spot_scale) );
+    --spot_index_0: 0px;
+    --spot_index_1: var(--spot_size);
+    --spot_index_2: calc(var(--spot_size) * 2);
+    --spot_index_3: calc(var(--spot_size) * 3);
+    --spot_index_4: calc(var(--spot_size) * 4);
+
+}
+
 .tockSpot {
     background-image: url("stylesheets/spots.css");
     background-repeat: no-repeat;
-    width: 90px;
-    height: 90px;
+    width: var(--spot_size_actual);
+    height: var(--spot_size_actual);
 }
-empty { background-position: 360px 0px; }
-highlight { background-position: 360px 90px; }
+empty { background-position:         var(--spot_index_4)    var(--spot_index_0); }
+highlight { background-position:     var(--spot_index_4)    var(--spot_index_0); }
 
-player1 { background-position: 0px 0px; }
-player1High { background-position: 90px 0px; }
-player1CB { background-position: 0px 90px; }
-player1CBHigh { background-position: 90px 90px; }
+player1 { background-position:       var(--spot_index_0)    var(--spot_index_0); }
+player1High { background-position:   var(--spot_index_1)    var(--spot_index_0); }
+player1CB { background-position:     var(--spot_index_0)    var(--spot_index_1); }
+player1CBHigh { background-position: var(--spot_index_1)    var(--spot_index_1); }
 
-player2 { background-position: 180px 0px; }
-player2High { background-position: 180px 90px; }
-player2CB { background-position: 0px 180px; }
-player2CBHigh { background-position: 90px 180px; }
+player2 { background-position:       var(--spot_index_2)    var(--spot_index_0); }
+player2High { background-position:   var(--spot_index_2)    var(--spot_index_1); }
+player2CB { background-position:     var(--spot_index_0)    var(--spot_index_2); }
+player2CBHigh { background-position: var(--spot_index_1)    var(--spot_index_2); }
 
-player3 { background-position: 0px 270px; }
-player3High { background-position: 90px 270px; }
-player3CB { background-position: 180px 270px; }
-player3CBHigh { background-position: 270px 270px; }
+player3 { background-position:       var(--spot_index_0)    var(--spot_index_3); }
+player3High { background-position:   var(--spot_index_1)    var(--spot_index_3); }
+player3CB { background-position:     var(--spot_index_2)    var(--spot_index_3); }
+player3CBHigh { background-position: var(--spot_index_3)    var(--spot_index_3); }
 
-player4 { background-position: 180px 180px; }
-player4High { background-position: 270px 0px; }
-player4CB { background-position: 270px 90px; }
-player4CBHigh { background-position: 270px 180px; }
+player4 { background-position:       var(--spot_index_2)    var(--spot_index_2); }
+player4High { background-position:   var(--spot_index_3)    var(--spot_index_0); }
+player4CB { background-position:     var(--spot_index_3)    var(--spot_index_1); }
+player4CBHigh { background-position: var(--spot_index_3)    var(--spot_index_2); }

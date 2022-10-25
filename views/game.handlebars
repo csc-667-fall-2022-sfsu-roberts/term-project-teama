@@ -5,42 +5,62 @@
 -->
 
 <style>
-    .container {
-        align-items: stretch;
+    :root {
+        --player1: #45C445;
+        --player2: #003575;
+        --player3: #FFC730;
+        --player4: #424242;
     }
-    .gameContainer {
-        background-color: var(--color-fg-dark);
-    }
-    .chatContainer {
-    }
-    .body {
-        height: 100%;
-        min-height: 100%;
-    }
-    .chatEntry {
+    .container { align-items: stretch; }
+    .gameContainer { background-color: var(--color-fg-dark); }
+    .chatContainer { }
+    body, .fillHeight { min-height: 100vh; }
+    .name_player1 { color: var(--player1); }
+    .name_player2 { color: var(--player2); }
+    .name_player3 { color: var(--player3); }
+    .name_player4 { color: var(--player4); }
+    .Entry {
         background-color: var(--color-bg-dark);
         display:inline-flex;
     }
     .chatDisplay {
         flex-grow: 2;
         background-color: var(--color-bg-main);
+        margin-bottom:1em;
+        padding:0.5em;
     }
     #chatInput {
         flex-grow:2;
         width:auto;
     }
-    #chatSend {
-        width:fit-content;
-    }
+    #chatSend { width:fit-content; }
+    .chatAvatar {  }
 </style>
 
-<div class="container-fluid h-100">
-    <div class="row no-gutters">
-        <div class="col-lg-10 gameContainer">
+<div class="container-fluid fillHeight">
+    <div class="row no-gutters fillHeight">
+        <div class="col-lg-10 gameContainer" id="gameContainer">
 
         </div>
         <div class="col-lg-2 d-flex flex-column justify-content-end chatContainer">
-            <div class="chatDisplay">
+            <div class="chatDisplay" id="chatDisplay">
+
+                <div class="chatMsg">
+                    <div class="chatMsgHeader">
+                        <div class="chat_avatar avatar_base"> </div>
+                        <div class="chat_userName name_player1">testUser1</div>
+                        <div class="chat_timeStamp">yesterday at 2:45pm</div>
+                    </div>
+                    <p>Message test right here: Blah blah blah, testing, 1, 2, and... yup! You are confirmed to be awesome!</p>
+                </div>
+
+                <div class="chatMsgSys">
+                    <p>testUser1 left the game!</p>
+                </div>
+
+                <div class="chatMsgSys">
+                    <p>The game has been canceled due to no current players.</p>
+                </div>
 
             </div>
             <div class="chatEntry">

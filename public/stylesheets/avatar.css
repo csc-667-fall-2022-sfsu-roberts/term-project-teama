@@ -1,0 +1,44 @@
+:root {
+    --avatar_scale: 5;
+    --avatar_size_actual: 256px;
+    --avatar_size: calc( var(--avatar_size_actual) / var(--avatar_scale) );
+    --avatar_0: 0px;
+    --avatar_1: var(--avatar_size);
+    --avatar_2: calc( var(--avatar_size) * 2);
+    --avatar_3: calc( var(--avatar_size) * 3);
+    --avatar_4: calc( var(--avatar_size) * 4);
+    --avatar_5: calc( var(--avatar_size) * 5);
+    --avatar_6: calc( var(--avatar_size) * 6);
+    --avatar_7: calc( var(--avatar_size) * 7);
+    --avatar_8: calc( var(--avatar_size) * 8);
+    --avatar_9: calc( var(--avatar_size) * 9);
+    --avatar_10: calc( var(--avatar_size) * 10);
+    --avatar_11: calc( var(--avatar_size) * 11);
+    --avatar_12: calc( var(--avatar_size) * 12);
+    --avatar_13: calc( var(--avatar_size) * 13);
+    --avatar_14: calc( var(--avatar_size) * 14);
+    --avatar_15: calc( var(--avatar_size) * 15);
+}
+.avatar {
+    background-image: url("images/Avatar.ss.png");
+    background-repeat: no-repeat;
+    width: var(--avatar_size);
+    height: var(--avatar_size);
+    background-position-y: var(--avatar_0);
+}
+.avatar_0 { background-position-x: var(--avatar_0); }
+.avatar_1 { background-position-x: var(--avatar_1); }
+.avatar_2 { background-position-x: var(--avatar_2); }
+.avatar_3 { background-position-x: var(--avatar_3); }
+.avatar_4 { background-position-x: var(--avatar_4); }
+.avatar_5 { background-position-x: var(--avatar_5); }
+.avatar_6 { background-position-x: var(--avatar_6); }
+.avatar_7 { background-position-x: var(--avatar_7); }
+.avatar_8 { background-position-x: var(--avatar_8); }
+.avatar_9 { background-position-x: var(--avatar_9); }
+.avatar_10 { background-position-x: var(--avatar_10); }
+.avatar_11 { background-position-x: var(--avatar_11); }
+.avatar_12 { background-position-x: var(--avatar_12); }
+.avatar_13 { background-position-x: var(--avatar_13); }
+.avatar_14 { background-position-x: var(--avatar_14); }
+.avatar_15 { background-position-x: var(--avatar_15); }

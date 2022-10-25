@@ -10,7 +10,9 @@ router.get("/:id", function (req, res, next) {
         gameId: req.params.id, 
         siteCSS: true,
         head: '<link rel="stylesheet" href="/stylesheets/cards.css">\n'
-            + '<link rel="stylesheet" href="/stylesheets/spots.css">'
+            + '<link rel="stylesheet" href="/stylesheets/spots.css">\n'
+            + '<script src="/javascripts/game_board.js" defer="true" > </script>\n'
+            + '<script src="/javascripts/game_chat.js" defer="true" > </script>'
      });
 });
 

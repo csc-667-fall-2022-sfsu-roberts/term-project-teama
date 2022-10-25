@@ -1,29 +1,57 @@
-.tockCard {
-    background-image: url("stylesheets/cards.css");
-    background-repeat: no-repeat;
-    width:40px;
-    height: 60px;
+:root {
+    --card_scale: 2;
+
+    --card_width_actual: 40px;
+    --card_width: calc( var(--card_width_actual) / var(--card_scale) );
+    --card_w_0: 0px;
+    --card_w_1: var(--card_width);
+    --card_w_2: calc( var(--card_width) * 2);
+    --card_w_3: calc( var(--card_width) * 3);
+    --card_w_4: calc( var(--card_width) * 4);
+    --card_w_5: calc( var(--card_width) * 5);
+    --card_w_6: calc( var(--card_width) * 6);
+    --card_w_7: calc( var(--card_width) * 7);
+    --card_w_8: calc( var(--card_width) * 8);
+    --card_w_9: calc( var(--card_width) * 9);
+    --card_w_10: calc( var(--card_width) * 10);
+    --card_w_11: calc( var(--card_width) * 11);
+    --card_w_12: calc( var(--card_width) * 12);
+
+    --card_height_actual: 60px;
+    --card_height: calc( var(--card_height_actual) / var(--card_scale) );
+    --card_h_0: 0px;
+    --card_h_1: var(--card_height);
+    --card_h_2: calc( var(--card_height) * 2);
+    --card_h_3: calc( var(--card_height) * 3);
+    --card_h_4: calc( var(--card_height) * 4);
 }
 
-.diamond { background-position-y: 0px; }
-.heart { background-position-y: 60px; }
-.spade { background-position-y: 120px; }
-.club { background-position-y: 180px; }
+.tockCard {
+    background-image: url("images/cards.png");
+    background-repeat: no-repeat;
+    width: var(--card_width);
+    height: var(--card_height);
+}
 
-.ace { background-position-x: 0px; }
-.two { background-position-x: 40px; }
-.three { background-position-x: 80px; }
-.four { background-position-x: 120px; }
-.five { background-position-x: 160px; }
-.six { background-position-x: 200px; }
-.seven { background-position-x: 240px; }
-.eight { background-position-x: 280px; }
-.nine { background-position-x: 320px; }
-.ten { background-position-x: 360px; }
-.king { background-position-x: 400px; }
-.queen { background-position-x: 440px; }
-.jack { background-position-x: 480px; }
+.diamond { background-position-y: var(--card_h_0); }
+.heart   { background-position-y: var(--card_h_1); }
+.spade   { background-position-y: var(--card_h_2); }
+.club    { background-position-y: var(--card_h_3); }
 
-.joker { background-position: 0px 240px; }
-.deck { background-position: 40px 240px; }
+.ace     { background-position-x: var(--card_w_0); }
+.two     { background-position-x: var(--card_w_1); }
+.three   { background-position-x: var(--card_w_2); }
+.four    { background-position-x: var(--card_w_3); }
+.five    { background-position-x: var(--card_w_4); }
+.six     { background-position-x: var(--card_w_5); }
+.seven   { background-position-x: var(--card_w_6); }
+.eight   { background-position-x: var(--card_w_7); }
+.nine    { background-position-x: var(--card_w_8); }
+.ten     { background-position-x: var(--card_w_9); }
+.king    { background-position-x: var(--card_w_10); }
+.queen   { background-position-x: var(--card_w_11); }
+.jack    { background-position-x: var(--card_w_12); }
+
+.joker   { background-position: var(--card_w_0) var(--card_h_4); }
+.deck    { background-position: var(--card_w_1) var(--card_h_4); }
 

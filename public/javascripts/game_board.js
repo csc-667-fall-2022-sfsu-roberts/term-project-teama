@@ -1,0 +1,1 @@
+const gameContainerID = "gameContainer";
