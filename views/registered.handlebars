@@ -4,15 +4,18 @@
     View: registered.handlebars
 -->
 
-<style>
-    .loginBtn {
-        margin-right: 1em;
-        margin-left: auto;
-        padding: 0.5em;
-    }
-</style>
-
 {{> navbar}}
-<h1 class="mx-auto my-2">You've been registered!</h1>
-<p>Your account has been created. You can now login and start playing Tock! Click below to begin the login process.</p>
-<a class="btn btn-primary loginBtn" href="/users/login">Go to Login</a>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="offset-md-4 col-md-4">
+            <h2>Success</h2>
+            <hr>
+            <p>Your account has been created.</p> 
+            <p>You can now login and start playing Tock!</p>
+            <a class="btn btn-success w-100 mb-4" href="/users/login">Go to Login</a>
+
+        </div>
+    </div>
+</div>

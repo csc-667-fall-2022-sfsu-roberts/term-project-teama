@@ -3,62 +3,50 @@
     URI: /register
     View: register.handlebars
 -->
-<style>
-    .formItem {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: end;
-        margin-bottom: 1em;
-    }
-
-    .formItem>label {
-        margin-right: 1em;
-    }
-
-    .formItem>input {
-        width: 75%;
-        margin-right: 1em;
-    }
-
-    .formSubmit {
-        margin-right: 1em;
-        margin-left: auto;
-        padding: 0.5em;
-    }
-</style>
 
 {{> navbar}}
-<form action="/users/register" method="post" id="registerForm" class="d-flex flex-column justify-space-between">
 
-    <h1 class="mx-auto my-2">Register to Play!</h1>
-
-    {{> messages}}
-    
-    <div class="formItem">
-        <label for="email">Email Address:</label>
-        <input type="email" id="email" name="email" placeholder="Please enter a valid email address" required />
+<div class="container-fluid">
+    <div class="row">
+        <div class="offset-md-4 col-md-4">
+            <h2>Register</h2>
+            <hr>
+            {{> messages}}
+            {{!-- form --}}
+            <form class="form-horizontal" action="/users/register" method="post">
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="email">Email:</label>
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" id="email" name="email" placeholder="john.doe@gmail.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="username">Username:</label>
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="password">Password:</label>
+                    <div class="col-sm-12">
+                        <input type="password" class="form-control" id="pw1" name="password" placeholder="8 characters. Must have a digit, an uppercase, and a symbol." required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-2" for="password">Re-entry:</label>
+                    <div class="col-sm-12">
+                        <input type="password" class="form-control" id="pw2" name="confirmpw" placeholder="Password" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-12">
+                        <button type="submit" class="btn btn-success w-100 mb-4">Register</button>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p>Already registered? <a href="/users/login">Login</a></p>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <div class="formItem">
-        <label for="pw1">Password:</label>
-        <input type="password" id="pw1" name="password"
-            placeholder="At least 8 characters, including 1 uppercase, 1 digit, and 1 symbol" required />
-    </div>
-
-    <div class="formItem">
-        <label for="pw2">Re-enter Password:</label>
-        <input type="password" id="pw2" name="confirmpwd" placeholder="Please re-enter your password" required />
-    </div>
-
-    <div class="formItem">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" placeholder="Please enter a unique username" required />
-    </div>
-
-    <button class="tockBtn formSubmit">Register</button>
-
-    <div class="text-center">
-        <p>Already have an account? <a href="/users/login">Login</a></p>
-    </div>
-</form>
+</div>
