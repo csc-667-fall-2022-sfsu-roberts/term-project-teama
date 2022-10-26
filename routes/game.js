@@ -4,13 +4,16 @@ var router = express.Router();
 /* Game */
 
 /* PAGE: /game/:id */
-router.get("/:id", function (req, res, next) {
+router.get("/show/:id", function (req, res, next) {
+    let numPlayers = 4;
     res.render("game", { 
         title: "Tock", 
         gameId: req.params.id, 
-        siteCSS: true,
+        siteCSS: false,
         head: '<link rel="stylesheet" href="/stylesheets/cards.css">\n'
             + '<link rel="stylesheet" href="/stylesheets/spots.css">\n'
+            + '<link rel="stylesheet" href="/stylesheets/gameChatAvatar.css">\n'
+            + '<link rel="stylesheet" href="/stylesheets/board_'+numPlayers+'.css">\n'
             + '<script src="/javascripts/game_board.js" defer="true" > </script>\n'
             + '<script src="/javascripts/game_chat.js" defer="true" > </script>'
      });
