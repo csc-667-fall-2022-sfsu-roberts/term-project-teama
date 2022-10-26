@@ -5,7 +5,7 @@ const passport = require('passport');
 const initilizePassport = require('../config/passport-config');
 const dbQuery = require('../db/dbquery');
 initilizePassport(passport);
-const { LoggedInUser } = require('../config/authenticated');
+const { LoggedInUser, notLoggedInUser } = require('../config/authenticated');
 
 /* PAGE: /login */
 router.get("/login", LoggedInUser, function (req, res, next) {
@@ -52,6 +52,21 @@ router.get("/registered", function (req, res, next) {
 
 router.get("/reset", function (req, res, next) {
     res.render("reset");
+});
+
+router.get("/profile", notLoggedInUser, function (req, res, next) {
+    const user = req.user;
+    res.render("profile", { user: user });
+});
+
+router.get("/logout", notLoggedInUser, function (req, res, next) {
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
+        req.flash('successMessage', 'You have logged out successfully');
+        res.redirect("../users/login");
+    });
 });
 
 module.exports = router;
