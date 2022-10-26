@@ -1,5 +1,5 @@
 :root {
-    --avatar_scale: 4;
+    --avatar_scale: 6;
     --avatar_image_width_actual: 4096px;
     --avatar_image_width: calc( var(--avatar_image_width_actual) / var(--avatar_scale));
     --avatar_size_actual: 256px;

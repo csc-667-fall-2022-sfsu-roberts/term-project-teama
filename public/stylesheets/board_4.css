@@ -1,0 +1,44 @@
+
+.playerArea {
+    position: relative;
+    width: 50%;
+    height: 50%;
+    min-width:50%;
+    min-height: 50%;
+    border: 1px var(--player1) solid;
+}
+.playerArea div div{
+    position: absolute;
+}
+.startArea {}
+.homeArea {}
+.boardArea {}
+
+.start_0 { left: 10%; top: 10%; }
+.start_1 { left: 30%; top: 10%; }
+.start_2 { left: 10%; top: 30%; }
+.start_3 { left: 30%; top: 30%; }
+
+.home_0 { left: 15%; top: 90%; }
+.home_1 { left: 25%; top: 90%; }
+.home_2 { left: 35%; top: 90%; }
+.home_3 { left: 45%; top: 90%; }
+
+.board_0 { left: 0%; top: 80%; }
+.board_1 { left: 0%; top: 70%; }
+.board_2 { left: 10%; top: 70%; }
+.board_3 { left: 20%; top: 70%; }
+.board_4 { left: 30%; top: 70%; }
+.board_5 { left: 40%; top: 70%; }
+.board_6 { left: 50%; top: 70%; }
+.board_7 { left: 60%; top: 70%; }
+.board_8 { left: 70%; top: 70%; }
+.board_9 { left: 70%; top: 60%; }
+.board_10 { left: 70%; top: 50%; }
+.board_11 { left: 70%; top: 40%; }
+.board_12 { left: 70%; top: 30%; }
+.board_13 { left: 70%; top: 20%; }
+.board_14 { left: 70%; top: 10%; }
+.board_15 { left: 70%; top: 0%; }
+.board_16 { left: 80%; top: 0%; }
+.board_17 { left: 90%; top: 0%; }
