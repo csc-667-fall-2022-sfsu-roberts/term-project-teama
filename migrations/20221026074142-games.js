@@ -2,7 +2,7 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.createTable(
-      'users',
+      'games',
       {
         id: {
           type: Sequelize.INTEGER,
@@ -14,33 +14,32 @@ module.exports = {
           allowNull: false,
           unique: true
         },
-        email: {
+        state: {
           type: Sequelize.STRING,
-          allowNull: false,
-          unique: true
+          defaultValue: 0
         },
-        password: {
-          type: Sequelize.STRING,
+        creator: {
+          type: Sequelize.INTEGER,
           allowNull: false
         },
-        wins: {
-          type: Sequelize.INTEGER,
-          defaultValue: 0
-        },
-        loses: {
-          type: Sequelize.INTEGER,
-          defaultValue: 0
-        },
-        createdAt: {
+        DateCreated: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()'),
           allowNull: false
+        },
+        DateEnded: {
+          type: Sequelize.DATE,
+          allowNull: true
+        },
+        winer: {
+          type: Sequelize.INTEGER,
+          allowNull: true
         }
       }
     );
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.dropTable('users');
+    return queryInterface.dropTable('games');
   }
 };

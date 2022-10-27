@@ -1,6 +1,7 @@
-var express = require("express");
-var router = express.Router();
-
+const express = require("express");
+const router = express.Router();
+const dbQuery = require("../db/dbquery");
+const { notLoggedInUser } = require('../config/authenticated');
 /* Game */
 
 /* PAGE: /game/:id */
@@ -25,7 +26,7 @@ router.get("/summary/:id", function (req, res, next) {
 });
 
 /* PAGE: /game/create */
-router.get("/create", function (req, res, next) {
+router.get("/create", notLoggedInUser, function (req, res, next) {
     res.render("create", { title: "Create Game" });
 });
 

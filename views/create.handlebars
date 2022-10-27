@@ -4,7 +4,144 @@
     View: create.handlebars
 -->
 
-<h1>Game Creation</h1>
+{{!-- <h1>Game Creation</h1>
 <h2>/game/create</h2>
 <h2>create.handlebars</h2>
-<h2>Chosen ID: {{ gameId }}</h2>
+<h2>Chosen ID: {{ gameId }}</h2> --}}
+
+<style>
+    .pr-12 {
+        padding-right: 12px;
+    }
+
+    .b-1 {
+        border: 1px solid#ebebeb;
+    }
+
+    .mb-20 {
+        margin-bottom: 20px;
+    }
+
+    .fs-20 {
+        font-size: 25px;
+    }
+
+    .pr-16 {
+        padding-right: 16px;
+    }
+
+    .card {
+        position: relative;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: rgb(231, 229, 229);
+        background-clip: border-box;
+        border: 1px solid rgba(0, 0, 0, .125);
+        border-radius: .25rem;
+    }
+
+    .player {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-align: start;
+        align-items: flex-start;
+    }
+
+    .avatar {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        border-radius: 100%;
+        background-color: #f3eef2;
+        color: #c2c4c8;
+        text-transform: uppercase;
+    }
+</style>
+
+{{> navbar}}
+<br>
+
+<div class="container">
+    <div class="col-md-12">
+
+        <div class=" col-md-4">
+            <h3>Players At This Table</h3>
+        </div>
+
+        <div class="card b-1 mb-20">
+            <div class="player card-body">
+                <div class="player-left pr-12">
+                    <img class="avatar" src="" alt="avatar">
+                </div>
+                <div class="player-body">
+                    <div class="mb-2">
+                        <span class="fs-20 pr-16">Player1</span>
+                        <small class="fs-16 fw-300 ls-1">(table administrator)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card b-1 mb-20">
+            <div class="player card-body">
+                <div class="player-left pr-12">
+                    <img class="avatar" src="" alt="avatar">
+                </div>
+                <div class="player-body">
+                    <div class="mb-2">
+                        <span class="fs-20 pr-16">Player2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card b-1 mb-20">
+            <div class="player card-body">
+                <div class="player-left pr-12">
+                    <img class="avatar" src="" alt="avatar">
+                </div>
+                <div class="player-body">
+                    <div class="mb-2">
+                        <span class="fs-20 pr-16">Player3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card b-1 mb-20">
+            <div class="player card-body">
+                <div class="player-left pr-12">
+                    <img class="avatar" src="" alt="avatar">
+                </div>
+                <div class="player-body">
+                    <div class="mb-2">
+                        <span class="fs-20 pr-16">Player4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+
+        <div id='toolbar'>
+            <div class='wrapper text-center'>
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <a class="btn btn-primary" href="#" role="button">Open the table to others</a>
+                </div>
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <a class="btn btn-primary" href="/game/show/:id" role="button">Start game</a>
+                </div>
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <a class="btn btn-secondary" href="/lobby" role="button">Quit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

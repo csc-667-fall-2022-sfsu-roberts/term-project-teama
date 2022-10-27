@@ -65,7 +65,7 @@ router.get("/logout", notLoggedInUser, function (req, res, next) {
             return next(err);
         }
         req.flash('successMessage', 'You have logged out successfully');
-        res.redirect("../users/login");
+        res.redirect("/users/login");
     });
 });
 
