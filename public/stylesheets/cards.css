@@ -1,29 +1,31 @@
 :root {
     --card_scale: 2;
 
+    --card_image_width_actual: 520px;
+    --card_image_width: calc( var(--card_image_width_actual) / var(--card_scale));
     --card_width_actual: 40px;
     --card_width: calc( var(--card_width_actual) / var(--card_scale) );
     --card_w_0: 0px;
-    --card_w_1: var(--card_width);
-    --card_w_2: calc( var(--card_width) * 2);
-    --card_w_3: calc( var(--card_width) * 3);
-    --card_w_4: calc( var(--card_width) * 4);
-    --card_w_5: calc( var(--card_width) * 5);
-    --card_w_6: calc( var(--card_width) * 6);
-    --card_w_7: calc( var(--card_width) * 7);
-    --card_w_8: calc( var(--card_width) * 8);
-    --card_w_9: calc( var(--card_width) * 9);
-    --card_w_10: calc( var(--card_width) * 10);
-    --card_w_11: calc( var(--card_width) * 11);
-    --card_w_12: calc( var(--card_width) * 12);
+    --card_w_1: 0 - var(--card_width);
+    --card_w_2: calc( var(--card_width) * -2);
+    --card_w_3: calc( var(--card_width) * -3);
+    --card_w_4: calc( var(--card_width) * -4);
+    --card_w_5: calc( var(--card_width) * -5);
+    --card_w_6: calc( var(--card_width) * -6);
+    --card_w_7: calc( var(--card_width) * -7);
+    --card_w_8: calc( var(--card_width) * -8);
+    --card_w_9: calc( var(--card_width) * -9);
+    --card_w_10: calc( var(--card_width) * -10);
+    --card_w_11: calc( var(--card_width) * -11);
+    --card_w_12: calc( var(--card_width) * -12);
 
     --card_height_actual: 60px;
     --card_height: calc( var(--card_height_actual) / var(--card_scale) );
     --card_h_0: 0px;
-    --card_h_1: var(--card_height);
-    --card_h_2: calc( var(--card_height) * 2);
-    --card_h_3: calc( var(--card_height) * 3);
-    --card_h_4: calc( var(--card_height) * 4);
+    --card_h_1: 0 - var(--card_height);
+    --card_h_2: calc( var(--card_height) * -2);
+    --card_h_3: calc( var(--card_height) * -3);
+    --card_h_4: calc( var(--card_height) * -4);
 }
 
 .tockCard {
