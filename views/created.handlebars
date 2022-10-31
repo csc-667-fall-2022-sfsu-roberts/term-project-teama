@@ -1,0 +1,105 @@
+{{> navbar}}
+<br>
+
+<div class="container">
+    <div class="col-md-12">
+        <div class=" col-md-4">
+            <h2>Table: {{gamename}}</h2>
+        </div>
+        <div class=" col-md-4">
+            <h3>Players At This Table: {{num}}/4</h3>
+        </div>
+
+        {{#each players}}
+        <div class="card b-1 mb-20">
+            <div class="player card-body">
+                <div class="player-left pr-12">
+                    <img class="avatar" src="" alt="avatar">
+                </div>
+                <div class="player-body">
+                    <div class="mb-2">
+                        <span class="fs-20 pr-16">{{this.info.name}}</span>
+                        {{#if this.iscreator}}
+                        <small class="fs-16 fw-300 ls-1">(table administrator)</small>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+
+        <div id='toolbar'>
+            <div class='wrapper text-center'>
+                {{#if isFull}}
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <a class="btn btn-primary" href="/game/show/:id" role="button">Start game</a>
+                </div>
+                {{else}}
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <button type="submit" class="btn btn-primary" style="pointer-events: none;">Start game(not enough members)</button>
+                </div>
+                {{/if}}
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <a class="btn btn-secondary" href="/lobby" role="button" >Quit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .pr-12 {
+        padding-right: 12px;
+    }
+
+    .b-1 {
+        border: 1px solid#ebebeb;
+    }
+
+    .mb-20 {
+        margin-bottom: 20px;
+    }
+
+    .fs-20 {
+        font-size: 25px;
+    }
+
+    .pr-16 {
+        padding-right: 16px;
+    }
+
+    .card {
+        position: relative;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: rgb(231, 229, 229);
+        background-clip: border-box;
+        border: 1px solid rgba(203, 200, 200, 0.125);
+        border-radius: .25rem;
+    }
+
+    .player {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-align: start;
+        align-items: flex-start;
+    }
+
+    .avatar {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        line-height: 50px;
+        text-align: center;
+        border-radius: 100%;
+        background-color: #f3eef2;
+        color: #d9dadc;
+        text-transform: uppercase;
+    }
+</style>

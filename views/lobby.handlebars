@@ -28,18 +28,19 @@
                 <div class="ms-2">
                     <p>List Games Here</p>
                     <table>
+                        {{#each games}}
                         <tr>
                             <td>
-                                <p>Game #1 .....</p>
+                                <p> {{this.gamename}}: </p>
                             </td>
-                            <td><button type="button" class="btn btn-primary my-3">Join</button></td>
-                        </tr>
-                        <tr>
                             <td>
-                                <p>Game #2 .....</p>
+                                <p> {{this.nums}}/4 </p>
                             </td>
-                            <td><button type="button" class="btn btn-primary my-3">Join</button></td>
+                            <td>
+                                <a href="/game/created/{{this.id}}" class="btn btn-primary my-3" role="button">Join</a>
+                            </td>
                         </tr>
+                        {{/each}}
                     </table>
                 </div>
             </div>

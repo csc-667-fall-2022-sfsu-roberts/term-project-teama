@@ -15,21 +15,25 @@ module.exports = {
         },
         game_id: {
           type: Sequelize.INTEGER,
-          allowNull: false,
-        },
-        playerIndex: {
-          type: Sequelize.STRING,
           allowNull: false
         },
-        HasConceded: {
+        iscreator: {
           type: Sequelize.BOOLEAN,
-          default: false,
           allowNull: false
-        },
-        TurnsIdle: {
-          type: Sequelize.INTEGER,
-          default: 0
         }
+        // playerIndex: {
+        //   type: Sequelize.STRING,
+        //   allowNull: false
+        // },
+        // HasConceded: {
+        //   type: Sequelize.BOOLEAN,
+        //   default: false,
+        //   allowNull: false
+        // },
+        // TurnsIdle: {
+        //   type: Sequelize.INTEGER,
+        //   default: 0
+        // }
       });
   },
 

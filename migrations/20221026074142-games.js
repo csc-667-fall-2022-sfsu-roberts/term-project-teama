@@ -11,17 +11,16 @@ module.exports = {
         },
         name: {
           type: Sequelize.STRING,
-          allowNull: false,
-          unique: true
+          allowNull: false
         },
         state: {
           type: Sequelize.STRING,
           defaultValue: 0
         },
-        creator: {
-          type: Sequelize.INTEGER,
-          allowNull: false
-        },
+        // creator: {
+        //   type: Sequelize.INTEGER,
+        //   allowNull: false
+        // },
         DateCreated: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()'),
