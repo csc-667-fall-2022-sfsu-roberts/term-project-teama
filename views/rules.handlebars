@@ -1,0 +1,63 @@
+{{#if as_page }}
+{{> navbar}} 
+<style>
+    h2 {
+        background-color: seagreen;
+        padding: 0.6em;
+        border: 1px darkgreen solid;
+        border-radius: 0em 1em 1em 0em;
+        color: whitesmoke;
+    }
+    h4, a { color: seagreen; }
+</style>
+<div class="container-fluid mt-1">
+    <div class="row">
+        <div class="offset-md-3 col-md-6">
+{{/if}}
+
+<h1>Tock</h1>
+
+<h2>Summary</h2>
+<p>In Tock, players are attempting to get their <a href="#glossary_marble">marbles</a> out of their <a href="#glossary_start_space">start spaces</a>, around the board, and into their <a href="#glossary_home_space">home spaces</a> using <a href="#glossary_card">cards</a> from a standard poker deck.</p>
+
+<h2>The Board</h2>
+
+<h3>Start Spaces</h3>
+<p>The <a href="#glossary_start_space">start spaces</a> are where a player's marble begins the game. To move a marble out of the player's start spaces, a <a href="#glossary_start_card">start card</a> must be used, putting the marble at that players 0 spot. This area is not accessible by any other player.</p>
+<h3>The Board</h3>
+<p>The board consists of a series of spaces which are accessible by all players. The important spots include spot 0, where a player's marbles will enter the board after using a start card, spot 8, a safe spot at the middle ground between two players' homes, and spot 17, the entry point into the next player's home spaces.</p>
+<h4>Spot 0</h4>
+<p>Spot 0 is the location at which a marble leaves the start spaces. If a marble belonging to the associated player is on this spot, no other marble may pass or tock it. If another player's marble is on this spot, it may be tocked when a marble is started.</p>
+<h4>Spot 8</h4>
+<p>The spot halfway between two player's home spaces is a safe spot. Marbles here, no matter who owns them, cannot be passed or tocked.</p>
+<h4>Spot 17</h4>
+<p>The spot just before a player's spot 0 is the entry to that players home spaces. A player must move their marbles into the home spaces if passing this spot, unless moving backwards, during which, the marble must stay outside of the home spaces.</p>
+<h3>Home Spaces</h3>
+<p>Each player has a set of 4 home spaces which they are trying to fill with their marbles. To win the game, each of the four home spots must be filled with a player's marble. A marble can never tock or be passed by a marble owned by the same player, and you can not use a card which would move a marble further than the last open home space.</p>
+
+<h2>The Rules</h2>
+<h3>Traversal</h3>
+<p>In general, a player may not pass or tock their own marbles.</p>
+
+<h2>Glossary</h2>
+
+<h4 id="glossary_home_space">Home</h4>
+
+<h4 id="glossary_marble">Marble</h4>
+<p>Each player controls four marbles, trying to get them out of their <a href="#glossary_start_space">Start Spaces</a>, around the board, and into their <a href="#glossary_home_space">Home Spaces</a>.</p>
+<p>Player one's marbles are light green and associated with spades. Player two's marbles are dark blue and associated with hearts. Player three's marbles are yellow and associated with diamonds. Player four's marbles are grey and associated with clubs.</p>
+
+<h4 id="glossary_space">Space</h4>
+
+<h4 id="glossary_start_space">Start Space</h4>
+<h4 id="glossary_start_card">Start Card</h4>
+
+<h4 id="glossary_tock">Tock</h4>
+
+<h4 id="glossary_tocking">Tocking</h4>
+
+{{#if as_page }}
+        </div>
+    </div>
+</div>
+{{/if}}

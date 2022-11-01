@@ -25,6 +25,11 @@ router.get("/summary/:id", function (req, res, next) {
     res.render("summary", { title: "Tock", gameId: req.params.id });
 });
 
+/* PAGE: /game/rules */
+router.get("/rules", function (req, res, next) {
+    res.render("rules", { title: "Tock" });
+});
+
 /* PAGE: /game/create */
 router.get("/create", notLoggedInUser, function (req, res, next) {
     res.render("create", { username: req.user.name});
