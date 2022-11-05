@@ -7,17 +7,19 @@ const { notLoggedInUser } = require('../config/authenticated');
 /* PAGE: /game/:id */
 router.get("/show/:id", function (req, res, next) {
     let numPlayers = 4;
-    res.render("game", { 
-        title: "Tock", 
-        gameId: req.params.id, 
+    console.log('gamepage, game', req.game)
+    console.log('gamepage players', req.players)
+    res.render("game", {
+        title: "Tock",
+        gameId: req.params.id,
         siteCSS: false,
         head: '<link rel="stylesheet" href="/stylesheets/cards.css">\n'
             + '<link rel="stylesheet" href="/stylesheets/spots.css">\n'
             + '<link rel="stylesheet" href="/stylesheets/gameChatAvatar.css">\n'
-            + '<link rel="stylesheet" href="/stylesheets/board_'+numPlayers+'.css">\n'
+            + '<link rel="stylesheet" href="/stylesheets/board_' + numPlayers + '.css">\n'
             + '<script src="/javascripts/game_board.js" defer="true" > </script>\n'
             + '<script src="/javascripts/game_chat.js" defer="true" > </script>'
-     });
+    });
 });
 
 /* PAGE: /game/summary/:id */
@@ -32,49 +34,142 @@ router.get("/rules", function (req, res, next) {
 
 /* PAGE: /game/create */
 router.get("/create", notLoggedInUser, function (req, res, next) {
-    res.render("create", { username: req.user.name});
+    const user = req.user;
+    res.render("create", { user: user });
 });
 
 router.post("/create", notLoggedInUser, async function (req, res, next) {
     try {
-        const {gamename} = req.body;
-        const gameid = await dbQuery.createNewGame(gamename);
-        await dbQuery.createNewGameUsers(gameid[0].id, req.user.id, true);
-        console.log("gameid", gameid)
-        console.log("userid", req.user.id)
-        res.redirect(`/game/created/${gameid[0].id}`);
-    } catch {
-        res.redirect('/game/create')
+        const { gamename } = req.body;
+        const user = req.user;
+        const game = await dbQuery.createNewGame(gamename)
+        await dbQuery.createNewGameUsers(game.id, user.id, true);
+        // console.log(user.name, 'created', gamename, 'gameid =', game.id)
+        res.redirect(`/game/created/${game.id}`);
+    } catch (err) {
+        console.log(err)
     }
-    
 });
 
 /* PAGE: /game/created/:id */
-router.get("/created/:id",notLoggedInUser, async function (req, res, next) {
-    const game = await dbQuery.findGamesByGameId(req.params.id);
-    console.log('game', game);
-    const gameusers = await dbQuery.findAllUsersByGameId(req.params.id);
-    console.log(gameusers)
-    const players = [];
-    for(let i = 0; i < gameusers.length; i++) {
-        console.log(gameusers[i].user_id)
-        const userinfo = await dbQuery.findUserById(gameusers[i].user_id);
-        console.log('user info', userinfo)
-        players[i] = 
-        { 
-            info: userinfo,
-            iscreator: gameusers[i].iscreator,
-        };
+router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
+    try {
+        const currentUser = await dbQuery.findUserByGameUserId(req.game.id, req.user.id);
+        if(currentUser){ 
+            if(currentUser.isstarted){
+                res.redirect(`/game/show/${req.game.id}`);
+            }
+        } 
+        res.render("created", { user: req.user, game: req.game, players: req.players });
+    } catch (err) {
+        console.log(err)
     }
-   
-    const numberOfPlayers = players.length;
-    let isFull = false;
-    if(numberOfPlayers == 4){
-        isFull = true;
-    };
-
-    res.render("created", { user: req.user, gamename: game.name, num: numberOfPlayers, players: players, isFull: isFull});
 });
+
+router.post("/join", notLoggedInUser, async (req, res, next) => {
+    try {
+        const { gameid } = req.body;
+        const user = req.user;
+        const results = await dbQuery.findUserByGameUserId(gameid, user.id);
+        if (!results) {
+            await dbQuery.createNewGameUsers(gameid, user.id, false);
+            // console.log(user.name, 'joined in game', gameid)
+        }
+        res.json({
+            code: 1,
+            status: 'success'
+        })
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+router.post("/quit", notLoggedInUser, async (req, res, next) => {
+    try {
+        const { gameid } = req.body;
+        const user = req.user;
+        const results = await dbQuery.findUserByGameUserId(gameid, user.id)
+        if (results.iscreator) {
+            await dbQuery.deleteALLUserByGameId(gameid);
+            await dbQuery.deleteGameById(gameid);
+
+        } else {
+            await dbQuery.deleteUserByGameUserId(gameid, user.id);
+        }
+        console.log(user.name, 'quit from game', gameid)
+        res.json({
+            code: 1,
+            status: 'success'
+        })
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+router.post("/start", notLoggedInUser, async (req, res, next) => {
+    try {
+        const { gameid } = req.body;
+        const user = req.user;
+        console.log('start gameid', gameid, user);
+        const requser = await dbQuery.findUserByGameUserId(gameid, user.id)
+        if (!requser.isstarted) {
+            await dbQuery.updateToStarted(gameid, user.id);
+        }
+
+        // if all users start game, then game.state become 1
+        console.log(user.name, 'started', gameid)
+        let gameState;
+        
+        res.json({
+            code: 1,
+            status: 'success'
+        })
+    } catch (err) {
+        console.log(err)
+    }
+})
+
+router.param("id", async (req, res, next, id) => {
+    try {
+        const game = await dbQuery.findGamesByGameId(id);
+        req.game =
+        {
+            id: id,
+            name: game.name,
+            state: game.state
+        };
+        gameusers = await dbQuery.findAllUsersByGameId(id);
+        req.players = [];
+        let startedUser = 0;
+        for (let i = 0; i < gameusers.length; i++) {
+            const userinfo = await dbQuery.findUserById(gameusers[i].user_id);
+            req.players[i] =
+            {
+                name: userinfo.name,
+                // avatar: userinfo.avatar,
+                iscreator: gameusers[i].iscreator,
+                isstarted: gameusers[i].isstarted
+            };
+            if(gameusers[i].isstarted){
+                startedUser += 1;
+            }
+        }
+        // update game state=1 if all users start game
+        if(startedUser == 4){
+            req.game.state = 1;
+            dbQuery.updateGamestate(req.game.id, 1)
+        }
+        req.game.num = req.players.length;
+        if (req.game.num == 4) {
+            req.game.isFull = true;
+        } else {
+            req.game.isFull = false;
+        }
+        next();
+    }catch (err) {
+        console.log(err)
+    }
+})
 
 /* API: /game/chat/:id 
 router.get("/login/forget", function (req, res, next) {

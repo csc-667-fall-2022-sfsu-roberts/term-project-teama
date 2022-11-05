@@ -4,10 +4,10 @@
 <div class="container">
     <div class="col-md-12">
         <div class=" col-md-4">
-            <h2>Table: {{gamename}}</h2>
+            <h2>Table: {{game.name}}</h2>
         </div>
         <div class=" col-md-4">
-            <h3>Players At This Table: {{num}}/4</h3>
+            <h3>Players At This Table: {{game.num}}/4</h3>
         </div>
 
         {{#each players}}
@@ -18,7 +18,7 @@
                 </div>
                 <div class="player-body">
                     <div class="mb-2">
-                        <span class="fs-20 pr-16">{{this.info.name}}</span>
+                        <span class="fs-20 pr-16">{{this.name}}</span>
                         {{#if this.iscreator}}
                         <small class="fs-16 fw-300 ls-1">(table administrator)</small>
                         {{/if}}
@@ -30,22 +30,28 @@
 
         <div id='toolbar'>
             <div class='wrapper text-center'>
-                {{#if isFull}}
+                {{#if game.isFull}}
                 <div class="btn-group me-2" role="group" aria-label="First group">
-                    <a class="btn btn-primary" href="/game/show/:id" role="button">Start game</a>
+                    <a class="btn btn-primary" href="#" role="button" id="start-game-btn"
+                        data-gameid="{{game.id}}">Start game</a>
                 </div>
                 {{else}}
                 <div class="btn-group me-2" role="group" aria-label="First group">
-                    <button type="submit" class="btn btn-primary" style="pointer-events: none;">Start game(not enough members)</button>
+                    <button type="submit" class="btn btn-primary" id="start-game-btn"
+                        style="pointer-events: none;">Start game(not enough
+                        members)</button>
                 </div>
                 {{/if}}
                 <div class="btn-group me-2" role="group" aria-label="First group">
-                    <a class="btn btn-secondary" href="/lobby" role="button" >Quit</a>
+                    <a class="btn btn-secondary" href="/lobby" role="button" id="quit-game-btn"
+                        data-gameid="{{game.id}}">Quit</a>
+                </div>
+                <div class="btn-group me-2" role="group" aria-label="First group">
+                    <a class="btn btn-secondary" href="/lobby" role="button">Back to lobby</a>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 
 <style>
@@ -103,3 +109,53 @@
         text-transform: uppercase;
     }
 </style>
+
+<script>
+    const quitButton = document.getElementById("quit-game-btn");
+    quitButton.addEventListener('click', e => {
+        let { gameid } = quitButton.dataset;
+        console.log('Quited gameid', gameid)
+        fetch('/game/quit', {
+            method: "POST",
+            headers: {
+                "Content-Type": "Application/json"
+            },
+            body: JSON.stringify({
+                gameid: gameid
+            })
+        })
+            .then(response => response.json())
+            .then(json => {
+                if (json.code == 1) {
+                    console.log(window.location.href)
+                    window.location.href = '/lobby'
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    })
+
+    const startButton = document.getElementById("start-game-btn");
+    startButton.addEventListener('click', e => {
+        let { gameid } = startButton.dataset;
+        fetch('/game/start', {
+            method: "POST",
+            headers: {
+                "Content-Type": "Application/json"
+            },
+            body: JSON.stringify({
+                gameid: gameid
+            })
+        })
+            .then(response => response.json())
+            .then(json => {
+                if (json.code == 1) {
+                    window.location.href = `/game/show/${gameid}`
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    })
+</script>

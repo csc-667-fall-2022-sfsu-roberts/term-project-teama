@@ -17,6 +17,29 @@
                 <div class="mx-auto">
                     <a href="/game/create" class="btn btn-primary my-3" role="button">Create New Game</a>
                 </div>
+                <div class="ms-2">
+                    <p>Your Games Here</p>
+                    <table class="engaged-games">
+                        {{#each engaedGames}}
+                        <tr>
+                            <td>
+                                <p> {{this.game.name}}: </p>
+                            </td>
+                            <td>
+                                <p> {{this.numOfUsers}}/4 </p>
+                            </td>
+                            <td>
+                                <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
+                                    id="view-game-btn">View</a>
+                            </td>
+                            <td>
+                                <a href="" class="btn btn-primary my-3" role="button" id="quit-game-btn"
+                                    data-gameid="{{this.game.id}}">Quit</a>
+                            </td>
+                        </tr>
+                        {{/each}}
+                    </table>
+                </div>
             </div><br>
             <div class="card bg-light">
                 <div class="card-body">
@@ -27,17 +50,22 @@
                 </div>
                 <div class="ms-2">
                     <p>List Games Here</p>
-                    <table>
+                    <table class="not-engaged-games">
                         {{#each games}}
                         <tr>
                             <td>
-                                <p> {{this.gamename}}: </p>
+                                <p> {{this.game.name}}: </p>
                             </td>
                             <td>
-                                <p> {{this.nums}}/4 </p>
+                                <p> {{this.numOfUsers}}/4 </p>
                             </td>
                             <td>
-                                <a href="/game/created/{{this.id}}" class="btn btn-primary my-3" role="button">Join</a>
+                                <a class="btn btn-primary my-3" role="button" id="join-game-btn"
+                                    data-gameid="{{this.game.id}}" data-players="{{this.numOfUsers}}">Join</a>
+                            </td>
+                            <td>
+                                <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
+                                    id="view-game-btn">View</a>
                             </td>
                         </tr>
                         {{/each}}
@@ -72,3 +100,58 @@
         </div>
 
 </main>
+
+<script>
+    const joinButtons = document.querySelectorAll("#join-game-btn");
+    joinButtons.forEach(function (button) {
+        button.addEventListener('click', e => {
+            let { gameid } = button.dataset;
+            console.log('gameid', gameid)
+            fetch('/game/join', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "Application/json"
+                },
+                body: JSON.stringify({
+                    gameid: gameid
+                })
+            })
+                .then(response => response.json())
+                .then(json => {
+                    if (json.code == 1) {
+                        console.log(window.location.href)
+                        window.location.href = `/game/created/${gameid}`
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        })
+    })
+    const quitButtons = document.querySelectorAll("#quit-game-btn");
+    quitButtons.forEach(function (button) {
+        button.addEventListener('click', e => {
+            let { gameid } = button.dataset;
+            console.log('Quited gameid', gameid)
+            fetch('/game/quit', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "Application/json"
+                },
+                body: JSON.stringify({
+                    gameid: gameid
+                })
+            })
+                .then(response => response.json())
+                .then(json => {
+                    if (json.code == 1) {
+                        console.log(window.location.href)
+                        window.location.href = '/lobby'
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        })
+    })
+</script>

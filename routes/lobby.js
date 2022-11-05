@@ -6,18 +6,30 @@ const dbQuery = require('../db/dbquery');
 
 /* PAGE: /lobby */
 router.get('/', notLoggedInUser, async function (req, res, next) {
-    const user = req.user
-    const games = await dbQuery.findAllGames();
-    const gamesinfo = [];
-    for (let i = 0; i < games.length; i++){
-        const numOfUsers = (await dbQuery.findAllUsersByGameId(games[i].id)).length;
-        gamesinfo[i] = {
-            id: games[i].id,
-            gamename:games[i].name,
-            nums: numOfUsers
-        } ;
+    const user = req.user;
+    const results = await dbQuery.findEngaedGames(user.id);
+    const engaedGames = [];
+    for (let i = 0; i < results.length; i++){
+        engaedGames[i] = {
+            game: results[i],
+            numOfUsers: (await dbQuery.findNumOfUsersByGameId(results[i].id)).count
+        }
     }
-    res.render('lobby', { user: user, games: gamesinfo });
+    // console.log('engaged',engaedGames);
+
+    const games = [];
+    const rs = await dbQuery.findNotEngagedGames(user.id);
+   
+    for (let i = 0; i < rs.length; i++){
+        games[i] = {
+            game:rs[i],
+            numOfUsers: (await dbQuery.findNumOfUsersByGameId(rs[i].id)).count
+        }
+    }
+
+    // console.log('Games',games);
+    
+    res.render('lobby', { user: user, engaedGames: engaedGames, games: games });
 });
 
 /* API: /lobby/send 

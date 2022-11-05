@@ -1,7 +1,7 @@
 // authenticated user, cannot access login/signup
 const LoggedInUser = (req, res, next) => {
     if (req.isAuthenticated()) {
-        return res.redirect('../lobby')
+        return res.redirect('/lobby')
     }
     next()
 }
@@ -12,7 +12,7 @@ const notLoggedInUser = (req, res, next) => {
         return next()
     }
     req.flash('errorMessage', 'Please login to play with others');
-    res.redirect('../users/login')
+    res.redirect('/users/login')
 }
 
 module.exports = {

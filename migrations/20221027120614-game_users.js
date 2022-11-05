@@ -20,11 +20,11 @@ module.exports = {
         iscreator: {
           type: Sequelize.BOOLEAN,
           allowNull: false
-        }
-        // playerIndex: {
-        //   type: Sequelize.STRING,
-        //   allowNull: false
-        // },
+        },
+        playerindex: {
+          type: Sequelize.INTEGER,
+          allowNull: false
+        },
         // HasConceded: {
         //   type: Sequelize.BOOLEAN,
         //   default: false,
@@ -33,7 +33,12 @@ module.exports = {
         // TurnsIdle: {
         //   type: Sequelize.INTEGER,
         //   default: 0
-        // }
+        // },
+        isstarted: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+          allowNull: false
+        }
       });
   },
 
