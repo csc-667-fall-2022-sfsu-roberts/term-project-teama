@@ -78,27 +78,17 @@
                 <div class="card-body bg-light">
                     <h5 class="card-title">Chatting</h5>
                 </div>
-                <div class="display-message ms-2">
-                    <p>List Massages Here</p>
-                    <p>Message #1 .....</p>
-                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                    <p>Message #2 .....</p>
-                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                </div>
-                <div class="send-message ms-2">
-                    <div class="row">
-                        <div class="col-9">
-                            <textarea id="Message" style="width: 100%;" name="Message" class="message" rows="2"
-                                maxlength="3000" required></textarea>
-                        </div>
-                        <div class="col-2">
-                            <button type="submit" id="send-msg-button" class="btn btn-primary my-3">Send</button>
-                        </div>
-                    </div>
+                <div class="display-message ms-2" style="height: 500px; overflow-y: scroll;">
+                    <div class="chat-message"></div>
                 </div>
             </div>
+            <div class="chat-form-container">
+                <form id="chat-form">
+                    <input id="msg" type="text" placeholder="Enter Message..." required autocomplete="off">
+                    <button type="submit" class="btn btn-primary my-3">Send</button>
+                </form>
+            </div>
         </div>
-
 </main>
 
 <script>
@@ -154,4 +144,59 @@
                 })
         })
     })
+
+    const chatForm = document.getElementById('chat-form');
+    const chatMessages = document.querySelector('.chat-message');
+    const socket = io();
+
+    //var id = {{ user.id }};
+    //const username = {{user.name }};
+    const username = "qin";
+
+    socket.emit('login', username);
+
+    socket.on('message', ( message ) => {
+        console.log("receive message from socket server...");
+        //console.log(message);
+        outputMessage(message);
+    });
+
+    // Message submit
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log("receive message from chat form...");
+        //console.log(`username and user id: ${user.name}, ${user.id}`);
+        //chatMessages.textContent = `Form Submitted! Time stamp: ${event.timeStamp}`;
+
+        // Get message text
+        let msg = e.target.elements.msg.value;
+        msg = msg.trim();
+        if (!msg) {
+            return false;
+        }
+
+        // Emit message to server
+        socket.emit('chatMessage', ({username, msg}));
+
+        // Clear input
+        e.target.elements.msg.value = '';
+        e.target.elements.msg.focus();
+    });
+
+    // Output message to DOM
+    function outputMessage(message) {
+        const div = document.createElement('div');
+        div.classList.add('message');
+        const p = document.createElement('p');
+        p.classList.add('meta');
+        p.innerText = message.username;
+        p.innerHTML += `<span> ${message.time}</span>`;
+        div.appendChild(p);
+        const para = document.createElement('p');
+        para.classList.add('text');
+        para.innerText = message.text;
+        div.appendChild(para);
+        document.querySelector('.chat-message').appendChild(div);
+    }
+
 </script>
