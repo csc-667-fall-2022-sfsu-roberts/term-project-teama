@@ -1,12 +1,44 @@
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 0px) { 
+    :root {
+        --card_scale: 0.75;
+        --hand_scale: 1;
+    }
+ }
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) { 
+    :root {
+        --card_scale: 0.65;
+        --hand_scale: 0.9;
+    }
+ }
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) { 
+    :root {
+        --card_scale: 0.60;
+        --hand_scale: 0.8;
+    }
+ }
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) { 
+    :root {
+        --card_scale: 0.5;
+        --hand_scale: 0.7;
+    }
+ }
+
+
 :root {
-    --card_scale: 2;
 
     --card_image_width_actual: 520px;
     --card_image_width: calc( var(--card_image_width_actual) / var(--card_scale));
     --card_width_actual: 40px;
     --card_width: calc( var(--card_width_actual) / var(--card_scale) );
     --card_w_0: 0px;
-    --card_w_1: 0 - var(--card_width);
+    --card_w_1: calc(0px - var(--card_width));
     --card_w_2: calc( var(--card_width) * -2);
     --card_w_3: calc( var(--card_width) * -3);
     --card_w_4: calc( var(--card_width) * -4);
@@ -22,17 +54,41 @@
     --card_height_actual: 60px;
     --card_height: calc( var(--card_height_actual) / var(--card_scale) );
     --card_h_0: 0px;
-    --card_h_1: 0 - var(--card_height);
+    --card_h_1: calc(0px - var(--card_height));
     --card_h_2: calc( var(--card_height) * -2);
     --card_h_3: calc( var(--card_height) * -3);
     --card_h_4: calc( var(--card_height) * -4);
+
+
+    --hand_image_width: calc( var(--card_image_width_actual) / var(--hand_scale));
+
+    --hand_card_width: calc( var(--card_width_actual) / var(--hand_scale));
+    --hand_card_x: calc(0px - var(--hand_card_width));
+    --card_fan_width: calc( 20px - var(--hand_card_width));
+    --card_fan_width_total: calc( var(--card_fan_width) + 80px );
+
+    --hand_card_height: calc( var(--card_height_actual) / var(--hand_scale));
+    --hand_card_y: calc( var(--hand_card_height) * -4);
+    --card_fan_height: calc( 10px - var(--hand_card_height));
+    --card_fan_height_total: calc( var(--card_fan_height) + 40px );
 }
 
 .tockCard {
-    background-image: url("images/cards.png");
+    background-image: url("/images/cards.png");
     background-repeat: no-repeat;
+    background-size: var(--card_image_width);
     width: var(--card_width);
     height: var(--card_height);
+}
+.tockCard:hover {
+}
+.opponentCard {
+    background-image: url("/images/cards.png");
+    background-repeat: no-repeat;
+    background-size: var(--hand_image_width);
+    background-position: var(--hand_card_x) var(--hand_card_y);
+    width: var(--hand_card_width);
+    height: var(--hand_card_height);
 }
 
 .diamond { background-position-y: var(--card_h_0); }
@@ -57,3 +113,20 @@
 .joker   { background-position: var(--card_w_0) var(--card_h_4); }
 .deck    { background-position: var(--card_w_1) var(--card_h_4); }
 
+.hHand { display: flex; flex-direction: row; width: fit-content; margin: 0px auto 0px auto; padding: 0.5em; }
+.hHand div { 
+    position: relative; 
+    margin-left: var(--card_fan_width);
+    box-shadow:-2px 0px 2px rgba(0,0,0,0.3); 
+    transition: box-shadow 0.1s;
+}
+.hHand div:first-child { margin-left:0px; }
+#currentHand div div:hover { box-shadow:-3px 0px 3px rgba(0,0,0,0.9); }
+#currentHand div div:last-child { box-shadow:-4px 0px 4px rgba(0,0,0,1); }
+.vHand { display: flex; flex-direction: column; }
+.vHand div { 
+    position: relative; 
+    margin-top: var(--card_fan_height);
+    box-shadow:0px -2px 2px rgba(0,0,0,0.3); 
+}
+.vHand div:first-child { margin-top: 0px; }

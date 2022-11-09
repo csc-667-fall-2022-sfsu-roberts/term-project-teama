@@ -1,11 +1,43 @@
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 0px) { 
+    :root {
+        --deco_border: 2px;
+    }
+ }
 
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) { 
+    :root {
+        --deco_border: 3px;
+    }
+ }
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) { 
+    :root {
+        --deco_border: 4px;
+    }
+ }
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) { 
+    :root {
+        --deco_border: 5px;
+    }
+ }
+ :root {
+     --deco-color: #323232;
+     --deco-space-color: #e0e0e0;
+ }
 .playerArea {
     position: relative;
     width: 50%;
     height: 50%;
     min-width:50%;
     min-height: 50%;
-    border: 1px var(--player1) solid;
+    border-top: 2px var(--deco-color) solid;
+    border-left: 2px var(--deco-color) solid;
+    border-radius: 10px 0px 0px 0px;
 }
 .playerArea div div{
     position: absolute;
@@ -42,3 +74,168 @@
 .board_15 { left: 70%; top: 0%; }
 .board_16 { left: 80%; top: 0%; }
 .board_17 { left: 90%; top: 0%; }
+
+/* CurrentPlayer: 1 */
+.player1asCenter {
+    margin-left: 2%;
+    margin-top: 47%;
+    transform: rotate(-90deg);
+}
+.player1asCenter div div { transform: rotate(90deg); }
+.player2asLeft {
+    margin-left: 2%;
+    margin-top: -95%;
+}
+.player3asAcross {
+    margin-left: 47%;
+    margin-top: -50%;
+    transform: rotate(90deg);
+}
+.player3asAcross div div { transform: rotate(-90deg); }
+.player4asRight {
+    margin-left: 47%;
+    margin-top: -5%;
+    transform: rotate(180deg);
+}
+.player4asRight div div { transform: rotate(-180deg); }
+
+/* CurrentPlayer: 2 */
+.player2asCenter {
+    margin-left: 2%;
+    margin-top: -50%;
+    transform: rotate(-90deg);
+}
+.player2asCenter div div { transform: rotate(90deg); }
+.player3asLeft {
+    margin-left: 2%;
+    margin-top: -95%;
+}
+.player4asAcross {
+    margin-left: 47%;
+    margin-top: -50%;
+    transform: rotate(90deg);
+}
+.player4asAcross div div { transform: rotate(-90deg); }
+.player1asRight {
+    margin-top: 47%;
+    margin-left: 47%;
+    transform: rotate(180deg);
+}
+.player1asRight div div { transform: rotate(-180deg); }
+
+/* CurrentPlayer: 3 */
+.player3asCenter {
+    margin-top: -50%;
+    margin-left: 2%;
+    transform: rotate(-90deg);
+}
+.player3asCenter div div { transform: rotate(90deg); }
+.player4asLeft {
+    margin-top: -95%;
+    margin-left: 2%;
+}
+.player1asAcross {
+    margin-top: 2%;
+    margin-left: 47%;
+    transform: rotate(90deg);
+}
+.player1asAcross div div { transform: rotate(-90deg); }
+.player2asRight {
+    margin-left: 47%;
+    margin-top: -5%;
+    transform: rotate(180deg);
+}
+.player2asRight div div { transform: rotate(-180deg); }
+
+/* CurrentPlayer: 4 */
+.player4asCenter {
+    margin-top: -50%;
+    margin-left: 2%;
+    transform: rotate(-90deg);
+}
+.player4asCenter div div { transform: rotate(90deg); }
+.player1asLeft {
+    margin-top: 2%;
+    margin-right: 2%;
+}
+.player2asAcross {
+    margin-top:-50%;
+    margin-left: 47%;
+    transform: rotate(90deg);
+}
+.player2asAcross div div { transform: rotate(-90deg); }
+.player3asRight {
+    margin-top: -5%;
+    margin-left: 47%;
+    transform: rotate(180deg);
+}
+.player3asRight div div { transform: rotate(-180deg); }
+
+.gameBoard {
+    width: 70vh;
+    height: 70vh;
+    margin: auto;
+    background-color: var(--deco-space-color);
+}
+.centerDeco {
+    background-color: var(--deco-color);
+    border-radius: 10px;
+    position: absolute;
+    min-width: 20%;
+    min-height: 20%;
+    margin-top: 80%;
+    margin-left: 80%;
+
+}
+.startDeco {
+    background-color: var(--deco-space-color);
+    border-radius: 10px;
+    position: absolute;
+    min-width: 37%;
+    min-height: 37%;
+    margin-top: 6%;
+    margin-left: 6%;
+}
+.homeDeco {
+    background-color: rgba(0,0,0,.1);
+    border-radius: 10px;
+    position: absolute;
+    min-width: 45%;
+    min-height: 15%;
+    margin-top: 87%;
+    margin-left: 12%;
+}
+.portalDeco {
+    background-color: rgba(0,0,0,.1);
+    border-radius: 10px;
+    position: absolute;
+    min-width: var(--spot_size);
+    min-height: var(--spot_size);
+    margin-top: 80%;
+    margin-left: 0%;
+}
+.emptyDeco {
+    background-color: var(--deco-color);
+    border-radius: 10px;
+    position: absolute;
+    min-width: 65%;
+    min-height: 65%;
+    margin-top: 1%;
+    margin-left: 1%;
+}
+
+.decoPlayer_0{
+    border: var(--deco_border) var(--player1) solid;
+}
+
+.decoPlayer_1{
+    border: var(--deco_border) var(--player2) solid;
+}
+
+.decoPlayer_2{
+    border: var(--deco_border) var(--player3) solid;
+}
+
+.decoPlayer_3{
+    border: var(--deco_border) var(--player4) solid;
+}

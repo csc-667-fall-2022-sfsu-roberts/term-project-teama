@@ -1,5 +1,31 @@
-:root {
-    --spot_scale: 4;
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 0px) { 
+    :root {
+        --spot_scale: 6;
+    }
+ }
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) { 
+    :root {
+        --spot_scale: 5.5;
+    }
+ }
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) { 
+    :root {
+        --spot_scale: 5;
+    }
+ }
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) { 
+    :root {
+        --spot_scale: 4;
+    }
+ }
+ :root {
     --spot_image_width_actual: 1620px;
     --spot_image_width: calc( var(--spot_image_width_actual) / var(--spot_scale));
     --spot_size_actual: 90px;

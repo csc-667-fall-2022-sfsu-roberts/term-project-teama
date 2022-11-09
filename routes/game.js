@@ -7,19 +7,37 @@ const { notLoggedInUser } = require('../config/authenticated');
 /* PAGE: /game/:id */
 router.get("/show/:id", function (req, res, next) {
     let numPlayers = 4;
+    let gameId = req.params.id;
+    let head = '<link rel="stylesheet" href="/stylesheets/cards.css">\n'
+    + '<link rel="stylesheet" href="/stylesheets/spots.css">\n'
+    + '<link rel="stylesheet" href="/stylesheets/gameChatAvatar.css">\n'
+    + '<link rel="stylesheet" href="/stylesheets/board_'+numPlayers+'.css">\n'
+    + '<script src="/javascripts/game_board.js" defer="true" > </script>\n'
+    + '<script src="/javascripts/game_chat.js" defer="true" > </script>\n';
     console.log('gamepage, game', req.game)
     console.log('gamepage players', req.players)
-    res.render("game", {
-        title: "Tock",
-        gameId: req.params.id,
+    res.render("game", { 
+        title: "Tock", 
+        gameId: gameId, 
         siteCSS: false,
-        head: '<link rel="stylesheet" href="/stylesheets/cards.css">\n'
-            + '<link rel="stylesheet" href="/stylesheets/spots.css">\n'
-            + '<link rel="stylesheet" href="/stylesheets/gameChatAvatar.css">\n'
-            + '<link rel="stylesheet" href="/stylesheets/board_' + numPlayers + '.css">\n'
-            + '<script src="/javascripts/game_board.js" defer="true" > </script>\n'
-            + '<script src="/javascripts/game_chat.js" defer="true" > </script>'
-    });
+        head: head,
+        numPlayers: 4,
+        curPlayerIndex: 1,
+        player: [
+            { name: "tryHard2012", avatar: 4 },
+            { name: "wjplachno", avatar: 10 },
+            { name: "jStangle", avatar: 3 },
+            { name: "rubySoho1998", avatar: 5}
+        ],
+        hands: [5, 5, 5, 5],
+        curHand: [
+            { category: "Spade", value: 2 },
+            { category: "Heart", value: 6 },
+            { category: "Red", value: 0 },
+            { category: "Heart", value: 11 },
+            { category: "Club", value: 13 }
+        ]
+     });
 });
 
 /* PAGE: /game/summary/:id */

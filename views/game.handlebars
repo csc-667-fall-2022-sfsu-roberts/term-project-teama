@@ -2,40 +2,271 @@
     Title: Game Page
     URI: /game/
     View: game.handlebars
+
+    |----------------------------------|
+    |            1A                    |
+    |----------------------------------|
+    |     |      5A       |     |      |
+    |     |---------------|     |      |
+    | 4A  |               | 4C  |      |
+    |     |      5B       |     |  2B  |
+    |     |               |     |      |
+    |---------------------------|      |
+    |          3B               |      |
+    |---------------------------|------|
+
+
 -->
+<script>
+    let numPlayers = {{numPlayers}};
+    let curPlayer = {{curPlayerIndex}};
+    let players = [
+        {{#each player}}
+        { name: "{{this.name}}", avatar: "{{this.avatar}}" },
+        {{/each}}
+    ];
+    let hands = [ {{#each hands}}{{this}},{{/each}}];
+    let curHand = [ {{#each curHand}}{ category: "{{this.category}}", value: {{this.value}} }, {{/each}}];
+</script>
 
 <style>
     :root {
         --player1: #45C445;
-        --player2: #003575;
+        --player2: #0859bb;
         --player3: #FFC730;
-        --player4: #424242;
+        --player4: #971a97;
+
     }
-    .container { align-items: stretch; }
-    .gameContainer { background-color: var(--color-fg-dark); }
-    .chatContainer { }
-    body, .fillHeight { min-height: 100vh; }
-    .name_player1 { color: var(--player1); }
-    .name_player2 { color: var(--player2); }
-    .name_player3 { color: var(--player3); }
-    .name_player4 { color: var(--player4); }
-    .Entry {
-        background-color: var(--color-bg-dark);
-        display:inline-flex;
+    .test1 { border: 1px red solid; }
+    .test2 { border: 1px green solid; }
+    .test3 { border: 1px blue solid; }
+    .test4 { border: 1px yellow solid; }
+    .test5 { border: 1px orange solid; }
+    .test6 { border: 1px purple solid; }
+    .test7 { border: 1px brown solid; }
+
+
+    body { min-height: 100vh; min-width: 600px; }
+    .heightFit { min-height: 100vh; }
+    
+    #gameContainer { 
+        padding: 1em 3em 1em 3em;
+        display:flex;
+        flex-direction: column;
+        align-items:stretch;
     }
+    .selectedCardText {
+        max-width: 60%;
+        margin: 0.5em;
+        border: 1px black solid;
+        border-radius: 0.25em;
+        background-color: rgba(0,0,0,.05);
+    }
+    #selectedCardText { margin: 0.5em; }
+    .name_player1 { text-shadow: 1px 1px var(--player1); }
+    .name_player2 { text-shadow: 1px 1px var(--player2); }
+    .name_player3 { text-shadow: 1px 1px var(--player3); }
+    .name_player4 { text-shadow: 1px 1px var(--player4); }
+
+    #chatContainer { min-width: 250px; }
+    #chatContainer span{ height: 1em; }
+
+
     .chatDisplay {
         flex-grow: 2;
-        background-color: var(--color-bg-main);
-        margin-bottom:1em;
-        padding:0.5em;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        flex-direction: column-reverse;
     }
+    .chatDisplay > div:last-child {
+        scroll-snap-align: end;
+    }
+
+    .chatMsg{
+        background-color: rgba(0,0,0,.05);
+        border-radius: 10px;
+        width: 90%;
+        margin: 1em auto 1em auto;
+    }
+    .chatMsg p { text-align: center; }
+    .chatMsgHeader {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content:space-between;
+    }
+    .chatID {
+        display: inline-flex;
+        align-items: center;
+    }
+    .chat_userName {
+        margin-left: 1em;
+    }
+    .chat_timeStamp {
+        color: rgba(0,0,0,.4);
+    }
+
+    .chatMsgSys {
+        color: rgba(0,0,0,.5);
+    }
+
+    .chatEntry { margin: 0.5em 0.5em 1.25em 0.5em; }
     #chatInput {
         flex-grow:2;
         width:auto;
     }
-    #chatSend { width:fit-content; }
-    .chatAvatar {  }
+    #chatSend { width:fit-content; align-self: end; }
+    #stackContainer { background-color: #FFC730;}
+    .opponentDash{
+        margin: 0.5em;
+        border-radius: 0.25em;
+        background-color: rgba(0,0,0,.05);
+        max-width: 200px;
+    }
 </style>
+
+<!-- Template 1: Opponent Display -->
+<template>
+    <div class="opponentDash" id="opponentLeft">
+        <div class="d-flex flex-row justify-content-between">
+            <div class="m-1 avatar avatar_{{player.2.avatar}}"></div>
+            <p class="name_player3 m-1">{{player.2.name}} </p>
+        </div>
+        <div class="hHand m-1">
+            <div class="opponentCard" id="opponentLeft_1"></div>
+            <div class="opponentCard" id="opponentLeft_2"></div>
+            <div class="opponentCard" id="opponentLeft_3"></div>
+            <div class="opponentCard" id="opponentLeft_4"></div>
+            <div class="opponentCard" id="opponentLeft_5"></div>
+        </div>
+    </div>
+</template>
+
+<!-- Separation 1: Navbar, Main Body -->
+<div class="d-flex flex-column heightFit ">
+    <!-- 1A: Navbar -->
+    <div class="row">
+{{> navbar}}
+    </div>
+
+    <!-- 1B: Main Body -->
+    <!-- Separation 2: Game Area, Chat -->
+    <div class="row flex-grow-1">
+        <!-- 2A: Game Area -->
+        <!-- Separation 3: Table, Player -->
+        <div class="col-sm-12 col-md-9 mt-1 d-flex flex-column justify-content-end" >
+            <!-- 3A: Table -->
+            <!-- Separation 4: Left, Center, Right -->
+            <div class="flex-grow-1 mx-1 d-flex flex-row">
+                <!-- 4A: Left -->
+                <div class="flex-grow-1 d-flex flex-column align-items-end">
+                    <!-- Event List
+                    <div class="d-flex flex-column align-content-stretch">
+                        <div class="event bg-blue">Turn Start</div>
+                        <div class="event bg-green">Marble 1 Selected</div>
+                    </div>
+                    -->
+                    <div class="opponentDash" id="opponentLeft"> </div>
+                </div>
+                <!-- 4B: Center -->
+                <div class="d-flex flex-row">
+                    <div class="gameBoard flex-grow-1 mt-1" id="gameBoard"> </div>
+                </div>
+                <!-- 4C: Right -->
+                <div class="d-flex flex-column justify-content-around">
+                    <div class="mx-auto flex-grow-1" >
+                        <div class="opponentDash" id="opponentAcross"> </div>
+                    </div>
+                    <div class="me-1 mt-auto">
+                        <div class="opponentDash" id="opponentRight"> </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 3B: Player -->
+            <div>
+                <div class="playerDisplay d-flex flex-row-reverse justify-content-start">
+                    <div class="cards mx-2 mt-1" id="currentHand">
+                        <div class="hHand">
+                            <div class="tockCard" id="playerHand_1"></div>
+                            <div class="tockCard" id="playerHand_2"></div>
+                            <div class="tockCard" id="playerHand_3"></div>
+                            <div class="tockCard" id="playerHand_4"></div>
+                            <div class="tockCard" id="playerHand_5"></div>
+                        </div>
+
+                    </div>
+                    <div class="selectedCardText">
+                        <div id="selectedCardText">
+                            <p >Four of Hearts:</p>
+                            <p>Move one marble four spaces backwards. Cannot be used to mave backwards into your home.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 2B: Chat -->
+        <div class="col-lg-3 d-flex flex-column justify-contents-end " id="chatContainer">
+            <div class="row dropdown mt-2 mx-2">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Options
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="/game/rules" target="_blank">Open Rules</a>
+                    <a class="dropdown-item" href="#" id="cbSettingElement"></a>
+                    <a class="dropdown-item" href="#">Leave the Game</a>
+                </div>
+            </div>
+            <div class="row chatDisplay m-1 ">
+
+                <div class="chatMsgSys">
+                    <p>The game has been canceled due to no current players.</p>
+                </div>
+
+                <div class="chatMsgSys">
+                    <p>testUser1 left the game!</p>
+                </div>
+
+                <div class="chatMsg card">
+                    <div class="chatMsgHeader">
+                        <div class="chatID">
+                            <div class="avatar avatar_4"> </div>
+                            <div class="chat_userName name_player1">testUser1</div>
+                        </div>
+                        <div class="chat_timeStamp">2:45pm</div>
+                    </div>
+                    <p class=>Message test right here: Blah blah blah, testing, 1, 2, and... yup! You are confirmed to be awesome!</p>
+                </div>
+
+            </div>
+            <div class="row d-flex flex-column justify-content-around align-items-stretch chatEntry">
+                <input id="chatInput" class="" type="text" />
+                <input id="chatSend" class="tockBtn m-1" type="button" value="Send" />
+            </div>
+        </div>
+    </div>
+</div>
+<!--
+{{> navbar}}
+<div class="container h-100 mt-1 test1">
+    <div class="row align-items-stretch test2">
+        <div class="col-md-9 test1" id="gameContainer">
+        </div>
+        <div class="col-md-3 d-flex flex-column justify-contents-end test2" id="chatContainer">
+            <div class="row chatDisplay test1">
+
+            </div>
+            <div class="row chatEntry mb-1 test3">
+                <input id="chatInput" class="col-xs-10" type="text" />
+                <input id="chatSend" class="tockBtn col-xs-2" type="button" value="Send">
+            </div>
+        </div>
+    </div>
+</div>
+-->
+<!--
 
 <div class="container-fluid fillHeight">
     <div class="row no-gutters fillHeight">
@@ -70,3 +301,5 @@
         </div>
     </div>
 </div>
+
+-->
