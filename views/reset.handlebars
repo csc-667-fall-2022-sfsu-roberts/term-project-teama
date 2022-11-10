@@ -1,13 +1,46 @@
-<form action="" method="post" id="resetForm" class="d-flex flex-column justify-space-between">
+<!-- 
+    Title: Login Portal
+    URI: /login
+    View: login.handlebars
+-->
 
-    <h1 class="mx-auto my-2">Trouble Logging In?</h1>
+{{> navbar}}
 
-    <div class="formItem">
-        <label for="email">Email Address:</label>
-        <input type="email" id="email" name="email" placeholder="Email" required />
+<div class="container-fluid mt-1">
+    <div class="row">
+        <div class="offset-md-4 col-md-4">
+            <h2 class="mx-auto">Trouble Logging In?</h2>
+            <hr>
+
+            <form id="resetForm" class="form-horizontal" action="/users/reset" method="post">
+                <div class="formItem">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" placeholder="Email" required />
+                </div>
+                <div class="form-group my-2">
+                    <label class="control-label" for="username">Username:</label>
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" id="username_reset" name="username"
+                            placeholder="Enter Username" required>
+                    </div>
+                </div>
+                <div class="form-group my-2">
+                    <label class="control-label" for="password">Password:</label>
+                    <div class="col-sm-12">
+                        <input type="password  my-2" class="form-control" id="en_password" name="password"
+                            placeholder="Enter Password" required>
+                    </div>
+                    <label class="control-label  my-2" for="password">Re-Enter Password:</label>
+                    <div class="col-sm-12  my-2">
+                        <input type="password" class="form-control" id="re_password" name="password"
+                            placeholder="Re-enter Password" required>
+                    </div>
+                </div>
+                <div class="formItem">
+                    <button class="btn btn-success w-100 my-2 mx-auto">Send Login Link</button>
+                </div>
+            </form>
+            <a href="/users/login" class="btn btn-success w-100 my-2 mx-auto">Back To Login</a>
+        </div>
     </div>
-    <div class="formItem">
-        <button class="tockBtn formSubmit">Send Login Link</button>
-    </div>
-</form>
-<button class="tockBtn formSubmit"><a href="/users/login">Back To Login</a></button>
+</div>
