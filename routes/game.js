@@ -47,7 +47,11 @@ router.get("/summary/:id", function (req, res, next) {
 
 /* PAGE: /game/rules */
 router.get("/rules", function (req, res, next) {
-    res.render("rules", { title: "Tock" });
+    res.render("rules", { 
+        title: "Tock", 
+        as_page: true,
+        head: '<link rel="stylesheet" href="/stylesheets/cards.css">\n' 
+    });
 });
 
 /* PAGE: /game/create */

@@ -18,43 +18,333 @@
 <h1>Tock</h1>
 
 <h2>Summary</h2>
-<p>In Tock, players are attempting to get their <a href="#glossary_marble">marbles</a> out of their <a href="#glossary_start_space">start spaces</a>, around the board, and into their <a href="#glossary_home_space">home spaces</a> using <a href="#glossary_card">cards</a> from a standard poker deck.</p>
+<p>
+    In Tock, players are attempting to get their <a href="#glossary_marble">marbles</a> 
+    out of their <a href="#glossary_start_space">start spaces</a>, around the board, 
+    and into their <a href="#glossary_home_space">home spaces</a> using <a href="#glossary_card">
+    cards</a> from a standard poker deck.
+</p>
 
 <h2>The Board</h2>
 
+<!-- Picture Needed: Different areas of board -->
+
 <h3>Start Spaces</h3>
-<p>The <a href="#glossary_start_space">start spaces</a> are where a player's marble begins the game. To move a marble out of the player's start spaces, a <a href="#glossary_start_card">start card</a> must be used, putting the marble at that players 0 spot. This area is not accessible by any other player.</p>
+<!-- Picture Needed: Board with highlighted Start Spaces -->
+<p>
+    The <a href="#glossary_start_space">start spaces</a> are where a player's marble 
+    begins the game. To move a marble out of the player's start spaces, a 
+    <a href="#glossary_start_card">start card</a> must be used, putting the marble at 
+    that players 0 spot. This area is not accessible by any other player.
+</p>
+
 <h3>The Board</h3>
-<p>The board consists of a series of spaces which are accessible by all players. The important spots include spot 0, where a player's marbles will enter the board after using a start card, spot 8, a safe spot at the middle ground between two players' homes, and spot 17, the entry point into the next player's home spaces.</p>
+<!-- Picture Needed: Board with highlighted board Spaces, including 00, 8, 17 -->
+<p>
+    The board consists of a series of spaces which are accessible by all players. 
+    The important spots include spot 0, also known as the start portal, where a 
+    player's marbles will enter the board after using a start card, spot 8, the 
+    corner space, a safe spot at the middle ground between two players' homes, 
+    and spot 17, the home portal, or the entry point into the next player's home 
+    spaces.
+</p>
+
 <h4>Spot 0</h4>
-<p>Spot 0 is the location at which a marble leaves the start spaces. If a marble belonging to the associated player is on this spot, no other marble may pass or tock it. If another player's marble is on this spot, it may be tocked when a marble is started.</p>
+<p>
+    Spot 0 is the location at which a marble leaves the start spaces. If a marble 
+    belonging to the associated player is on this spot, no other marble may pass 
+    or tock it. If another player's marble is on this spot, it may be tocked when 
+    a marble is started.
+</p>
+
 <h4>Spot 8</h4>
-<p>The spot halfway between two player's home spaces is a safe spot. Marbles here, no matter who owns them, cannot be passed or tocked.</p>
+<p>
+    The spot halfway between two player's home spaces is a safe spot. Marbles here, 
+    no matter who owns them, cannot be passed or tocked.
+</p>
+
 <h4>Spot 17</h4>
-<p>The spot just before a player's spot 0 is the entry to that players home spaces. A player must move their marbles into the home spaces if passing this spot, unless moving backwards, during which, the marble must stay outside of the home spaces.</p>
+<p>
+    The spot just before a player's spot 0 is the entry to that players home spaces. 
+    A player must move their marbles into the home spaces if passing this spot, unless 
+    moving backwards, during which, the marble must stay outside of the home spaces.
+</p>
+
 <h3>Home Spaces</h3>
-<p>Each player has a set of 4 home spaces which they are trying to fill with their marbles. To win the game, each of the four home spots must be filled with a player's marble. A marble can never tock or be passed by a marble owned by the same player, and you can not use a card which would move a marble further than the last open home space.</p>
+<!-- Picture Needed: Board with highlighted home Spaces -->
+<p>
+    Each player has a set of 4 home spaces which they are trying to fill with their 
+    marbles. To win the game, each of the four home spots must be filled with a player's 
+    marble. A marble can never tock or be passed by a marble owned by the same player, 
+    and you can not use a card which would move a marble further than the last open home 
+    space.
+</p>
 
 <h2>The Rules</h2>
-<h3>Traversal</h3>
-<p>In general, a player may not pass or tock their own marbles.</p>
+
+<h3>The Purpose</h3>
+<p>
+    Players will be using cards to <a href="#glossary_start_Card">start their marbles</a>, 
+    then propel those marbles around the board and into their home spaces.
+</p>
+
+<h3>Your Turn</h3>
+<p>
+    Each turn, a player will select a card to use and then select a marble to use it on. 
+</p>
+
+<h4>Moving Your Marbles</h4>
+<p>
+    At the beginning of every turn, a player will select a card to use. Most cards allow 
+    a player to move a single marble they control a number of spaces equal to the value 
+    of a card. For example, a player could use an 8 of Clubs to move one of their marbles 
+    from spot 4 to spot 12. For the sake of matching cards, an Ace is one, Jack is 11, 
+    Queen 12, King 13, and Joker is equal to 15.
+</p><p>
+    There are several rules to where a marble can be propelled to, and if a marble cannot
+    legally reach a space, then the selected card cannot be used on that marble in that way.
+    A marble may never enter a start space or home space controlled by a different player.
+    A marble cannot pass another marble controlled by the same player, but can usually pass
+    another player's marbles. Two marbles can never share a space on the board, but a marble
+    may land in the space occupied by a different player's marble. This is called "tocking".
+</p>
+
+<h4>Tocking</h4>
+<p>
+    When a player's marble lands in a space occupied by another player's marble, that marble
+    "tocks" the other marble. A "tocked" marble is sent to an empty start space controlled
+    by the same player that controls the tocked marble. That player must again use a start
+    card to get that marble back on the board.
+</p>
+
+<h4>Special Spaces</h4>
+<p>
+    There are two special spaces which are unpassable.
+</p><p>
+    A player's start portal, the space which a started marble enters the board, normally acts
+    as just another space. If the player who controls the start space has a marble there, then
+    the space is unpassable and cannot be passed by any other marble. That said, another player 
+    may still tock the marble. For example, if Jessica has a marble on their start portal, and 
+    Will has a  marble two spaces behind it, Will must consider which card to use. If his hand 
+    consists of an Ace, a two and a four, Will could use the Ace to move up behind the marble, 
+    but cannot use the four. Will may also use the two, but doing so makes him vulnerable - If 
+    Will tocks Jessica's marble, Jessica may use a start card on her turn, starting her marble 
+    and tocking Wills.
+</p><p>
+    The other special space is the corner spaces. When unoccupied, the space exists as any 
+    other on the board. When any player moves their marble to an 8-space, the corner space, the
+    marble is unpassable and protected. A protected marble cannot be tocked. You cannot tock or
+    pass a marble on an 8-space.
+</p>
+
+<h4>The Cards</h4>
+<p>If a player has no card which provides
+    a legal move, they must select a card to waste, discarding it for no effect on the game. If a 
+    player has a move available, they may not waste a card, and must use the available card, even if 
+    they would rather not. 
+</p><p>
+    While most cards may be used to simply propel a marble an equal number of spaces, there are 
+    some cards which may be used to do things differently. 
+</p>
+
+<table class="mx-auto">
+    <tr style="border-bottom: 1px black solid;">
+        <td class="m-1">Image</td>
+        <td class="m-1" style="min-width:15%;">Name</td>
+        <td class="m-1">Usage (Choose One Option)</td>
+    </tr><tr>
+        <td><div class="tockCard ace m-1"></div></td>
+        <td class="m-1">Ace</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble one space</li>
+                <li>Start a marble</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard two m-1"></div></td>
+        <td class="m-1">Two</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble two spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard three m-1"></div></td>
+        <td class="m-1">Three</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble three spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard four m-1"></div></td>
+        <td class="m-1">Four</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble four spaces <b>backwards</b></li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard five m-1"></div></td>
+        <td class="m-1">Five</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble five spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard six m-1"></div></td>
+        <td class="m-1">Six</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble six spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard seven m-1"></div></td>
+        <td class="m-1">Seven</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel any number of your marbles a total of 7 spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard eight m-1"></div></td>
+        <td class="m-1">Eight</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble eight spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard nine m-1"></div></td>
+        <td class="m-1">Nine</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble nine spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard ten m-1"></div></td>
+        <td class="m-1">Ten</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble ten spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard jack m-1"></div></td>
+        <td class="m-1">Jack</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble eleven spaces</li>
+                <li>Switch any of your marbles not in a home or start space with any marble of a different color not in a home or start space</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard queen m-1"></div></td>
+        <td class="m-1">Queen</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble twelve spaces</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard king m-1"></div></td>
+        <td class="m-1">King</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble thirteen spaces</li>
+                <li>Start a marble</li>
+            </ul>
+        </td>
+    </tr><tr>
+        <td><div class="tockCard joker m-1"></div></td>
+        <td class="m-1">Joker</td>
+        <td class="m-1">
+            <ul>
+                <li>Propel one marble 15 spaces, draw a card, then take another turn</li>
+                <li>Start a marble, draw a card, then take another turn</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+
+
+<h4>Going Home</h4>
+<p>
+    While the home spaces have no <i>special</i> rules, the rules previously defined become more
+    important. A marble can never pass another marble of the same color. A player must orchestrate
+    their moves to load their marbles into home spaces and occupy them space by space. The first 
+    marble should be pushed to the last home space, the second marble to the second to last home
+    space, the third marble to the third home space, and the last marble to the final home space.
+    Please note that 
+</p>
+
+
 
 <h2>Glossary</h2>
 
 <h4 id="glossary_home_space">Home</h4>
+<p>
+    Each player has a set of four home spaces. These spaces are the four spaces in outer corners 
+    of the board, and must be filled for a player to win the game. No marble in a home space may 
+    be switched with another marble, but a four may be played on the outer-most marble, pulling
+    it out of the home spaces and back onto the board. Note that no marble may pass a marble of 
+    the same card. 
+</p>
 
 <h4 id="glossary_marble">Marble</h4>
-<p>Each player controls four marbles, trying to get them out of their <a href="#glossary_start_space">Start Spaces</a>, around the board, and into their <a href="#glossary_home_space">Home Spaces</a>.</p>
-<p>Player one's marbles are light green and associated with spades. Player two's marbles are dark blue and associated with hearts. Player three's marbles are yellow and associated with diamonds. Player four's marbles are grey and associated with clubs.</p>
+<p>
+    Each player controls four marbles, trying to get them out of their 
+    <a href="#glossary_start_space">Start Spaces</a>, around the board, 
+    and into their <a href="#glossary_home_space">Home Spaces</a>.
+</p><p>
+    Player one's marbles are light green and associated with spades. 
+    Player two's marbles are dark blue and associated with hearts. 
+    Player three's marbles are yellow and associated with diamonds. 
+    Player four's marbles are purple and associated with clubs.
+    You may turn on or off the symbols on the marbles by selecting
+    the colorblind checkbox in the options menu.
+</p>
 
 <h4 id="glossary_space">Space</h4>
+<p>
+    A space is any location in the game where a marble may reside.
+    There are three types of spaces: Start spaces, Home spaces, and 
+    Board spaces. The start and home spaces may only be occupied by
+    marbles of the player who controls the start spaces.
+</p>
 
 <h4 id="glossary_start_space">Start Space</h4>
+<p>
+    A start space is a space in which a marble starts the game. To 
+    leave the start spaces, the player must use a card to start a 
+    marble, moving it to the start portal, or the location on the 
+    board at which a player's marbles enter the board spaces. When 
+    a marble is tocked, it is sent to its owner's start spaces.
+</p>
+
 <h4 id="glossary_start_card">Start Card</h4>
+<p>
+    A start card is any card which may be used to start a marble, 
+    moving the marble from a start space to the player's start portal.
+    The start cards are an Ace, a King, or a Joker.
+</p>
 
 <h4 id="glossary_tock">Tock</h4>
+<p>
+    As a noun, Tock refers to the game. In other uses, 
+</p>
 
 <h4 id="glossary_tocking">Tocking</h4>
+<p>
+    To "tock" a marble refers to moving a marble into a space occupied 
+    by a marble of a different color, thereby sending the other marble 
+    back to its corresponding start spaces.
+</p>
 
 {{#if as_page }}
         </div>
