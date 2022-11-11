@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.createTable(
@@ -23,19 +24,15 @@ module.exports = {
           type: Sequelize.STRING,
           allowNull: false
         },
-        wins: {
-          type: Sequelize.INTEGER,
-          defaultValue: 0
-        },
-        loses: {
-          type: Sequelize.INTEGER,
-          defaultValue: 0
-        },
-        createdAt: {
+        createdat: {
           type: Sequelize.DATE,
-          defaultValue: Sequelize.literal('NOW()'),
+          defaultValue: Sequelize.literal('NOW()')
+        },
+        avatar: {
+          type: Sequelize.STRING,
+          defaultValue: 1,
           allowNull: false
-        }
+        },
       }
     );
   },

@@ -15,35 +15,35 @@
             {{!-- form --}}
             <form class="form-horizontal" action="/users/register" method="post">
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="email">Email:</label>
+                    <label class="control-label col-sm-4 mt-1" for="email">Email:</label>
                     <div class="col-sm-12">
                         <input type="text" class="form-control" id="email" name="email" placeholder="john.doe@gmail.com" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="username">Username:</label>
+                    <label class="control-label col-sm-4 mt-1" for="username">Username:</label>
                     <div class="col-sm-12">
                         <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="password">Password:</label>
+                    <label class="control-label col-sm-4 mt-1" for="password">Password:</label>
                     <div class="col-sm-12">
                         <input type="password" class="form-control" id="pw1" name="password" placeholder="8 characters. Must have a digit, an uppercase, and a symbol." required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="password">Re-entry:</label>
+                    <label class="control-label col-sm-4 mt-1" for="password">Re-entry:</label>
                     <div class="col-sm-12">
                         <input type="password" class="form-control" id="pw2" name="confirmpw" placeholder="Password" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-12">
-                        <button type="submit" class="btn btn-success w-100 mb-4">Register</button>
+                    <div class="col-sm-offset-2 col-sm-12 mt-3">
+                        <button type="submit" class="btn btn-success w-100">Register</button>
                     </div>
                 </div>
-                <div class="text-center">
+                <div class="text-center mt-3">
                     <p>Already registered? <a href="/users/login">Login</a></p>
                 </div>
             </form>

@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     return queryInterface.createTable(
@@ -19,25 +20,27 @@ module.exports = {
         },
         iscreator: {
           type: Sequelize.BOOLEAN,
-          allowNull: false
+          defaultValue: false
         },
         playerindex: {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        // HasConceded: {
-        //   type: Sequelize.BOOLEAN,
-        //   default: false,
-        //   allowNull: false
-        // },
-        // TurnsIdle: {
-        //   type: Sequelize.INTEGER,
-        //   default: 0
-        // },
-        isstarted: {
+        hasconceded: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
-          allowNull: false
+        },
+        turnsidle: {
+          type: Sequelize.INTEGER,
+          defaultValue: 0
+        },
+        isstarted: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false
+        },
+        iswinner: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false
         }
       });
   },

@@ -1,10 +1,9 @@
 const session = require("express-session");
 
 const sessionInstance = session({
-    secret: "akhrglkahdfklahdfglkhadflkg",
-    cookie: { maxAge: 24 * 60 * 60 },
+    secret: "secretvalue",
     resave: false,
-    saveUninitialized: true,
-});
+    saveUninitialized: false
+})
 
 module.exports = sessionInstance;

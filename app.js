@@ -36,13 +36,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // session setting
-const session = require('express-session');
-app.use(session({
-    secret: 'secretvalue', 
-    resave: false, 
-    saveUninitialized: false
-  })
-);
+const sessionInstance = require("./config/session");
+app.use(sessionInstance);
 
 // flash message
 const flash = require("connect-flash");

@@ -1,6 +1,6 @@
 
 const socketIO = require("socket.io");
-
+const passport = require("passport");
 const formatMessage = require("../public/javascripts/messages")
 const botName = "ChatCord Bot";
 
@@ -13,28 +13,31 @@ const Server = socketIO.Server;
 const init = (httpServer, app) => {
     const io = new Server(httpServer);
 
-    /*
+ 
     const wrap = (middleware) => (socket, next) =>
       middleware(socket.request, {}, next);
     io.use(wrap(sessionMiddleware));
-  
+    io.use(wrap(passport.initialize()));
+    io.use(wrap(passport.session())); 
+
     io.use((socket, next) => {
       const session = socket.request.session;
-  
-      if (session && session.authenticated) {
+      
+      if (socket.request.user) {
+        console.log('authorized user', socket.request.user)
         next();
       } else {
         next(new Error("unauthorized"));
       }
     });
-    */
+
     io.on("connection", (socket) => {
-        /*
+      
         console.log({
           message: "Connection happened",
           session: socket.request.session,
         });
-        */
+       
 
         console.log("New connetction socket.id : ", socket.id);
 

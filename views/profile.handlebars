@@ -107,8 +107,7 @@
     <div class="col-lg-4 my-5">
       <div class="card mb-4">
         <div class="card-body text-center">
-          <img src="https://portalsf.surge.sh/static/Icons/grossedCat.png" alt="avatar" class="rounded-circle img-fluid"
-            style="width: 150px;" id="avatar_image">
+          <img class="m-1 avatar avatar_{{user.avatar}}">
           <h5 class="my-3">{{user.name}}</h5>
           <p class="my-3">Upload New Avatar</p>
           <input class="mx-5" type="file" id="image_input2" accept="image/png, image/jpg">
@@ -146,7 +145,7 @@
               <p class="mb-0">Member Since</p>
             </div>
             <div class="col-sm-9">
-              <p class="text-muted mb-0">{{user.createdAt}}</p>
+              <p class="text-muted mb-0">{{user.createdat}}</p>
             </div>
           </div>
           <hr>

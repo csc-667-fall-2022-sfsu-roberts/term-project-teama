@@ -7,7 +7,7 @@
 
 {{> navbar}}
 
-<div class="container-fluid mt-1">
+<div class="container-fluid my-3">
     <div class="row">
         <div class="offset-md-4 col-md-4">
             <h2>Login</h2>
@@ -16,28 +16,28 @@
             {{!-- form --}}
             <form class="form-horizontal" action="/users/login" method="post">
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="username">Username:</label>
+                    <label class="control-label" for="username">Username:</label>
                     <div class="col-sm-12">
                         <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-sm-2" for="password">Password:</label>
+                    <label class="control-label mt-2" for="password">Password:</label>
                     <div class="col-sm-12">
                         <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                     </div>
                 </div>
                 <div class="row mb-2">
-                    <div class="col text-center">
+                    <div class="col text-center mt-2">
                         <a href="/users/reset" class="link-secondary">Forgot password?</a>
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-12">
-                        <button type="submit" class="btn btn-success w-100 mb-4">Login</button>
+                    <div class="col-sm-offset-2 mt-2">
+                        <button type="submit" class="btn btn-success w-100">Login</button>
                     </div>
                 </div>
-                <div class="text-center">
+                <div class="text-center mt-3">
                     <p>Not a member? <a href="/users/register">Register</a></p>
                 </div>
             </form>

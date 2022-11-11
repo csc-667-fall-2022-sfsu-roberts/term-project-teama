@@ -1,26 +1,44 @@
-{{> navbar}}
-<br>
+<style>
+    .card {
+        position: relative;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: rgb(231, 229, 229);
+        background-clip: border-box;
+        border: 1px solid rgba(203, 200, 200, 0.125);
+        border-radius: .25rem;
+    }
 
-<div class="container">
+    .player-left {
+        position: relative;
+        display: inline-block;
+        text-align: center;
+        border-radius: 100%;
+        background-color: #f3eef2;
+        text-transform: uppercase;
+    }
+</style>
+
+{{> navbar}}
+
+<div class="container my-3">
     <div class="col-md-12">
-        <div class=" col-md-4">
-            <h2>Table: {{game.name}}</h2>
+        <div class=" col-md-4 my-3">
+            <h3>Table: {{game.name}}</h2>
         </div>
-        <div class=" col-md-4">
-            <h3>Players At This Table: {{game.num}}/4</h3>
+        <div class="col-md-4 my-3">
+            <h4>Players At This Table: {{game.num}}/4</h3>
         </div>
 
         {{#each players}}
-        <div class="card b-1 mb-20">
-            <div class="player card-body">
-                <div class="player-left pr-12">
-                    <img class="avatar" src="" alt="avatar">
-                </div>
+        <div class="card d-flex flex-column mb-3">
+            <div class="card-body d-flex align-content-start">
+                <div class="player-left m-1 avatar avatar_{{user.avatar}}"> </div>
                 <div class="player-body">
                     <div class="mb-2">
-                        <span class="fs-20 pr-16">{{this.name}}</span>
+                        <span class="fs-5 ps-2">{{this.name}}</span>
                         {{#if this.iscreator}}
-                        <small class="fs-16 fw-300 ls-1">(table administrator)</small>
+                        <small class="fs-6 ps-1">(table administrator)</small>
                         {{/if}}
                     </div>
                 </div>
@@ -54,61 +72,7 @@
     </div>
 </div>
 
-<style>
-    .pr-12 {
-        padding-right: 12px;
-    }
 
-    .b-1 {
-        border: 1px solid#ebebeb;
-    }
-
-    .mb-20 {
-        margin-bottom: 20px;
-    }
-
-    .fs-20 {
-        font-size: 25px;
-    }
-
-    .pr-16 {
-        padding-right: 16px;
-    }
-
-    .card {
-        position: relative;
-        display: -ms-flexbox;
-        display: flex;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        min-width: 0;
-        word-wrap: break-word;
-        background-color: rgb(231, 229, 229);
-        background-clip: border-box;
-        border: 1px solid rgba(203, 200, 200, 0.125);
-        border-radius: .25rem;
-    }
-
-    .player {
-        display: -ms-flexbox;
-        display: flex;
-        -ms-flex-align: start;
-        align-items: flex-start;
-    }
-
-    .avatar {
-        position: relative;
-        display: inline-block;
-        width: 50px;
-        height: 50px;
-        line-height: 50px;
-        text-align: center;
-        border-radius: 100%;
-        background-color: #f3eef2;
-        color: #d9dadc;
-        text-transform: uppercase;
-    }
-</style>
 
 <script>
     const quitButton = document.getElementById("quit-game-btn");
