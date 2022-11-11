@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        return queryInterface.createTable("Spot", {
+        return queryInterface.createTable("spots", {
             gamePlayerID: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
