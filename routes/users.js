@@ -59,6 +59,19 @@ router.get("/profile", notLoggedInUser, function (req, res, next) {
     res.render("profile", { user: user });
 });
 
+
+router.post("/profile", notLoggedInUser, async (req, res) => {
+    const user = req.user;
+    const {avatar} = req.body;
+
+    try {
+        await dbQuery.changeAvater(avatar, user.id);
+        res.render("profile", { user: user });
+    } catch {
+        res.render("profile", { user: user });
+    }
+});
+
 router.get("/logout", notLoggedInUser, function (req, res, next) {
     req.logout((err) => {
         if (err) {

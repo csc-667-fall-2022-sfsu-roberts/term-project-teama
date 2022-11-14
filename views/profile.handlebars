@@ -3,6 +3,7 @@
     URI: /profile
     View: profile.handlebars
 -->
+<link rel="stylesheet" href="/stylesheets/avatar.css">
 <style>
   * {
     box-sizing: border-box;
@@ -34,6 +35,12 @@
   .stats {
     margin-top: 5vh;
 
+  }
+
+  #avatarForm{
+    height: 200px; 
+    overflow-y: scroll;  // show vertical scrollbar
+    overflow-x: hidden;  // hide horizontal scrollbar
   }
 </style>
 
@@ -109,8 +116,140 @@
         <div class="card-body text-center">
           <img class="m-1 avatar avatar_{{user.avatar}}">
           <h5 class="my-3">{{user.name}}</h5>
-          <p class="my-3">Upload New Avatar</p>
-          <input class="mx-5" type="file" id="image_input2" accept="image/png, image/jpg">
+
+          <p class="my-3">Change Your Avater</p>
+          <form id="avatarForm" action="/users/profile" method="post">
+            <input type="radio" id="0" name="avatar" value="0">
+            <label for="0">
+              <div class="avatar avatar_0"></div>
+            </label>
+
+            <input type="radio" id="1" name="avatar" value="1">
+            <label for="1">
+              <div class="avatar avatar_1"></div>
+            </label>
+
+            <input type="radio" id="2" name="avatar" value="2">
+            <label for="2">
+              <div class="avatar avatar_2"></div>
+            </label>
+
+            <input type="radio" id="3" name="avatar" value="3">
+            <label for="3">
+              <div class="avatar avatar_3"></div>
+            </label><br><br>
+
+            <input type="radio" id="4" name="avatar" value="4">
+            <label for="4">
+              <div class="avatar avatar_4"></div>
+            </label>
+
+            <input type="radio" id="5" name="avatar" value="5">
+            <label for="5">
+              <div class="avatar avatar_5"></div>
+            </label>
+
+            <input type="radio" id="6" name="avatar" value="6">
+            <label for="6">
+              <div class="avatar avatar_6"></div>
+            </label>
+
+            <input type="radio" id="7" name="avatar" value="7">
+            <label for="7">
+              <div class="avatar avatar_7"></div>
+            </label><br><br>
+
+            <input type="radio" id="8" name="avatar" value="8">
+            <label for="8">
+              <div class="avatar avatar_8"></div>
+            </label>
+
+            <input type="radio" id="9" name="avatar" value="9">
+            <label for="9">
+              <div class="avatar avatar_9"></div>
+            </label>
+
+            <input type="radio" id="10" name="avatar" value="10">
+            <label for="10">
+              <div class="avatar avatar_10"></div>
+            </label>
+
+            <input type="radio" id="11" name="avatar" value="11">
+            <label for="11">
+              <div class="avatar avatar_11"></div>
+            </label><br><br>
+
+            <input type="radio" id="12" name="avatar" value="12">
+            <label for="12">
+              <div class="avatar avatar_12"></div>
+            </label>
+
+            <input type="radio" id="13" name="avatar" value="13">
+            <label for="13">
+              <div class="avatar avatar_13"></div>
+            </label>
+
+            <input type="radio" id="14" name="avatar" value="14">
+            <label for="14">
+              <div class="avatar avatar_14"></div>
+            </label>
+
+            <input type="radio" id="15" name="avatar" value="15">
+            <label for="15">
+              <div class="avatar avatar_15"></div>
+            </label><br><br>
+
+            <input type="radio" id="16" name="avatar" value="16">
+            <label for="16">
+              <div class="avatar avatar_16"></div>
+            </label>
+
+            <input type="radio" id="17" name="avatar" value="17">
+            <label for="17">
+              <div class="avatar avatar_17"></div>
+            </label>
+
+            <input type="radio" id="18" name="avatar" value="18">
+            <label for="18">
+              <div class="avatar avatar_18"></div>
+            </label>
+
+            <input type="radio" id="19" name="avatar" value="19">
+            <label for="19">
+              <div class="avatar avatar_19"></div>
+            </label><br><br>
+
+            <input type="radio" id="20" name="avatar" value="20">
+            <label for="20">
+              <div class="avatar avatar_20"></div>
+            </label>
+
+            <input type="radio" id="21" name="avatar" value="21">
+            <label for="21">
+              <div class="avatar avatar_21"></div>
+            </label>
+
+            <input type="radio" id="22" name="avatar" value="22">
+            <label for="22">
+              <div class="avatar avatar_22"></div>
+            </label>
+
+            <input type="radio" id="23" name="avatar" value="23">
+            <label for="23">
+              <div class="avatar avatar_23"></div>
+            </label><br><br>
+
+            <input type="radio" id="24" name="avatar" value="24">
+            <label for="24">
+              <div class="avatar avatar_24"></div>
+            </label>
+
+            <input type="radio" id="25" name="avatar" value="25">
+            <label for="25">
+              <div class="avatar avatar_25"></div>
+            </label>
+            <input type="submit" value="Submit">
+          </form>
         </div>
       </div>
       <div class="card mb-4 mb-lg-0">
@@ -190,28 +329,17 @@
   </div>
 </section>
 
-<input type="file" id="image_input" accept="image/png, image/jpg">
 
-<div id="display_image"></div>
-<img src="#" id="image" width="200px" height="150px">
 
 <script>
-  const image_input = document.querySelector("#image_input");
-  var uploaded_image = "";
-
-  image_input.addEventListener("change", function () {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-
-      uploaded_image = reader.result;
-      localStorage.setItem("uploaded_image", uploaded_image);
-      //document.querySelector("#display_image").style.backgroundImage = `url(${uploaded_image})`;
-    });
-    //reader.readAsDataURL(this.files[0]);
-    let img = document.getElementById('avatar_image');
-    img.src = localStorage.getItem('uploaded_image');
-  })
-
+  //function changeAvatar() {
+    // Get the selected score (assuming one was selected)
+    var avatar_num = document.querySelector('input[name="avatar"]:checked').value;
+    var id = {{ user.id }};
+    //let changeAvatar = require("../db/dbquery");
+    //changeAvatar(avatar_num, id);
+    alert('Your avatar has bee updated! Avatat is' + avatar_num +' and id is ' + id);
+  }
 </script>
 
 

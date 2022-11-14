@@ -75,6 +75,9 @@ const findNotEngagedGames = (userid) => {
     return db.any('SELECT * FROM games WHERE id NOT IN (SELECT game_id FROM game_users WHERE user_id=${userid}) ORDER BY id DESC', {userid})
 }
 
+const changeAvater = (avatar_num, userid) => {
+    return db.any('UPDATE users SET avatar=${avatar_num} WHERE id=${userid}', {avatar_num, userid})
+}
 module.exports = {
     createNewUser,
     findUser,
@@ -93,5 +96,6 @@ module.exports = {
     findNumOfUsersByGameId,
     findEngaedGames,
     findNotEngagedGames,
-    updateGamestate
+    updateGamestate,
+    changeAvater
 };
