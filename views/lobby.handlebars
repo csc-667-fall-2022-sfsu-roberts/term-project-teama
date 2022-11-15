@@ -5,7 +5,6 @@
 -->
 
 {{> navbar}}
-
 <main>
 
     <div class="row mt-5">
@@ -74,22 +73,25 @@
             </div>
         </div>
         <div class="col-4 me-auto">
-            <div class="card ">
-                <div class="card-body bg-light">
-                    <h5 class="card-title">Chatting</h5>
+            <div class="card" id="chat1" style="border-radius: 15px;">
+                <div class="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
+                    style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                    <p class="mb-0 fw-bold">Lobby Live chat</p>
                 </div>
-                <div class="display-message ms-2" style="height: 500px; overflow-y: scroll;">
-                    <div class="chat-message"></div>
+                <div class="chat-message card-body" style="height: 500px; overflow-y: scroll;">
                 </div>
-
-            </div>
-            <div class="chat-form-container">
-                <form id="chat-form">
-                    <input id="msg" type="text" placeholder="Enter Message..." required autocomplete="off">
-                    <button type="submit" class="btn btn-primary my-3">Send</button>
-                </form>
+                <div class="chat-form-container">
+                    <form id="chat-form" class="form-outline">
+                        <div class="card-footer text-muted d-flex justify-content-start align-items-center p-1">
+                            <img class="mx-1 avatar avatar_{{user.avatar}}" style="width: 60px;">
+                            <input id="msg" type="text" class="form-control form-control-lg mx-2"
+                                placeholder="Type message" required autocomplete="off">
+                            <button type="submit" class="btn btn-primary my-3">Send</button>
+                    </form>
+                </div>
             </div>
         </div>
+    </div>
 </main>
 
 <script>
@@ -150,15 +152,10 @@
     const chatMessages = document.querySelector('.chat-message');
     const socket = io();
 
-    //var id = {{ user.id }};
-    //const username = {{user.name }};
-    const username = "qin";
+    socket.emit('login');
 
-    socket.emit('login', username);
-
-    socket.on('message', ( message ) => {
-        //console.log("receive message from socket server...");
-        console.log(username);
+    socket.on('message', (message) => {
+        console.log(message);
         outputMessage(message);
     });
 
@@ -177,7 +174,7 @@
         }
 
         // Emit message to server
-        socket.emit('chatMessage', ({username, msg}));
+        socket.emit('chatMessage', (msg));
 
         // Clear input
         e.target.elements.msg.value = '';
@@ -187,18 +184,28 @@
     // Output message to DOM
     function outputMessage(message) {
         console.log("outputMessage...");
+        console.log(`the received message is: ${message}`);
         const div = document.createElement('div');
-        div.classList.add('message');
+        div.classList.add("message", "d-flex", "flex-row", "justify-content-start", "mb-4");
+        const img = document.createElement('img');
+        img.classList.add("mx-1", "avatar", `avatar_${message.avatar}`);
+        img.setAttribute('style', 'width: 40px;');
+        const b = document.createElement('b');
+        b.classList.add('name');
+        b.innerText = `${message.username}`;
+        const div2 = document.createElement('div');
         const p = document.createElement('p');
-        p.classList.add('meta');
-        p.innerText = "{{user.name}}";
-        p.innerHTML += `<span style="font-weight:bold;"> ${message.time}:</span>`;
-        div.appendChild(p);
-        const para = document.createElement('p');
-        para.classList.add('text');
-        para.innerText = message.text;
-        div.appendChild(para);
+        p.classList.add('meta', 'mall', 'p-2', 'ms-3', 'mb-1', 'rounded-3');
+        p.setAttribute('style', 'background-color: #f5f6f7;');
+        p.innerHTML = `${message.text}`;
+        const p2 = document.createElement('p');
+        p2.classList.add('small', 'ms-3', 'mb-3', 'rounded-3', 'text-muted');
+        p2.innerHTML = `${message.time}`;
+        div2.appendChild(p);
+        div2.appendChild(p2);
+        div.appendChild(img);
+        div.appendChild(b);
+        div.appendChild(div2);
         document.querySelector('.chat-message').appendChild(div);
     }
-
 </script>

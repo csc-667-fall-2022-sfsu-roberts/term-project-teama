@@ -3,7 +3,6 @@
     URI: /profile
     View: profile.handlebars
 -->
-<link rel="stylesheet" href="/stylesheets/avatar.css">
 <style>
   * {
     box-sizing: border-box;
@@ -37,10 +36,10 @@
 
   }
 
-  #avatarForm{
-    height: 200px; 
-    overflow-y: scroll;  // show vertical scrollbar
-    overflow-x: hidden;  // hide horizontal scrollbar
+  #avatarForm {
+    height: 200px;
+    overflow-y: scroll; // show vertical scrollbar
+    overflow-x: hidden; // hide horizontal scrollbar
   }
 </style>
 
@@ -333,12 +332,12 @@
 
 <script>
   //function changeAvatar() {
-    // Get the selected score (assuming one was selected)
-    var avatar_num = document.querySelector('input[name="avatar"]:checked').value;
-    var id = {{ user.id }};
-    //let changeAvatar = require("../db/dbquery");
-    //changeAvatar(avatar_num, id);
-    alert('Your avatar has bee updated! Avatat is' + avatar_num +' and id is ' + id);
+  // Get the selected score (assuming one was selected)
+  var avatar_num = document.querySelector('input[name="avatar"]:checked').value;
+  var id = {{ user.id }};
+  //let changeAvatar = require("../db/dbquery");
+  //changeAvatar(avatar_num, id);
+  alert('Your avatar has bee updated! Avatat is' + avatar_num + ' and id is ' + id);
   }
 </script>
 
