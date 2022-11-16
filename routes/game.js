@@ -76,12 +76,25 @@ router.post("/create", notLoggedInUser, async function (req, res, next) {
 /* PAGE: /game/created/:id */
 router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
     try {
+        /*
         const currentUser = await dbQuery.findUserByGameUserId(req.game.id, req.user.id);
         if(currentUser){ 
             if(currentUser.isstarted){
                 res.redirect(`/game/show/${req.game.id}`);
             }
         } 
+        */
+        const gameInfo = findGamesByGameId(req.game.id);
+        if (gameInfo) {
+            if (gameInfo.state === 1){
+                if (userIsPlayingGame(req.game.id, req.user.id)){
+                    res.redirect(`/game/show/${req.game.id}`);
+                } else {
+                    res.redirect('/lobby');
+                }
+                
+            }
+        }
         res.render("created", { user: req.user, game: req.game, players: req.players });
     } catch (err) {
         console.log(err)
@@ -110,19 +123,30 @@ router.post("/quit", notLoggedInUser, async (req, res, next) => {
     try {
         const { gameid } = req.body;
         const user = req.user;
-        const results = await dbQuery.findUserByGameUserId(gameid, user.id)
-        if (results.iscreator) {
-            await dbQuery.deleteALLUserByGameId(gameid);
-            await dbQuery.deleteGameById(gameid);
+        const gameStarted = dbQuery.checkGameStarted(gameid);
+        if (gameStarted) {
+            // concede
+            res.json({
+                code: 2,
+                status: 'failure'
+            })
 
         } else {
-            await dbQuery.deleteUserByGameUserId(gameid, user.id);
+            // Leave game unless 
+            const isCreator = dbQuery.checkCreator(gameid, user.id);
+            if (isCreator) {
+                await dbQuery.deleteALLUserByGameId(gameid);
+                await dbQuery.deleteGameById(gameid);
+
+            } else {
+                await dbQuery.deleteUserByGameUserId(gameid, user.id);
+            }
+            console.log(user.name, 'quit from game', gameid)
+            res.json({
+                code: 1,
+                status: 'success'
+            })
         }
-        console.log(user.name, 'quit from game', gameid)
-        res.json({
-            code: 1,
-            status: 'success'
-        })
     } catch (err) {
         console.log(err)
     }
