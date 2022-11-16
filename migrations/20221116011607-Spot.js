@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    return queryInterface.createTable("Spot", {
+    return queryInterface.createTable("spot", {
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
@@ -13,7 +13,7 @@ module.exports = {
             type: Sequelize.INTEGER,
             allowNull: false,
         },
-        playerIndex: {
+        player_index: {
             type: Sequelize.INTEGER,
             allowNull: false,
         },

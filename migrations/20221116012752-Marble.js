@@ -3,29 +3,29 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        return queryInterface.createTable("Marble", {
+        return queryInterface.createTable("marble", {
             id: {
               type: Sequelize.INTEGER,
               primaryKey: true,
               autoIncrement: true
             },
-            gamePlayerID: {
+            game_player_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "Game_Player",
+                  model: "game_player",
                   key: "id"
                 },
             },
-            currentSpot: {
+            current_spot: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "Spot",
+                  model: "spot",
                   key: "id"
                 },
             },
-            marbleIndex: {
+            marble_index: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 defaultValue: 0

@@ -3,7 +3,7 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.createTable(
-      'Game',
+      'game',
       {
         id: {
           type: Sequelize.INTEGER,
@@ -23,7 +23,7 @@ module.exports = {
           allowNull: true,
           defaultValue: null,
           references: {
-            model: "User",
+            model: "user",
             key: "id"
           },
         },
@@ -31,15 +31,15 @@ module.exports = {
           type: Sequelize.INTEGER,
           defaultValue: null,
           references: {
-            model: "User",
+            model: "user",
             key: "id"
           },
         },
-        dateCreated: {
+        date_created: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()'),
         },
-        dateEnded: {
+        date_ended: {
           type: Sequelize.DATE,
           allowNull: true
         }

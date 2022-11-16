@@ -9,6 +9,7 @@
     "db:create:migration": "npx sequelize migration:generate --name ",
     "db:migrate": "npx sequelize db:migrate",
     "db:rollback": "npx sequelize db:migrate:undo",
+    "db:rollback:all": "npx sequelize-cli db:migrate:undo:all",
     "postinstall": "npx sequelize db:migrate"
   },
   "dependencies": {

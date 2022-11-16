@@ -3,7 +3,7 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     return queryInterface.createTable(
-      'User',
+      'user',
       {
         id: {
           type: Sequelize.INTEGER,
@@ -34,11 +34,11 @@ module.exports = {
           allowNull: false,
           defaultValue: 0
         },
-        dateAdded: {
+        date_added: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()')
         },
-        lastOnline: {
+        last_online: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()')
         },

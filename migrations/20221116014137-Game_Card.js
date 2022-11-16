@@ -4,30 +4,30 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     return queryInterface.createTable(
-      'Game_Card',
+      'game_card',
       {
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        gameID: {
+        game_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
-            model: "Game",
+            model: "game",
             key: "id"
           },
         },
-        cardID: {
+        card_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
-            model: "Card",
+            model: "card",
             key: "id"
           },
         },
-        locationID: {
+        location_id: {
           type: Sequelize.INTEGER,
           allowNull: false
         },

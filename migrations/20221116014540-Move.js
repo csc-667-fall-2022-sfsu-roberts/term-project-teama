@@ -3,49 +3,49 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        return queryInterface.createTable("Move", {
+        return queryInterface.createTable("move", {
             id: {
                 type: Sequelize.INTEGER,
                 primaryKey: true,
                 autoIncrement: true
             },
-            turnID: {
+            turn_id: {
                type: Sequelize.INTEGER,
                allowNull: false,
                references: {
-                 model: "Turn",
+                 model: "turn",
                  key: "id"
                },
             },
 
-            marbleID: {
+            marble_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "Marble",
+                  model: "marble",
                   key: "id"
                 },
             },
 
-            fromSpotID: {
+            from_spot_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "Spot",
+                  model: "spot",
                   key: "id"
                 },
             },
 
-            toSpotID: {
+            to_spot_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "Spot",
+                  model: "spot",
                   key: "id"
                 },
             },
 
-            movementType: {
+            movement_type: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 defaultValue: 0

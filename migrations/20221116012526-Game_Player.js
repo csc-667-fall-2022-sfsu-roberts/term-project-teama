@@ -3,38 +3,38 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     return queryInterface.createTable(
-      'Game_Player',
+      'game_player',
       {
         id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        playerID: {
+        player_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
-            model: "User",
+            model: "user",
             key: "id"
           },
         },
-        gameID: {
+        game_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
-            model: "Game",
+            model: "game",
             key: "id"
           },
         },
-        playerIndex: {
+        player_index: {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        hasConceded: {
+        has_conceded: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
         },
-        turnsIdle: {
+        turns_idle: {
           type: Sequelize.INTEGER,
           defaultValue: 0
         }

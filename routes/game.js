@@ -197,7 +197,7 @@ router.param("id", async (req, res, next, id) => {
             {
                 name: userinfo.username,
                 avatar: userinfo.avatar,
-                iscreator: gameusers[i].playerIndex===1
+                iscreator: gameusers[i].player_index===1
                 
             };
             // if(gameusers[i].isstarted){
