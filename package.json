@@ -7,7 +7,11 @@
     "start:dev": "NODE_ENV=development DEBUG=csc667teama:* nodemon ./bin/www",
     "start:dev:win": "SET \"NODE_ENV=development\" SET DEBUG=csc667teama:* && nodemon ./bin/www",
     "db:create:migration": "npx sequelize migration:generate --name ",
+    "db:create:seed": "npx sequelize seed:generate --name ",
     "db:migrate": "npx sequelize db:migrate",
+    "db:seed": "npx sequelize db:seed:all",
+    "db:seed:rollback": "npx sequelize db:seed:undo",
+    "db:seed:rollback:all": "npx sequelize db:seed:undo:all",
     "db:rollback": "npx sequelize db:migrate:undo",
     "db:rollback:all": "npx sequelize-cli db:migrate:undo:all",
     "postinstall": "npx sequelize db:migrate"
