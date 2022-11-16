@@ -64,10 +64,11 @@ router.post("/create", notLoggedInUser, async function (req, res, next) {
     try {
         const { gamename } = req.body;
         const user = req.user;
-        const game = await dbQuery.createNewGame(gamename)
-        await dbQuery.createNewGameUsers(game.id, user.id, true);
+        console.log('create page', user)
+        const gameid = await dbQuery.createNewGame(gamename, user.id)
+        
         // console.log(user.name, 'created', gamename, 'gameid =', game.id)
-        res.redirect(`/game/created/${game.id}`);
+        res.redirect(`/game/created/${gameid}`);
     } catch (err) {
         console.log(err)
     }
@@ -84,17 +85,17 @@ router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
             }
         } 
         */
-        const gameInfo = findGamesByGameId(req.game.id);
-        if (gameInfo) {
-            if (gameInfo.state === 1){
-                if (userIsPlayingGame(req.game.id, req.user.id)){
-                    res.redirect(`/game/show/${req.game.id}`);
-                } else {
-                    res.redirect('/lobby');
-                }
+        // const gameInfo = findGamesByGameId(req.game.id);
+        // if (gameInfo) {
+        //     if (gameInfo.state === 1){
+        //         if (userIsPlayingGame(req.game.id, req.user.id)){
+        //             res.redirect(`/game/show/${req.game.id}`);
+        //         } else {
+        //             res.redirect('/lobby');
+        //         }
                 
-            }
-        }
+        //     }
+        // }
         res.render("created", { user: req.user, game: req.game, players: req.players });
     } catch (err) {
         console.log(err)
@@ -184,33 +185,36 @@ router.param("id", async (req, res, next, id) => {
             name: game.name,
             state: game.state
         };
+        console.log('game',game)
         gameusers = await dbQuery.findAllUsersByGameId(id);
+        console.log('gameusers',gameusers)
         req.players = [];
         let startedUser = 0;
         for (let i = 0; i < gameusers.length; i++) {
-            const userinfo = await dbQuery.findUserById(gameusers[i].user_id);
+            const userinfo = await dbQuery.findUserById(gameusers[i].playerID);
+            console.log('userinfo', userinfo)
             req.players[i] =
             {
-                name: userinfo.name,
-                // avatar: userinfo.avatar,
-                iscreator: gameusers[i].iscreator,
-                isstarted: gameusers[i].isstarted
+                name: userinfo.username,
+                avatar: userinfo.avatar,
+                iscreator: gameusers[i].playerIndex===1
+                
             };
-            if(gameusers[i].isstarted){
-                startedUser += 1;
-            }
+            // if(gameusers[i].isstarted){
+            //     startedUser += 1;
+            // }
         }
         // update game state=1 if all users start game
-        if(startedUser == 4){
-            req.game.state = 1;
-            dbQuery.updateGamestate(req.game.id, 1)
-        }
+        // if(startedUser == 4){
+        //     req.game.state = 1;
+        //     dbQuery.updateGamestate(req.game.id, 1)
+        // }
         req.game.num = req.players.length;
-        if (req.game.num == 4) {
-            req.game.isFull = true;
-        } else {
-            req.game.isFull = false;
-        }
+        // if (req.game.num == 4) {
+        //     req.game.isFull = true;
+        // } else {
+        //     req.game.isFull = false;
+        // }
         next();
     }catch (err) {
         console.log(err)

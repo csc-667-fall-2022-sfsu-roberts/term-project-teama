@@ -36,7 +36,7 @@ const init = (httpServer, app) => {
       session: socket.request.session,
     });
 
-    const username = socket.request.user.name;
+    const username = socket.request.user.username;
     const avatar = socket.request.user.avatar;
     socket.on('login', () => {
       console.log("A user logged in....");

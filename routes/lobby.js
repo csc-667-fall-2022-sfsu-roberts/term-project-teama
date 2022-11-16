@@ -7,10 +7,10 @@ const dbQuery = require('../db/dbquery');
 /* PAGE: /lobby */
 router.get('/', notLoggedInUser, async function (req, res, next) {
     const user = req.user;
-    const results = await dbQuery.findEngaedGames(user.id);
-    const engaedGames = [];
+    const results = await dbQuery.findEngagedGames(user.id);
+    const engagedGames = [];
     for (let i = 0; i < results.length; i++){
-        engaedGames[i] = {
+        engagedGames[i] = {
             game: results[i],
             numOfUsers: (await dbQuery.findNumOfUsersByGameId(results[i].id)).count
         }
@@ -29,7 +29,7 @@ router.get('/', notLoggedInUser, async function (req, res, next) {
 
     // console.log('Games',games);
     
-    res.render('lobby', { user: user, engaedGames: engaedGames, games: games });
+    res.render('lobby', { user: user, engaedGames: engagedGames, games: games });
 });
 
 /* API: /lobby/send 

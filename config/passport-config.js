@@ -21,7 +21,7 @@ function initilize(passport) {
     passport.use(new localStrategy({ usernameField: 'username' }, authenticateUser));
     passport.serializeUser((user, done) => done(null, user.id));
     passport.deserializeUser((id, done) => {
-        db.any(`SELECT id, name, email, avatar, createdat FROM users`)
+        db.any(`SELECT id, username, email, avatar, "dateAdded" FROM "User"`)
             .then(results => {
                 user = results.find(user => user.id === id)
                 return done(null, user)

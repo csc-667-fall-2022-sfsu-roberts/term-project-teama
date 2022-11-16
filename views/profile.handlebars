@@ -114,7 +114,7 @@
       <div class="card mb-4">
         <div class="card-body text-center">
           <img class="m-1 avatar avatar_{{user.avatar}}">
-          <h5 class="my-3">{{user.name}}</h5>
+          <h5 class="my-3">{{user.username}}</h5>
 
           <p class="my-3">Change Your Avater</p>
           <form id="avatarForm" action="/users/profile" method="post">
@@ -265,7 +265,7 @@
               <p class="mb-0">Username</p>
             </div>
             <div class="col-sm-9">
-              <p class="text-muted mb-0">{{user.name}}</p>
+              <p class="text-muted mb-0">{{user.username}}</p>
             </div>
           </div>
           <hr>
@@ -283,7 +283,7 @@
               <p class="mb-0">Member Since</p>
             </div>
             <div class="col-sm-9">
-              <p class="text-muted mb-0">{{user.createdat}}</p>
+              <p class="text-muted mb-0">{{user.dateAdded}}</p>
             </div>
           </div>
           <hr>

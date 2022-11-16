@@ -18,8 +18,10 @@ const concedeGame = (gameId, userId) => {
     // set Game_Player.hasConceded = true;
     // set Game.state = 2 and game.DateEnded = now
 }
-const createNewGame = (name) => {
-    return db.one('INSERT INTO "Game" (username) VALUES ( ${name}) RETURNING id', {name})
+const createNewGame = async (gamename, userid) => {
+    let game = await db.one('INSERT INTO "Game" (name) VALUES ( ${gamename}) RETURNING id', {gamename})
+    createNewGameUsers(game.id, userid, true);
+    return game.id;
 }
 
 const deleteGameById = (gameid) => {
@@ -27,7 +29,7 @@ const deleteGameById = (gameid) => {
 }
 
 const findGameIdByUserId = (userid) => {
-    return db.any('SELECT "gameID" FROM "Game_Player" WHERE "userID"=${userid}', {userid})
+    return db.any('SELECT "gameID" FROM "Game_Player" WHERE "playerID"=${userid}', {userid})
 }
 
 const findAllGames = () => {
@@ -43,7 +45,7 @@ const updateGamestate = (gameid, state) => {
 }
 
 const userIsPlayingGame = (gameid, userid) => {
-    let res = db.one('SELECT "userID" FROM "Game_Player" WHERE "gameID"=${gameId} AND "userID"=${userId}', {gameid, userid});
+    let res = db.one('SELECT "playerID" FROM "Game_Player" WHERE "gameID"=${gameId} AND "playerID"=${userId}', {gameid, userid});
     if (res && res.length === 1) { return true; }
     return false;
 }
@@ -61,7 +63,7 @@ const  createNewGameUsers = async (gameid, userid, iscreator) => {
     if (iscreator) {
         await setCreator(gameid, userid);
     }
-    return db.one('INSERT INTO "Game_Player" ("gameID", "userID", "playerIndex") VALUES (${gameid}, ${userid}, ${playerIndex}) RETURNING id', {gameid, userid, playerIndex});
+    return db.one('INSERT INTO "Game_Player" ("gameID", "playerID", "playerIndex") VALUES (${gameid}, ${userid}, ${playerIndex}) RETURNING id', {gameid, userid, playerIndex});
 }
 
 const setCreator = (gameId, userId) => {
@@ -79,11 +81,11 @@ const findAllUsersByGameId = (gameid) => {
 }
 
 const findUserByGameUserId = (gameid, userid) => {
-    return db.oneOrNone('SELECT * FROM "Game_Player" WHERE "gameID"=${gameid} AND "userID"=${userid}', {gameid, userid})
+    return db.oneOrNone('SELECT * FROM "Game_Player" WHERE "gameID"=${gameid} AND "playerID"=${userid}', {gameid, userid})
 }
 
 const deleteUserByGameUserId = (gameid, userid) => {
-    return db.any('DELETE FROM "Game_Player" WHERE "gameID"=${gameid} AND "userID"=${userid}', {gameid, userid})
+    return db.any('DELETE FROM "Game_Player" WHERE "gameID"=${gameid} AND "playerID"=${userid}', {gameid, userid})
 }
 
 const deleteALLUserByGameId = (gameid, userid) => {
@@ -98,11 +100,11 @@ const findNumOfUsersByGameId = (gameid) => {
     return db.one('SELECT COUNT(*) FROM "Game_Player" WHERE "gameID"=${gameid}', {gameid})
 }
 const findEngagedGames = async (userid) => {
-    return db.any('SELECT * FROM "Game" WHERE id IN (SELECT "gameID" FROM "Game_Player" WHERE "userID"=${userid}) ORDER BY id DESC', {userid})
+    return db.any('SELECT * FROM "Game" WHERE id IN (SELECT "gameID" FROM "Game_Player" WHERE "playerID"=${userid}) ORDER BY id DESC', {userid})
 }
 
 const findNotEngagedGames = (userid) => {
-    return db.any('SELECT * FROM "Game" WHERE id NOT IN (SELECT "gameID" FROM "Game_Player" WHERE "userID"=${userid}) ORDER BY id DESC', {userid})
+    return db.any('SELECT * FROM "Game" WHERE id NOT IN (SELECT "gameID" FROM "Game_Player" WHERE "playerID"=${userid}) ORDER BY id DESC', {userid})
 }
 
 const changeAvatar = (avatar_num, userid) => {
