@@ -7,8 +7,8 @@ class ChatMessage {
         } else {
             this.type = "Player";
             this.sender = sender;
-            this.name = players[sender].name;
-            this.avatar = players[sender].avatar;
+            this.name = gameSetup.players[sender].name;
+            this.avatar = gameSetup.players[sender].avatar;
         }
         this.message = message;
         this.timestamp = timestamp;
@@ -44,7 +44,7 @@ class ChatList {
         let chatHTML = '';
         if (this.messages.length == 0) {
             chatHTML += '<div class="chatMsgSys"> <p>'
-                + 'Welcome to Tock Game #'+gameID+'\n'
+                + 'Welcome to Tock Game #'+gameSetup.gameID+'\n'
                 + 'Feel free to chat with your fellow players here!\n'
                 + '</p></div>';
         } else {
@@ -81,7 +81,7 @@ let chatList;
 function gcOnLoad() {
     chatList = new ChatList();
     chatList.loadHTML();
-    if (gameID == -1) {
+    if (gameSetup.gameID == -1) {
         testChats();
     }
 }

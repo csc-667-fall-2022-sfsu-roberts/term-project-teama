@@ -18,16 +18,19 @@
 
 -->
 <script>
-    let gameID = {{gameId}};
-    let numPlayers = {{numPlayers}};
-    let curPlayer = {{curPlayerIndex}};
-    let players = [
-        {{#each player}}
-        { name: "{{this.name}}", avatar: "{{this.avatar}}" },
-        {{/each}}
-    ];
-    let hands = [ {{#each hands}}{{this}},{{/each}}];
-    let curHand = [ {{#each curHand}}{ category: "{{this.category}}", value: {{this.value}} }, {{/each}}];
+    let gameSetup = {
+        gameID: {{gameId}},
+        numPlayers: {{numPlayers}},
+        curPlayer: {{curPlayerIndex}},
+        players: [
+            {{#each player}}
+            { name: "{{this.name}}", avatar: "{{this.avatar}}" },
+            {{/each}}
+        ],
+        hands:[ {{#each hands}}{{this}},{{/each}} ],
+        curHand: [ {{#each curHand}}{ category: "{{this.category}}", value: {{this.value}} }, {{/each}} ]
+    };
+
 </script>
 
 <style>

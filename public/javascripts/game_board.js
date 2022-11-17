@@ -14,6 +14,7 @@ class Spot {
         this.area = area;
         this.index = index;
         this.image = "empty";
+        this.highlight = 0;
         this.id = "spot_" + this.player + "_" + this.getAreaText() + "_" + this.index; 
     }
     setImage(imageClass) {
@@ -22,10 +23,25 @@ class Spot {
         this.image = imageClass;
         element.classList.add(this.image);
     }
+    setHighlight(newHighVal) {
+        this.highlight = (newHighVal % 6);
+    }
     getAreaText() { 
         if (this.area == 0) { return "start"; }
         else if (this.area == 1) { return "home"; }
         else { return "board"; }
+    }
+    getHTML() {
+        let spotTag = this.getAreaText() + '_' + this.index;
+        let htmlString = '<div class="tockSpot ' + this.image
+            + " " + spotTag 
+            + '" id="spot_'+this.player+'_'
+            + spotTag + '">';
+        if (this.highlight > 0) {
+            htmlString += '<div class="tockspot tshl_' + this.highlight + '"></div>'; 
+        }
+        htmlString += '</div>';
+        return htmlString;
     }
 }
 class Board {
@@ -66,6 +82,10 @@ class Board {
         }
         return newBoard;
     }
+    placeMarbles(marbles) {
+
+
+    }
     getPlayerClass(currentPlayer){
         let playerIndex = currentPlayer - this.localPlayer;
         if (playerIndex < 0) { playerIndex += this.numPlayers; }
@@ -96,19 +116,12 @@ class Board {
             let homeSpots = "";
             let boardSpots = "";
 
-            let spotPartOne = '<div class="tockSpot empty ';
-            let spotPartTwo = '" id="spot_'+playerIndex+'_';
-            let spotPartThree = '">'+closeDiv;
-
             for (let spotIndex=0; spotIndex<18; spotIndex++) {
                 if (spotIndex < 4) {
-                    let startTag = "start_"+spotIndex;
-                    let homeTag = "home_"+spotIndex;
-                    startSpots += spotPartOne +startTag+ spotPartTwo +startTag+ spotPartThree;
-                    homeSpots += spotPartOne +homeTag+ spotPartTwo +homeTag+ spotPartThree;
+                    startSpots += this.spots[playerIndex][0][spotIndex].getHTML();
+                    homeSpots += this.spots[playerIndex][1][spotIndex].getHTML();
                 }
-                let boardTag = "board_"+spotIndex;
-                boardSpots += spotPartOne +boardTag+ spotPartTwo +boardTag+ spotPartThree;
+                boardSpots += this.spots[playerIndex][2][spotIndex].getHTML();
             }
 
             boardHTML += playerOpen + playerDeco
@@ -203,21 +216,38 @@ class OpponentHand {
 }
 let opponentHands = [];
 
+class GameEvent {
+    constructor(name, state, handler) {
+        this.name = name;
+        this.state = state;
+        this.handler = handler;
+    }
+    show() {
+        this.state.AttachDivs();
+    }
+    handle(props) {
+        this.handler(props);
+    }
+}
+class TockHistory {
+    constructor(){}
+}
+
 
 function gbOnLoad() {
-    currentBoard = new Board(numPlayers, curPlayer);
+    currentBoard = new Board(gameSetup.numPlayers, gameSetup.curPlayer);
     currentBoard.AttachDivs();
 
-    currentHand = new CurrentHand(curHand);
+    currentHand = new CurrentHand(gameSetup.curHand);
     currentHand.loadHTML();
 
-    for (let playerIndex = 0; playerIndex< numPlayers; playerIndex++){
-        if (playerIndex != curPlayer) {
+    for (let playerIndex = 0; playerIndex< gameSetup.numPlayers; playerIndex++){
+        if (playerIndex != gameSetup.curPlayer) {
             let curPlayer = new OpponentHand(
                 playerIndex, 
-                players[playerIndex].name,
-                "avatar_" + players[playerIndex].avatar,
-                hands[playerIndex],
+                gameSetup.players[playerIndex].name,
+                "avatar_" + gameSetup.players[playerIndex].avatar,
+                gameSetup.hands[playerIndex],
                 currentBoard);
             curPlayer.loadHTML();
             opponentHands.push(curPlayer);
