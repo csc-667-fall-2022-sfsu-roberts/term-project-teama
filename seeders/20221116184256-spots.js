@@ -21,10 +21,10 @@ module.exports = {
             }
         }
         const allSpaces = startSpaces.concat(homeSpaces).concat(boardSpaces);
-        return queryInterface.bulkInsert('spot', allSpaces);
+        return queryInterface.bulkInsert('spots', allSpaces);
     },
 
     async down(queryInterface, Sequelize) {
-        return queryInterface.bulkDelete('spot', null, {});
+        return queryInterface.bulkDelete('spots', null, {});
     }
 };

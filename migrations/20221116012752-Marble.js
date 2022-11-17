@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        return queryInterface.createTable("marble", {
+        return queryInterface.createTable("marbles", {
             id: {
               type: Sequelize.INTEGER,
               primaryKey: true,
@@ -13,7 +13,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "game_player",
+                  model: "game_players",
                   key: "id"
                 },
             },
@@ -21,7 +21,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "spot",
+                  model: "spots",
                   key: "id"
                 },
             },
@@ -34,6 +34,6 @@ module.exports = {
     },
 
     async down(queryInterface, Sequelize) {
-        return queryInterface.dropTable("Marble");
+        return queryInterface.dropTable("marble");
     }
 };

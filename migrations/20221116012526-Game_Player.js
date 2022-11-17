@@ -3,7 +3,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     return queryInterface.createTable(
-      'game_player',
+      'game_players',
       {
         id: {
           type: Sequelize.INTEGER,
@@ -14,7 +14,7 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
-            model: "user",
+            model: "users",
             key: "id"
           },
         },
@@ -22,7 +22,7 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: false,
           references: {
-            model: "game",
+            model: "games",
             key: "id"
           },
         },
@@ -42,6 +42,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Game_Player');
+    return queryInterface.dropTable('game_player');
   }
 };

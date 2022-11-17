@@ -22,10 +22,10 @@ module.exports = {
         cards.push(blackJoker);
         let redJoker = { suite: "Red", value: 0, name: "Red Joker" };
         cards.push(redJoker);
-        return queryInterface.bulkInsert('card', cards);
+        return queryInterface.bulkInsert('cards', cards);
     },
 
     async down(queryInterface, Sequelize) {
-        return queryInterface.bulkDelete('card', null, {});
+        return queryInterface.bulkDelete('cards', null, {});
     }
 };
