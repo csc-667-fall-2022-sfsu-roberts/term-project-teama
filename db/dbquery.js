@@ -24,6 +24,22 @@ const createNewGame = async (gamename, userid) => {
     return game.id;
 }
 
+const joinGame = async (gameid, userid) => {
+    const results = await findAllUsersByGameId(gameid);
+    const playerIndex = results.length + 1;
+    return db.one('INSERT INTO "game_players" ("game_id", "player_id", "player_index") VALUES (${gameid}, ${userid}, ${playerIndex}) RETURNING id', {gameid, userid, playerIndex});
+}
+
+const quitGame = (gameid, userid) => {
+    return db.any('DELETE FROM "game_players" WHERE "game_id"=${gameid} AND "player_id"=${userid}', {gameid, userid})
+}
+
+const deleteGame = (gameid) => {
+    db.any('DELETE FROM "game_players" WHERE "game_id"=${gameid}', {gameid});
+    db.any('DELETE FROM "games" WHERE "id"=${gameid}', {gameid});
+    return;
+}
+
 const deleteGameById = (gameid) => {
     return db.any('DELETE FROM "games" WHERE "id"=${gameid}', {gameid})
 }
@@ -96,15 +112,56 @@ const updateToStarted = (gameid, userid) => {
     return updateGamestate(gameid, 1);
 }
 
-const findNumOfUsersByGameId = (gameid) => {
+const numOfPlayers = (gameid) => {
     return db.one('SELECT COUNT(*) FROM "game_players" WHERE "game_id"=${gameid}', {gameid})
 }
-const findEngagedGames = async (userid) => {
-    return db.any('SELECT * FROM "games" WHERE "id" IN (SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}) ORDER BY "id" DESC', {userid})
+
+/** return notEngaged games, engagedGames, fullGames */
+const engagedGames = async (userid) => {
+    let enGames = [];
+    let games = await db.any('SELECT * FROM "games" WHERE "id" IN (SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}) ORDER BY "date_created" DESC', {userid})
+    for(let i = 0; i < games.length; i++){
+        let num = (await numOfPlayers(games[i].id)).count;
+        enGames[i] = {
+            game: games[i],
+            numOfUsers: num,
+            isFull: (num==4)
+        }
+    }
+    console.log(enGames)
+    return enGames;
 }
 
-const findNotEngagedGames = (userid) => {
+const notEngagedGames = (userid) => {
     return db.any('SELECT * FROM "games" WHERE "id" NOT IN (SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}) ORDER BY "id" DESC', {userid})
+}
+
+const notEnOrFullGames = async (userid) => {
+    let rs = {
+        fullGames: [],
+        notEngagedGames:[]
+    };
+    let m = 0;
+    let n = 0;
+    let games = await notEngagedGames(userid);
+
+    for(let i = 0; i < games.length; i++){
+        let num =  (await numOfPlayers(games[i].id)).count;
+        if(num == 4){
+            rs.fullGames[m] = {
+                game: games[i],
+                numOfUsers: num
+            }
+            m++;
+        }else{
+            rs.notEngagedGames[n] = {
+                game: games[i],
+                numOfUsers: num
+            }
+            n++;
+        }
+    }
+    return rs;
 }
 
 const changeAvatar = (avatar_num, userid) => {
@@ -125,9 +182,12 @@ module.exports = {
     deleteUserByGameUserId,
     deleteALLUserByGameId,
     updateToStarted,
-    findNumOfUsersByGameId,
-    findEngagedGames,
-    findNotEngagedGames,
+    numOfPlayers,
+    engagedGames,
+    notEnOrFullGames,
     updateGamestate,
-    changeAvatar
+    changeAvatar,
+    joinGame,
+    quitGame,
+    deleteGame
 };

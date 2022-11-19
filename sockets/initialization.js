@@ -32,10 +32,10 @@ const init = (httpServer, app) => {
   });
 
   io.on("connection", (socket) => {
-    console.log({
-      message: "Connection happened",
-      session: socket.request.session,
-    });
+    // console.log({
+    //   message: "Connection happened",
+    //   session: socket.request.session,
+    // });
 
     const username = socket.request.user.username;
     const avatar = socket.request.user.avatar;
@@ -67,10 +67,8 @@ const init = (httpServer, app) => {
       if (!rooms[gameid]) {
         rooms[gameid] = {};
         rooms[gameid].host = user.id;
-        rooms[gameid].isOpen = true;
         rooms[gameid].players = [user.id];
       }
-      let specificRoom = rooms[gameid];
       let gameListInfo = {
         gameid: gameid,
         gamename: gamename,
@@ -86,28 +84,34 @@ const init = (httpServer, app) => {
       await dbQuery.joinGame(gameid, userid);
       // socket.join(gameid);
       rooms[gameid].players.push(userid);
-      io.emit('lobby-join-new-game', { gameid, playerNumber: rooms[gameid].players.length });
+      let playerNumber = rooms[gameid].players.length;
+      if (playerNumber === 4) {
+        dbQuery.updateGamestate(gameid, 1);
+      }
+      io.emit('lobby-join-new-game', { gameid, playerNumber });
     });
 
     socket.on('quit-game', gameid => {
       let gameInfo = rooms[gameid];
       let userid = socket.request.session.passport.user;
-      /**if user is host, delete game; if not, remove user from gameroom */
+      /** need test */
+      console.log(userid, gameInfo  )
       if (userid == gameInfo.host) {
         delete rooms[gameid];
-        console.log('HOST, after delete',rooms)
+        console.log('HOST, after delete', rooms)
         dbQuery.deleteGame(gameid);
         socket.broadcast.emit('lobby-delete-game', gameid);
-      }else {
+      } else {
         dbQuery.quitGame(gameid, userid);
         let index = rooms[gameid].players.indexOf(userid);
-        if(index > -1) {
+        if (index > -1) {
           rooms[gameid].players.splice(index, 1);
           let playerNumber = rooms[gameid].players.length;
-          socket.broadcast.emit('lobby-quit-game', {gameid, playerNumber});
+          socket.broadcast.emit('lobby-quit-game', { gameid, playerNumber });
         }
       }
     });
+    
   });
 
   app.io = io;

@@ -91,82 +91,31 @@ router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
             }
         } 
         */
-        
+       
         res.render("created", { user: req.user, game: req.game, players: req.players });
     } catch (err) {
         console.log(err)
     }
 });
 
-router.post("/quit", notLoggedInUser, async (req, res, next) => {
-    try {
-        const { gameid } = req.body;
-        const user = req.user;
-        const gameStarted = dbQuery.checkGameStarted(gameid);
-        if (gameStarted) {
-            // concede
-            res.json({
-                code: 2,
-                status: 'failure'
-            })
-
-        } else {
-            // Leave game unless 
-            const isCreator = dbQuery.checkCreator(gameid, user.id);
-            if (isCreator) {
-                await dbQuery.deleteALLUserByGameId(gameid);
-                await dbQuery.deleteGameById(gameid);
-
-            } else {
-                await dbQuery.deleteUserByGameUserId(gameid, user.id);
-            }
-            console.log(user.name, 'quit from game', gameid)
-            res.json({
-                code: 1,
-                status: 'success'
-            })
-        }
-    } catch (err) {
-        console.log(err)
-    }
-})
-
-router.post("/start", notLoggedInUser, async (req, res, next) => {
-    try {
-        const { gameid } = req.body;
-        const user = req.user;
-        console.log('start gameid', gameid, user);
-        const requser = await dbQuery.findUserByGameUserId(gameid, user.id)
-        if (!requser.isstarted) {
-            await dbQuery.updateToStarted(gameid, user.id);
-        }
-
-        // if all users start game, then game.state become 1
-        console.log(user.name, 'started', gameid)
-        let gameState;
-        
-        res.json({
-            code: 1,
-            status: 'success'
-        })
-    } catch (err) {
-        console.log(err)
-    }
-})
-
 router.param("id", async (req, res, next, id) => {
     try {
+        let currentUser = req.user.id;
         let game = await dbQuery.findGamesByGameId(id);
         req.game =
         {
             id: id,
             name: game.name,
-            state: game.state
+            state: game.state,
+            isPlayer: false
         };
         let gameusers = await dbQuery.findAllUsersByGameId(id);
         req.players = [];
         for (let i = 0; i < gameusers.length; i++) {
             const userinfo = await dbQuery.findUserById(gameusers[i].player_id);
+            if(currentUser === userinfo.id){
+                req.game.isPlayer = true;
+            }
             req.players[i] =
             {
                 name: userinfo.username,

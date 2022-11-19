@@ -7,29 +7,14 @@ const dbQuery = require('../db/dbquery');
 /* PAGE: /lobby */
 router.get('/', notLoggedInUser, async function (req, res, next) {
     const user = req.user;
-    const results = await dbQuery.findEngagedGames(user.id);
-    const engagedGames = [];
-    for (let i = 0; i < results.length; i++){
-        engagedGames[i] = {
-            game: results[i],
-            numOfUsers: (await dbQuery.findNumOfUsersByGameId(results[i].id)).count
-        }
-    }
-    // console.log('engaged',engaedGames);
-
-    const games = [];
-    const rs = await dbQuery.findNotEngagedGames(user.id);
-   
-    for (let i = 0; i < rs.length; i++){
-        games[i] = {
-            game:rs[i],
-            numOfUsers: (await dbQuery.findNumOfUsersByGameId(rs[i].id)).count
-        }
-    }
-
-    // console.log('Games',games);
-    
-    res.render('lobby', { user: user, engaedGames: engagedGames, games: games });
+    const engagedGames = await dbQuery.engagedGames(user.id);
+    const {notEngagedGames, fullGames} = await dbQuery.notEnOrFullGames(user.id);
+    /*
+    console.log('en:',engagedGames);
+    console.log('not-en:',notEngagedGames);
+    console.log('not-en-full:',fullGames);
+    */
+    res.render('lobby', { user, engagedGames, notEngagedGames, fullGames });
 });
 
 /* API: /lobby/send 
