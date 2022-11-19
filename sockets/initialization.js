@@ -88,14 +88,13 @@ const init = (httpServer, app) => {
       if (playerNumber === 4) {
         dbQuery.updateGamestate(gameid, 1);
       }
-      io.emit('lobby-join-new-game', { gameid, playerNumber });
+      socket.broadcast.emit('lobby-join-new-game', { gameid, playerNumber });
     });
 
     socket.on('quit-game', gameid => {
       let gameInfo = rooms[gameid];
       let userid = socket.request.session.passport.user;
       /** need test */
-      console.log(userid, gameInfo  )
       if (userid == gameInfo.host) {
         delete rooms[gameid];
         console.log('HOST, after delete', rooms)

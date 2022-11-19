@@ -74,6 +74,10 @@ socket.on('lobby-add-new-game', data => {
 
 function createNewRow(data) {
     let row = tBodyGames.insertRow(0);
+    row.setAttribute("id", "game-info");
+    row.setAttribute("class", "not-en-game-info");
+    row.setAttribute("data-gameid", `${data.gameid}`)
+    row.setAttribute("data-gamename", `${data.gamename}`);
     let cell1 = row.insertCell(0);
     let cell2 = row.insertCell(1);
     let cell3 = row.insertCell(2);
@@ -122,12 +126,14 @@ socket.on('lobby-join-new-game', ({ gameid, playerNumber }) => {
 })
 
 socket.on('lobby-delete-game', gameid => {
-    let tRowGame = document.getElementById("game-info");
-    let id = tRowGame.dataset.gameid;
-    if (id == gameid) {
-        console.log('delete gameid', id)
-        tRowGame.remove();
-    }
+    document.querySelectorAll("#game-info").forEach(row => {
+        let id = row.dataset.gameid;
+        console.log('delete game', gameid, 'row id', id)
+        if (id == gameid) {
+            console.log('deleted gameid', id)
+            row.remove();
+        }
+    })
 })
 
 /** todo: if playerNumber from 4 to 3, move game row from fullgame to not game */
@@ -146,7 +152,7 @@ function joinBtn(gameid) {
     socket.emit('join-game', gameid);
     setTimeout(function () {
         window.location.href = `/lobby`;
-    }, 1000)
+    }, 2000)
 }
 
 function quitBtn(gameid) {
@@ -154,5 +160,5 @@ function quitBtn(gameid) {
     socket.emit('quit-game', gameid);
     setTimeout(function () {
         window.location.href = `/lobby`;
-    }, 1000)
+    }, 2000)
 }
