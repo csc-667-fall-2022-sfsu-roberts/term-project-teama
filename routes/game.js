@@ -64,11 +64,12 @@ router.post("/create", notLoggedInUser, async function (req, res, next) {
     try {
         const { gamename } = req.body;
         const user = req.user;
-        console.log('create page', user)
         const gameid = await dbQuery.createNewGame(gamename, user.id)
-        
-        // console.log(user.name, 'created', gamename, 'gameid =', game.id)
-        res.redirect(`/game/created/${gameid}`);
+        res.json({
+            code: 1,
+            gameid: gameid,
+            user: req.user
+        })
     } catch (err) {
         console.log(err)
     }
@@ -78,47 +79,24 @@ router.post("/create", notLoggedInUser, async function (req, res, next) {
 router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
     try {
         /*
-        const currentUser = await dbQuery.findUserByGameUserId(req.game.id, req.user.id);
-        if(currentUser){ 
-            if(currentUser.isstarted){
-                res.redirect(`/game/show/${req.game.id}`);
+        const gameInfo = findGamesByGameId(req.game.id);
+        if (gameInfo) {
+            if (gameInfo.state === 1){
+                if (userIsPlayingGame(req.game.id, req.user.id)){
+                    res.redirect(`/game/show/${req.game.id}`);
+                } else {
+                    res.redirect('/lobby');
+                }
+                
             }
         } 
         */
-        // const gameInfo = findGamesByGameId(req.game.id);
-        // if (gameInfo) {
-        //     if (gameInfo.state === 1){
-        //         if (userIsPlayingGame(req.game.id, req.user.id)){
-        //             res.redirect(`/game/show/${req.game.id}`);
-        //         } else {
-        //             res.redirect('/lobby');
-        //         }
-                
-        //     }
-        // }
+        
         res.render("created", { user: req.user, game: req.game, players: req.players });
     } catch (err) {
         console.log(err)
     }
 });
-
-router.post("/join", notLoggedInUser, async (req, res, next) => {
-    try {
-        const { gameid } = req.body;
-        const user = req.user;
-        const results = await dbQuery.findUserByGameUserId(gameid, user.id);
-        if (!results) {
-            await dbQuery.createNewGameUsers(gameid, user.id, false);
-            // console.log(user.name, 'joined in game', gameid)
-        }
-        res.json({
-            code: 1,
-            status: 'success'
-        })
-    } catch (err) {
-        console.log(err)
-    }
-})
 
 router.post("/quit", notLoggedInUser, async (req, res, next) => {
     try {
@@ -178,43 +156,26 @@ router.post("/start", notLoggedInUser, async (req, res, next) => {
 
 router.param("id", async (req, res, next, id) => {
     try {
-        const game = await dbQuery.findGamesByGameId(id);
+        let game = await dbQuery.findGamesByGameId(id);
         req.game =
         {
             id: id,
             name: game.name,
             state: game.state
         };
-        console.log('game',game)
-        gameusers = await dbQuery.findAllUsersByGameId(id);
-        console.log('gameusers',gameusers)
+        let gameusers = await dbQuery.findAllUsersByGameId(id);
         req.players = [];
-        let startedUser = 0;
         for (let i = 0; i < gameusers.length; i++) {
-            const userinfo = await dbQuery.findUserById(gameusers[i].playerID);
-            console.log('userinfo', userinfo)
+            const userinfo = await dbQuery.findUserById(gameusers[i].player_id);
             req.players[i] =
             {
                 name: userinfo.username,
                 avatar: userinfo.avatar,
-                iscreator: gameusers[i].player_index===1
-                
+                iscreator: gameusers[i].player_index===1    
             };
-            // if(gameusers[i].isstarted){
-            //     startedUser += 1;
-            // }
         }
-        // update game state=1 if all users start game
-        // if(startedUser == 4){
-        //     req.game.state = 1;
-        //     dbQuery.updateGamestate(req.game.id, 1)
-        // }
+   
         req.game.num = req.players.length;
-        // if (req.game.num == 4) {
-        //     req.game.isFull = true;
-        // } else {
-        //     req.game.isFull = false;
-        // }
         next();
     }catch (err) {
         console.log(err)

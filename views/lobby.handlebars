@@ -17,26 +17,32 @@
                     <a href="/game/create" class="btn btn-primary my-3" role="button">Create New Game</a>
                 </div>
                 <div class="ms-2">
-                    <p>Your Games Here</p>
-                    <table class="engaged-games">
-                        {{#each engaedGames}}
-                        <tr>
-                            <td>
-                                <p> {{this.game.name}}: </p>
-                            </td>
-                            <td>
-                                <p> {{this.numOfUsers}}/4 </p>
-                            </td>
-                            <td>
-                                <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
-                                    id="view-game-btn">View</a>
-                            </td>
-                            <td>
-                                <a href="" class="btn btn-primary my-3" role="button" id="quit-game-btn"
-                                    data-gameid="{{this.game.id}}">Quit</a>
-                            </td>
-                        </tr>
-                        {{/each}}
+                    <table class="engaged-game-list">
+                        <thead>
+                            <tr>
+                                <th>Your Games Here</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each engaedGames}}
+                            <tr id="game-info" data-gameid="{{this.game.id}}">
+                                <td>
+                                    <p id="game-name" data-gameid="{{this.game.id}}"> {{this.game.name}}: </p>
+                                </td>
+                                <td>
+                                    <p id="player-number" data-gameid="{{this.game.id}}"> {{this.numOfUsers}}/4 </p>
+                                </td>
+                                <td>
+                                    <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
+                                        id="view-game-btn">View</a>
+                                </td>
+                                <td>
+                                    <a href="/lobby" class="btn btn-primary my-3" role="button" id="quit-game-btn"
+                                        onclick="return quitBtn({{this.game.id}})">Quit</a>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
                     </table>
                 </div>
             </div><br>
@@ -48,26 +54,32 @@
                     <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
                 </div>
                 <div class="ms-2">
-                    <p>List Games Here</p>
-                    <table class="not-engaged-games">
-                        {{#each games}}
-                        <tr>
-                            <td>
-                                <p> {{this.game.name}}: </p>
-                            </td>
-                            <td>
-                                <p> {{this.numOfUsers}}/4 </p>
-                            </td>
-                            <td>
-                                <a class="btn btn-primary my-3" role="button" id="join-game-btn"
-                                    data-gameid="{{this.game.id}}" data-players="{{this.numOfUsers}}">Join</a>
-                            </td>
-                            <td>
-                                <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
-                                    id="view-game-btn">View</a>
-                            </td>
-                        </tr>
-                        {{/each}}
+                    <table class="not-engaged-games-list">
+                        <thead>
+                            <tr>
+                                <th>List Games Here</th>
+                            </tr>
+                        </thead>
+                        <tbody id="no-en-game">
+                            {{#each games}}
+                            <tr id="game-info" data-gameid="{{this.game.id}}">
+                                <td>
+                                    <p id="game-name" data-gameid="{{this.game.id}}"> {{this.game.name}}: </p>
+                                </td>
+                                <td>
+                                    <p id="player-number" data-gameid="{{this.game.id}}"> {{this.numOfUsers}}/4 </p>
+                                </td>
+                                <td>
+                                    <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button" id="join-game-btn"
+                                        onclick="return joinBtn({{this.game.id}})">Join</a>
+                                </td>
+                                <td>
+                                    <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
+                                        id="view-game-btn">View</a>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -94,118 +106,5 @@
     </div>
 </main>
 
-<script>
-    const joinButtons = document.querySelectorAll("#join-game-btn");
-    joinButtons.forEach(function (button) {
-        button.addEventListener('click', e => {
-            let { gameid } = button.dataset;
-            console.log('gameid', gameid)
-            fetch('/game/join', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "Application/json"
-                },
-                body: JSON.stringify({
-                    gameid: gameid
-                })
-            })
-                .then(response => response.json())
-                .then(json => {
-                    if (json.code == 1) {
-                        console.log(window.location.href)
-                        window.location.href = `/game/created/${gameid}`
-                    }
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-        })
-    })
-    const quitButtons = document.querySelectorAll("#quit-game-btn");
-    quitButtons.forEach(function (button) {
-        button.addEventListener('click', e => {
-            let { gameid } = button.dataset;
-            console.log('Quited gameid', gameid)
-            fetch('/game/quit', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "Application/json"
-                },
-                body: JSON.stringify({
-                    gameid: gameid
-                })
-            })
-                .then(response => response.json())
-                .then(json => {
-                    if (json.code == 1) {
-                        console.log(window.location.href)
-                        window.location.href = '/lobby'
-                    }
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-        })
-    })
-
-    const chatForm = document.getElementById('chat-form');
-    const chatMessages = document.querySelector('.chat-message');
-    const socket = io();
-
-    socket.emit('login');
-
-    socket.on('message', (message) => {
-        console.log(message);
-        outputMessage(message);
-    });
-
-    // Message submit
-    chatForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        console.log("receive message from chat form...");
-        //console.log(`username and user id: ${user.name}, ${user.id}`);
-        //chatMessages.textContent = `Form Submitted! Time stamp: ${event.timeStamp}`;
-
-        // Get message text
-        let msg = e.target.elements.msg.value;
-        msg = msg.trim();
-        if (!msg) {
-            return false;
-        }
-
-        // Emit message to server
-        socket.emit('chatMessage', (msg));
-
-        // Clear input
-        e.target.elements.msg.value = '';
-        e.target.elements.msg.focus();
-    });
-
-    // Output message to DOM
-    function outputMessage(message) {
-        console.log("outputMessage...");
-        console.log(`the received message is: ${message}`);
-        const div = document.createElement('div');
-        div.classList.add("message", "d-flex", "flex-row", "justify-content-start", "mb-4");
-        const img = document.createElement('img');
-        img.classList.add("mx-1", "avatar", `avatar_${message.avatar}`);
-        img.setAttribute('style', 'width: 40px;');
-        const b = document.createElement('b');
-        b.classList.add('name');
-        b.innerText = `${message.username}`;
-        const div2 = document.createElement('div');
-        const p = document.createElement('p');
-        p.classList.add('meta', 'mall', 'p-2', 'ms-3', 'mb-1', 'rounded-3');
-        p.setAttribute('style', 'background-color: #f5f6f7;');
-        p.innerHTML = `${message.text}`;
-        const p2 = document.createElement('p');
-        p2.classList.add('small', 'ms-3', 'mb-3', 'rounded-3', 'text-muted');
-        p2.innerHTML = `${message.time}`;
-        div2.appendChild(p);
-        div2.appendChild(p2);
-        div.appendChild(img);
-        div.appendChild(b);
-        div.appendChild(div2);
-        document.querySelector('.chat-message').appendChild(div);
-    }
-</script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/lobby.js"></script>

@@ -3,12 +3,13 @@ const socketIO = require("socket.io");
 const passport = require("passport");
 const formatMessage = require("../public/javascripts/messages")
 const botName = "ChatCord Bot";
-
+const dbQuery = require("../db/dbquery")
 // whats the use of express-session & middleware?
 // next step: how to create a session for room and add players into the room
 const sessionMiddleware = require("../config/session");
 
 const Server = socketIO.Server;
+let rooms = {};
 
 const init = (httpServer, app) => {
   const io = new Server(httpServer);
@@ -59,10 +60,57 @@ const init = (httpServer, app) => {
       console.log("disconnect => socket.id : ", socket.id);
     });
 
+    socket.on('new-game-created', async ({ user, gameid, gamename }) => {
+      // socket.join(gameid);
+      // let room = io.sockets.adapter.rooms;
+      // console.log('join room', room)
+      if (!rooms[gameid]) {
+        rooms[gameid] = {};
+        rooms[gameid].host = user.id;
+        rooms[gameid].isOpen = true;
+        rooms[gameid].players = [user.id];
+      }
+      let specificRoom = rooms[gameid];
+      let gameListInfo = {
+        gameid: gameid,
+        gamename: gamename,
+        user: user,
+        playerNumber: rooms[gameid].players.length
+      }
+      socket.broadcast.emit('lobby-add-new-game', gameListInfo);
+    });
+
+    socket.on('join-game', async gameid => {
+      let gameInfo = rooms[gameid];
+      const userid = socket.request.session.passport.user;
+      await dbQuery.joinGame(gameid, userid);
+      // socket.join(gameid);
+      rooms[gameid].players.push(userid);
+      io.emit('lobby-join-new-game', { gameid, playerNumber: rooms[gameid].players.length });
+    });
+
+    socket.on('quit-game', gameid => {
+      let gameInfo = rooms[gameid];
+      let userid = socket.request.session.passport.user;
+      /**if user is host, delete game; if not, remove user from gameroom */
+      if (userid == gameInfo.host) {
+        delete rooms[gameid];
+        console.log('HOST, after delete',rooms)
+        dbQuery.deleteGame(gameid);
+        socket.broadcast.emit('lobby-delete-game', gameid);
+      }else {
+        dbQuery.quitGame(gameid, userid);
+        let index = rooms[gameid].players.indexOf(userid);
+        if(index > -1) {
+          rooms[gameid].players.splice(index, 1);
+          let playerNumber = rooms[gameid].players.length;
+          socket.broadcast.emit('lobby-quit-game', {gameid, playerNumber});
+        }
+      }
+    });
   });
 
   app.io = io;
-
 };
 
 module.exports = init;

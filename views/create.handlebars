@@ -1,26 +1,26 @@
 {{> navbar}}
 
-<div class="container-fluid my-3">
-    <div class="row">
-        <div class="offset-md-4 col-md-4">
-            <h2>Welcome {{user.name}}</h2>
-            <hr>
-            <form class="form-horizontal" method="post" enctype="application/x-www-form-urlencoded" action="/game/create">
-                
-                <div class="form-group">
-                    <label class="control-label col-sm-2" for="gamename">Gamename: </label>
-                    <div class="col-sm-12">
-                        <input type="text" class="form-control" id="gamename" name="gamename" placeholder="enter a game name" required>
-                    </div>
-                </div>
+<div id="game-info-page">
+    <div class="container-fluid my-3" id="create-game-page">
+        <div class="row">
+            <div class="offset-md-4 col-md-4">
+                <h2>Welcome {{user.username}}</h2>
+                <hr>
+                <div class="form-group" id="create-game-container">
 
-                <div class="form-group mt-3">
-                    <div class="col-sm-offset-2 col-sm-12">
-                        <button type="submit" class="btn btn-primary w-100 mb-4">Create New Game</button>
-                    </div>
-                </div>
+                    <form id="create-game-form">
+                        <label class="control-label col-sm-4" for="gamename">Game Name: </label>
+                        <input class="col-sm-12" id="gamename" type="text" placeholder="Enter Game Name..." required
+                            autocomplete="off">
+                        <button type="submit" class="btn btn-primary my-3 w-100">Create New
+                            Game</button>
+                    </form>
 
-            </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/create.js"></script>

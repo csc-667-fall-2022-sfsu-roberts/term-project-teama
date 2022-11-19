@@ -2,9 +2,8 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const passport = require('passport');
-const initilizePassport = require('../config/passport-config');
 const dbQuery = require('../db/dbquery');
-initilizePassport(passport);
+
 const { LoggedInUser, notLoggedInUser } = require('../config/authenticated');
 
 /* PAGE: /login */
@@ -39,7 +38,7 @@ router.post("/register", LoggedInUser, async (req, res) => {
 
     try {
         const hashedPWD = await bcrypt.hash(password, 10);
-        await dbQuery.createNewUser(username, email, hashedPWD);
+        dbQuery.createNewUser(username, email, hashedPWD);
         res.redirect('/users/registered')
     } catch {
         res.redirect('/users/register')
