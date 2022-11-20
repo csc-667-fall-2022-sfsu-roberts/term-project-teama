@@ -9,7 +9,6 @@ const dbQuery = require("../db/dbquery")
 const sessionMiddleware = require("../config/session");
 
 const Server = socketIO.Server;
-let rooms = {};
 
 const init = (httpServer, app) => {
   const io = new Server(httpServer);
@@ -60,57 +59,47 @@ const init = (httpServer, app) => {
       console.log("disconnect => socket.id : ", socket.id);
     });
 
-    socket.on('new-game-created', async ({ user, gameid, gamename }) => {
-      // socket.join(gameid);
-      // let room = io.sockets.adapter.rooms;
-      // console.log('join room', room)
-      if (!rooms[gameid]) {
-        rooms[gameid] = {};
-        rooms[gameid].host = user.id;
-        rooms[gameid].players = [user.id];
-      }
+    socket.on('new-game-created', async ({ user, gameid, gamename, num }) => {
+      // let num = (await dbQuery.numOfPlayers(gameid)).count;
+
+      console.log('new game', num)
       let gameListInfo = {
         gameid: gameid,
         gamename: gamename,
         user: user,
-        playerNumber: rooms[gameid].players.length
+        playerNumber: num
       }
       socket.broadcast.emit('lobby-add-new-game', gameListInfo);
+
     });
 
     socket.on('join-game', async gameid => {
-      let gameInfo = rooms[gameid];
       const userid = socket.request.session.passport.user;
-      await dbQuery.joinGame(gameid, userid);
-      // socket.join(gameid);
-      rooms[gameid].players.push(userid);
-      let playerNumber = rooms[gameid].players.length;
-      if (playerNumber === 4) {
-        dbQuery.updateGamestate(gameid, 1);
+      let results = await dbQuery.joinGame(gameid, userid);
+      if (results) {
+        let playerNumber = (await dbQuery.numOfPlayers(gameid)).count;
+        socket.broadcast.emit('lobby-join-new-game', { gameid, playerNumber });
       }
-      socket.broadcast.emit('lobby-join-new-game', { gameid, playerNumber });
     });
 
-    socket.on('quit-game', gameid => {
-      let gameInfo = rooms[gameid];
+    socket.on('quit-game', async gameid => {
       let userid = socket.request.session.passport.user;
-      /** need test */
-      if (userid == gameInfo.host) {
-        delete rooms[gameid];
-        console.log('HOST, after delete', rooms)
+      let game = (await dbQuery.findGamesByGameId(gameid));
+
+      if (game && userid == game.creator) {
+        console.log(userid, 'quit game', game.creator)
+        /** delete game, game-players */
         dbQuery.deleteGame(gameid);
         socket.broadcast.emit('lobby-delete-game', gameid);
       } else {
+        console.log(userid, 'quit game', game.creator)
+        /** quit game, delete game-player */
         dbQuery.quitGame(gameid, userid);
-        let index = rooms[gameid].players.indexOf(userid);
-        if (index > -1) {
-          rooms[gameid].players.splice(index, 1);
-          let playerNumber = rooms[gameid].players.length;
-          socket.broadcast.emit('lobby-quit-game', { gameid, playerNumber });
-        }
+        let playerNumber = (await dbQuery.numOfPlayers(gameid)).count;
+        socket.broadcast.emit('lobby-quit-game', { gameid, playerNumber });
       }
     });
-    
+
   });
 
   app.io = io;

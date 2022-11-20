@@ -25,7 +25,7 @@ createGameForm.addEventListener('submit', e => {
     .then(json => {
         if(json.code === 1){
             let {user, gameid} = json;
-            socket.emit('new-game-created', {user, gameid, gamename});
+            socket.emit('new-game-created', {user, gameid, gamename, num: 1});
             setTimeout(function(){
                 window.location.href = `/game/created/${gameid}`;
             }, 1000)

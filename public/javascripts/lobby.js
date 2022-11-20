@@ -150,15 +150,9 @@ socket.on('lobby-quit-game', ({ gameid, playerNumber }) => {
 function joinBtn(gameid) {
     console.log(socket.id, 'wants to join game', gameid);
     socket.emit('join-game', gameid);
-    setTimeout(function () {
-        window.location.href = `/lobby`;
-    }, 2000)
 }
 
 function quitBtn(gameid) {
     console.log(socket.id, 'wants to quit game', gameid);
     socket.emit('quit-game', gameid);
-    setTimeout(function () {
-        window.location.href = `/lobby`;
-    }, 2000)
 }
