@@ -8,12 +8,13 @@ const dbQuery = require('../db/dbquery');
 router.get('/', notLoggedInUser, async function (req, res, next) {
     const user = req.user;
     const engagedGames = await dbQuery.engagedGames(user.id);
-    const {notEngagedGames, fullGames} = await dbQuery.notEnOrFullGames(user.id);
+    const { notEngagedGames, fullGames } = await dbQuery.notEnOrFullGames(user.id);
     /*
     console.log('en:',engagedGames);
     console.log('not-en:',notEngagedGames);
     console.log('not-en-full:',fullGames);
     */
+
     res.render('lobby', { user, engagedGames, notEngagedGames, fullGames });
 });
 

@@ -6,7 +6,6 @@
 
 {{> navbar}}
 <main>
-
     <div class="row mt-5">
         <div class="col-6 ms-auto">
             <div class="card">
@@ -35,11 +34,55 @@
                                 <td>
                                     <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
                                         id="view-game-btn">View</a>
+
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                        id="viewGameDetails" data-bs-target="#gameDetails">
+                                        View Game Details
+                                    </button>
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="gameDetails" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel">Game Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h5>Table Name: {{this.game.name}}</h5>
+                                                    <h5>Players At This Table: {{this.numOfUsers}}/4</h5>
+                                                    {{#each this.players}}
+                                                    <div class="card d-flex flex-column mb-3">
+                                                        <div class="card-body d-flex align-content-start">
+                                                            <div class="player-left m-1 avatar avatar_{{user.avatar}}">
+                                                            </div>
+                                                            <div class="player-body">
+                                                                <div class="mb-2">
+                                                                    <span class="fs-5 ps-2">{{this.name}}</span>
+                                                                    {{#if this.iscreator}}
+                                                                    <small class="fs-6 ps-1">(table
+                                                                        administrator)</small>
+                                                                    {{/if}}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {{/each}}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                                 {{#if this.isFull}}
                                 <td>
-                                    <a href="/game/show/{{this.game.id}}" class="btn btn-primary my-3" role="button"
-                                        id="start-game-btn" data-gameid="{{this.game.id}}">Start</a>
+                                    <a href="/game/show/{{this.game.id}}" target="_blank" class="btn btn-primary my-3"
+                                        role="button" id="start-game-btn" data-gameid="{{this.game.id}}">Start</a>
                                 </td>
                                 {{else}}
                                 <td>
@@ -53,11 +96,9 @@
                     </table>
                 </div>
             </div><br>
-            <div class="card bg-light">
-                <div class="card-body">
+            <div class="card">
+                <div class="card-body bg-light">
                     <h5 class="card-title">Available Games</h5>
-                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-                        additional content. This content is a little bit longer.</p>
                 </div>
                 <div class="ms-2">
                     <table class="not-engaged-games-list">
@@ -67,7 +108,7 @@
                             </tr>
                         </thead>
                         <tbody id="no-en-game">
-                            {{#each notEngagedGames}}
+                            {{#each notEngagedGames as | notEngagedGames |}}
                             <tr id="game-info" class="not-en-game-info" data-gameid="{{this.game.id}}"
                                 data-gamename="{{this.game.name}}">
                                 <td>
@@ -77,8 +118,8 @@
                                     <p id="player-number" data-gameid="{{this.game.id}}"> {{this.numOfUsers}}/4 </p>
                                 </td>
                                 <td>
-                                    <a href="/lobby" class="btn btn-primary my-3" role="button"
-                                        id="join-game-btn" onclick="return joinBtn({{this.game.id}})">Join</a>
+                                    <a href="/lobby" class="btn btn-primary my-3" role="button" id="join-game-btn"
+                                        onclick="return joinBtn({{this.game.id}})">Join</a>
                                 </td>
                                 <td>
                                     <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"

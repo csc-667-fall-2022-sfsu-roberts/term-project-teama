@@ -1,5 +1,4 @@
 const socket = io();
-
 const tBodyGames = document.getElementById('no-en-game');
 
 const chatForm = document.getElementById('chat-form');

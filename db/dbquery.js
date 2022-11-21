@@ -120,13 +120,26 @@ const numOfPlayers = (gameid) => {
 const engagedGames = async (userid) => {
     let enGames = [];
     let games = await db.any('SELECT * FROM "games" WHERE "id" IN (SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}) ORDER BY "date_created" DESC', { userid })
+
     for (let i = 0; i < games.length; i++) {
         let num = (await numOfPlayers(games[i].id)).count;
         if (num && num > 0) {
+            let gameusers = await findAllUsersByGameId(games[i].id);
+            let game_players = [];
+            for (let k = 0; k < gameusers.length; k++) {
+                const userinfo = await findUserById(gameusers[k].player_id);
+                game_players[k] =
+                {
+                    name: userinfo.username,
+                    avatar: userinfo.avatar,
+                    iscreator: gameusers[k].player_index === 1
+                };
+            }
             enGames[i] = {
                 game: games[i],
                 numOfUsers: num,
-                isFull: (num == 4)
+                isFull: (num == 4),
+                players: game_players
             }
         }
     }
@@ -171,7 +184,7 @@ const changeAvatar = (avatar_num, userid) => {
     return db.any('UPDATE "users" SET "avatar"=${avatar_num} WHERE "id"=${userid}', { avatar_num, userid })
 }
 
-const init =  async () => {
+const init = async () => {
     let rooms = {};
     /** find all games, find all users of each game */
     let games = db.any('SELECT * FROM "games" ORDER BY "id" DESC');
