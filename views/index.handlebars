@@ -7,51 +7,44 @@
 {{> navbar}}
 <style>
     #tock_board {
-        background-image: url("/images/Tock_board.jpg"), url("/images/Tock_board.jpg");
-        background-size: 40%, 40%;
-        background-repeat: no-repeat, no-repeat;
-        background-position: right bottom, left top;
+        background-image: url("/images/Tock_board.jpg"), url("/images/Tock_board.jpg"), url("/images/Tock_board.jpg");
+        background-size: 30%, 30%;
+        height: 200px;
+        background-repeat: no-repeat, no-repeat, no-repeat;
+        background-position: right bottom, left top, left top;
         padding: 15px;
     }
 </style>
 
 <main>
-    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light" id="tock_board">
+    {{!-- <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light" id="tock_board">
         <div class="col-md-5 p-lg-5 mx-auto my-4">
             <h1 class="display-4">Tock</h1>
             <p class="lead fw-normal">Display Tock Images Here.</p>
         </div>
-    </div>
+    </div> --}}
 
-    <div class="row">
+    <div class="row mt-5">
         <div class="col-6 ms-auto">
             <div class="card">
                 <div class="card-body bg-light">
-                    <h3 class="card-title">Tock Introduction</h3>
+                    <h4 class="card-title">Introduction</h4>
                 </div>
-                <div class="mx-auto">
-                    <p class="card-text">
-                        In Tock, players are attempting to get their <a href="#glossary_marble">marbles</a>
-                        out of their <a href="#glossary_start_space">start spaces</a>, around the board,
-                        and into their <a href="#glossary_home_space">home spaces</a> using <a href="#glossary_card">
-                            cards</a> from a standard poker deck.
-                    </p>
-
-                    <h3>The Board</h3>
-
-                    <!-- Picture Needed: Different areas of board -->
-
-                    <h3>Start Spaces</h3>
-                    <!-- Picture Needed: Board with highlighted Start Spaces -->
+                <div class="mx-4 mt-2" style="height: 500px; overflow-y: scroll;">
                     <p>
-                        The <a href="#glossary_start_space">start spaces</a> are where a player's marble
-                        begins the game. To move a marble out of the player's start spaces, a
-                        <a href="#glossary_start_card">start card</a> must be used, putting the marble at
-                        that players 0 spot. This area is not accessible by any other player.
+                        <b>Tock</b> (also known as Tuck in some English parts of Quebec and Atlantic Canada, and Pock in
+                        some
+                        parts of Alberta) is a board game, similar to Ludo, Aggravation or Sorry, in which players race
+                        their four tokens (or marbles) around the game board from start to finish—the objective being to
+                        be the first to take all of one's tokens "home". Like Sorry, it is played with playing cards
+                        rather than dice. In Tock, players are attempting to get their marbles
+                        out of their start spaces, around the board,
+                        and into their home spaces using
+                        cards from a standard poker deck.
                     </p>
 
-                    <h3>The Board</h3>
-                    <!-- Picture Needed: Board with highlighted board Spaces, including 00, 8, 17 -->
+                    <h4>The Board</h4>
+                    <img src="/images/Tock_board.jpg" width="60%" height="60%">
                     <p>
                         The board consists of a series of spaces which are accessible by all players.
                         The important spots include spot 0, also known as the start portal, where a
@@ -60,8 +53,16 @@
                         and spot 17, the home portal, or the entry point into the next player's home
                         spaces.
                     </p>
+                    <h4>Start Spaces</h4>
+                    <!-- Picture Needed: Board with highlighted Start Spaces -->
+                    <p>
+                        The start spaces are where a player's marble
+                        begins the game. To move a marble out of the player's start spaces, a
+                        start card must be used, putting the marble at
+                        that players 0 spot. This area is not accessible by any other player.
+                    </p>
 
-                    <h4>Spot 0</h4>
+                    <h5>Spot 0</h5>
                     <p>
                         Spot 0 is the location at which a marble leaves the start spaces. If a marble
                         belonging to the associated player is on this spot, no other marble may pass
@@ -69,20 +70,20 @@
                         a marble is started.
                     </p>
 
-                    <h4>Spot 8</h4>
+                    <h5>Spot 8</h5>
                     <p>
                         The spot halfway between two player's home spaces is a safe spot. Marbles here,
                         no matter who owns them, cannot be passed or tocked.
                     </p>
 
-                    <h4>Spot 17</h4>
+                    <h5>Spot 17</h5>
                     <p>
                         The spot just before a player's spot 0 is the entry to that players home spaces.
                         A player must move their marbles into the home spaces if passing this spot, unless
                         moving backwards, during which, the marble must stay outside of the home spaces.
                     </p>
 
-                    <h3>Home Spaces</h3>
+                    <h4>Home Spaces</h4>
                     <!-- Picture Needed: Board with highlighted home Spaces -->
                     <p>
                         Each player has a set of 4 home spaces which they are trying to fill with their
@@ -91,30 +92,30 @@
                         and you can not use a card which would move a marble further than the last open home
                         space.
                     </p>
-
                 </div>
             </div><br>
             <div class="card">
                 <div class="card-body bg-light">
                     <h5 class="card-title">Ranking List</h5>
                 </div>
-                <div class="mx-auto">
-                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-                        additional content. This content is a little bit longer.
-                    <p>List Rankings Here</p>
-                    <p>Ranking #1 .....</p>
-                    <p>Ranking #2 .....</p>
-                    </p>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {{#each rankings}}
+                        <li class="list-group-item"> {{ this.username }}, wins: {{ this.wins }}, loses: {{
+                            this.loses }}</li>
+                        {{/each}}
+                    </ul>
                 </div>
+                </p>
             </div>
         </div>
         <div class="col-4 me-auto">
             <div class="card ">
                 <div class="card-body bg-light">
                     <h5 class="card-title">How To Play</h5>
-                    <p class="card-text">Go through a short vedio and learn how to play!</p><br>
+                    <p class="card-text">Go through a short vedio and learn how to play!</p>
                 </div>
-                <div class="mx-auto">
+                <div class="mx-auto mt-2">
                     <iframe width="450" height="315" src="https://www.youtube.com/embed/bQybLanJo94"
                         title="YouTube video player" frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -123,17 +124,16 @@
             </div><br>
             <div class="card">
                 <div class="card-body bg-light">
-                    <h3 class="card-title">Learn Rules</h3>
-
+                    <h5 class="card-title">Learn Rules</h5>
                 </div>
-                <div class="mx-auto">
-                    <p class="card-text">
-                    <h3>The Purpose</h3>
-                    <p>
-                        Players will be using cards to <a href="#glossary_start_Card">start their
-                            marbles</a>,
+                <div class="mx-4">
+                    <h5>The Purpose</h5>
+                    <p>Players will be using cards to start their marbles,
                         then propel those marbles around the board and into their home spaces.
                     </p>
+                    <h5>Your Turn</h5>
+                    <p>
+                        Each turn, a player will select a card to use and then select a marble to use it on.
                     </p>
                 </div>
 
@@ -148,25 +148,23 @@
                     <div class="modal-dialog modal-xl">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="staticBackdropLabel">Tock Rules</h5>
+                                <h4 class="modal-title" id="staticBackdropLabel">Tock Rules</h4>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
-                                <h2>The Rules</h2>
-                                <h3>The Purpose</h3>
+                            <div class="modal-body mx-4">
+                                <h5>The Purpose</h5>
                                 <p>
-                                    Players will be using cards to <a href="#glossary_start_Card">start their
-                                        marbles</a>,
+                                    Players will be using cards to start their marbles,
                                     then propel those marbles around the board and into their home spaces.
                                 </p>
 
-                                <h3>Your Turn</h3>
+                                <h5>Your Turn</h5>
                                 <p>
                                     Each turn, a player will select a card to use and then select a marble to use it on.
                                 </p>
 
-                                <h4>Moving Your Marbles</h4>
+                                <h5>Moving Your Marbles</h5>
                                 <p>
                                     At the beginning of every turn, a player will select a card to use. Most cards allow
                                     a player to move a single marble they control a number of spaces equal to the value
@@ -190,7 +188,7 @@
                                     "tocking".
                                 </p>
 
-                                <h4>Tocking</h4>
+                                <h5>Tocking</h5>
                                 <p>
                                     When a player's marble lands in a space occupied by another player's marble, that
                                     marble
@@ -201,7 +199,7 @@
                                     card to get that marble back on the board.
                                 </p>
 
-                                <h4>Special Spaces</h4>
+                                <h5>Special Spaces</h5>
                                 <p>
                                     There are two special spaces which are unpassable.
                                 </p>
@@ -234,7 +232,7 @@
                                     pass a marble on an 8-space.
                                 </p>
 
-                                <h4>The Cards</h4>
+                                <h5>The Cards</h5>
                                 <p>If a player has no card which provides
                                     a legal move, they must select a card to waste, discarding it for no effect on the
                                     game. If a
@@ -416,9 +414,7 @@
                                     </tr>
                                 </table>
 
-
-
-                                <h4>Going Home</h4>
+                                <h5>Going Home</h5>
                                 <p>
                                     While the home spaces have no <i>special</i> rules, the rules previously defined
                                     become more
@@ -433,11 +429,9 @@
                                     Please note that
                                 </p>
 
+                                <h5>Glossary</h5>
 
-
-                                <h2>Glossary</h2>
-
-                                <h4 id="glossary_home_space">Home</h4>
+                                <h5 id="glossary_home_space">Home</h5>
                                 <p>
                                     Each player has a set of four home spaces. These spaces are the four spaces in outer
                                     corners
@@ -450,7 +444,7 @@
                                     the same card.
                                 </p>
 
-                                <h4 id="glossary_marble">Marble</h4>
+                                <h5 id="glossary_marble">Marble</h5>
                                 <p>
                                     Each player controls four marbles, trying to get them out of their
                                     <a href="#glossary_start_space">Start Spaces</a>, around the board,
@@ -465,7 +459,7 @@
                                     the colorblind checkbox in the options menu.
                                 </p>
 
-                                <h4 id="glossary_space">Space</h4>
+                                <h5 id="glossary_space">Space</h5>
                                 <p>
                                     A space is any location in the game where a marble may reside.
                                     There are three types of spaces: Start spaces, Home spaces, and
@@ -473,7 +467,7 @@
                                     marbles of the player who controls the start spaces.
                                 </p>
 
-                                <h4 id="glossary_start_space">Start Space</h4>
+                                <h5 id="glossary_start_space">Start Space</h5>
                                 <p>
                                     A start space is a space in which a marble starts the game. To
                                     leave the start spaces, the player must use a card to start a
@@ -482,19 +476,19 @@
                                     a marble is tocked, it is sent to its owner's start spaces.
                                 </p>
 
-                                <h4 id="glossary_start_card">Start Card</h4>
+                                <h5 id="glossary_start_card">Start Card</h5>
                                 <p>
                                     A start card is any card which may be used to start a marble,
                                     moving the marble from a start space to the player's start portal.
                                     The start cards are an Ace, a King, or a Joker.
                                 </p>
 
-                                <h4 id="glossary_tock">Tock</h4>
+                                <h5 id="glossary_tock">Tock</h5>
                                 <p>
                                     As a noun, Tock refers to the game. In other uses,
                                 </p>
 
-                                <h4 id="glossary_tocking">Tocking</h4>
+                                <h5 id="glossary_tocking">Tocking</h5>
                                 <p>
                                     To "tock" a marble refers to moving a marble into a space occupied
                                     by a marble of a different color, thereby sending the other marble
@@ -503,7 +497,6 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Understood</button>
                             </div>
                         </div>
                     </div>

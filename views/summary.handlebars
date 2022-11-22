@@ -4,18 +4,47 @@
     View: summary.handlebars
 -->
 
+<style>
+    #congrats {
+        background-size: 100%, 100%;
+        background-repeat: no-repeat;
+        padding: 0px;
+        width: 50%;
+        text-align: center;
+    }
+</style>
+
+{{> navbar}}
+
 <body>
-    <h1>Game Summary</h1>
-    <h2>/game/summary/:id</h2>
-    <h2>summary.handlebars</h2>
-    <h2>Chosen ID: {{ gameId }}</h2>
-    <div class="card" style="width: 18rem;">
-        <img src="..." class="card-img-top" alt="...">
+    <div class="card mx-auto mt-5" id="congrats">
+        <div class="card-body bg-light">
+            <h5 class="card-title">Game Result</h5>
+        </div>
         <div class="card-body">
-            <h5 class="card-title">Congratulations!<BR>You Won!</h5>
-            <h5 class="card-title">You Lost</h5>
-            <p class="card-text">xxx</p>
-            <a href="#" class="btn btn-primary">Play again</a>
+            {{#if win}}
+            <h5 class="card-title">
+                Congratulations!<BR>You Won!</h5><BR>
+            {{else}}
+            <h5 class="card-title">Sorry!<BR>You Lost!</h5><BR>
+            {{/if}}
+            <h5 class="card-title">Your winning rate is: {{user.wins/user.loses}}
+                ({{user.wins}}/{{user.loses}})</h5><BR>
+            <a href="/lobby" class="btn btn-info mx-auto">Play again</a>
+        </div>
+    </div>
+
+    <div class="card mx-auto mt-5" style="width: 50%; text-align:center">
+        <div class="card-body bg-light">
+            <h5 class="card-title">Ranking List</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                {{#each rankings}}
+                <li class="list-group-item"> {{ this.username }}, wins: {{ this.wins }}, loses: {{
+                    this.loses }}</li>
+                {{/each}}
+            </ul>
         </div>
     </div>
 </body>

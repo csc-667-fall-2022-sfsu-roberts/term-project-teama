@@ -19,7 +19,7 @@ const concedeGame = (gameId, userId) => {
     // set Game.state = 2 and game.DateEnded = now
 }
 
-const createNewGame = async(gamename, userid) => {
+const createNewGame = async (gamename, userid) => {
     let game = await db.one('INSERT INTO "games" ("name") VALUES ( ${gamename}) RETURNING "id"', { gamename })
     createNewGameUsers(game.id, userid, true);
     return game.id;
@@ -58,7 +58,7 @@ const checkGameStarted = (gameId) => {
 }
 
 // Game_Player
-const createNewGameUsers = async(gameid, userid, iscreator) => {
+const createNewGameUsers = async (gameid, userid, iscreator) => {
     const results = await findAllUsersByGameId(gameid);
     const playerIndex = results.length + 1;
     if (iscreator) {
@@ -102,7 +102,7 @@ const numOfPlayers = (gameid) => {
 }
 
 /* routes/lobby */
-const playersInGame = async(gameid) => {
+const playersInGame = async (gameid) => {
     let gameusers = await findAllUsersByGameId(gameid);
     let game_players = [];
     for (let k = 0; k < gameusers.length; k++) {
@@ -124,7 +124,7 @@ const notEngagedGames = (userid) => {
     return db.any('SELECT * FROM "games" WHERE "id" NOT IN (SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}) ORDER BY "id" DESC', { userid })
 }
 
-const enOrStartedGames = async(userid) => {
+const enOrStartedGames = async (userid) => {
     let rs = {
         startedGames: [],
         normalGames: []
@@ -157,7 +157,7 @@ const enOrStartedGames = async(userid) => {
     return rs;
 }
 
-const notEnOrFullGames = async(userid) => {
+const notEnOrFullGames = async (userid) => {
     let rs = {
         fullGames: [],
         notEngagedGames: []
@@ -189,7 +189,7 @@ const notEnOrFullGames = async(userid) => {
 }
 
 /* socket/initialization */
-const initRooms = async() => {
+const initRooms = async () => {
     let rooms = {};
     let games = await findAllGames();
     if (games) {
@@ -210,7 +210,7 @@ const initRooms = async() => {
     return rooms;
 }
 
-const joinGame = async(gameid, userid) => {
+const joinGame = async (gameid, userid) => {
     const results = await findAllUsersByGameId(gameid);
     const playerIndex = results.length + 1;
     db.one('INSERT INTO "game_players" ("game_id", "player_id", "player_index") VALUES (${gameid}, ${userid}, ${playerIndex}) RETURNING id', { gameid, userid, playerIndex });
@@ -229,6 +229,10 @@ const deleteGame = (gameid) => {
 
 const changeAvatar = (avatar_num, userid) => {
     return db.any('UPDATE "users" SET "avatar"=${avatar_num} WHERE "id"=${userid}', { avatar_num, userid })
+}
+
+const getRanking = () => {
+    return db.any('SELECT * FROM "users" ORDER BY "wins" DESC LIMIT 10');
 }
 
 module.exports = {
@@ -254,5 +258,6 @@ module.exports = {
     joinGame,
     quitGame,
     deleteGame,
-    initRooms
+    initRooms,
+    getRanking
 };

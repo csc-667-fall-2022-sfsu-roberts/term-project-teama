@@ -5,7 +5,7 @@ const { notLoggedInUser } = require('../config/authenticated');
 /* Game */
 
 /* PAGE: /game/:id */
-router.get("/show/:id", function(req, res, next) {
+router.get("/show/:id", function (req, res, next) {
     let numPlayers = 4;
     let gameId = req.params.id;
     let head = '<link rel="stylesheet" href="/stylesheets/cards.css">\n' +
@@ -36,12 +36,20 @@ router.get("/show/:id", function(req, res, next) {
 });
 
 /* PAGE: /game/summary/:id */
-router.get("/summary/:id", function(req, res, next) {
-    res.render("summary", { title: "Tock", gameId: req.params.id });
+router.get("/summary/:id", async function (req, res, next) {
+    const user = req.user;
+    const id = req.params.id;
+    const game = await dbQuery.findGamesByGameId(id);
+    const rank = await dbQuery.getRanking();
+    let win = false;
+    if (game.winner === user.id) {
+        win = true;
+    }
+    res.render("summary", { title: "Tock", game: game, win: win, user: user, rankings: rank });
 });
 
 /* PAGE: /game/rules */
-router.get("/rules", function(req, res, next) {
+router.get("/rules", function (req, res, next) {
     res.render("rules", {
         title: "Tock",
         as_page: true,
@@ -50,12 +58,12 @@ router.get("/rules", function(req, res, next) {
 });
 
 /* PAGE: /game/create */
-router.get("/create", notLoggedInUser, function(req, res, next) {
+router.get("/create", notLoggedInUser, function (req, res, next) {
     const user = req.user;
     res.render("create", { user: user });
 });
 
-router.post("/create", async function(req, res, next) {
+router.post("/create", async function (req, res, next) {
     try {
         const { gamename, user } = req.body;
         const gameid = await dbQuery.createNewGame(gamename, user.id)
@@ -70,7 +78,7 @@ router.post("/create", async function(req, res, next) {
 });
 
 /* PAGE: /game/created/:id */
-router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
+router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
     try {
         /*
         const gameInfo = findGamesByGameId(req.game.id);
@@ -92,7 +100,7 @@ router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
     }
 });
 
-router.param("id", async(req, res, next, id) => {
+router.param("id", async (req, res, next, id) => {
     try {
         let currentUser = req.user.id;
         let game = await dbQuery.findGamesByGameId(id);

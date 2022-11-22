@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const dbQuery = require("../db/dbquery");
 
 /* Landing */
 
 /* PAGE: / */
-router.get("/", function (req, res, next) {
+router.get("/", async function (req, res, next) {
     const user = req.user;
-    res.render("index", { user: user });
+    const rank = await dbQuery.getRanking();
+    res.render("index", { user: user, rankings: rank });
 });
 
 /* Page: /error. */

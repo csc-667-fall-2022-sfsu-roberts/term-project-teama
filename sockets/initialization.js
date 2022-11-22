@@ -1,10 +1,10 @@
 const socketIO = require("socket.io");
 const passport = require("passport");
 const formatMessage = require("../public/javascripts/messages")
-const botName = "ChatCord Bot";
+const botName = "Chat Bot";
 const dbQuery = require("../db/dbquery")
-    // whats the use of express-session & middleware?
-    // next step: how to create a session for room and add players into the room
+// whats the use of express-session & middleware?
+// next step: how to create a session for room and add players into the room
 const sessionMiddleware = require("../config/session");
 
 const Server = socketIO.Server;
@@ -35,7 +35,7 @@ const init = (httpServer, app) => {
 
         const username = socket.request.user.username;
         const avatar = socket.request.user.avatar;
-        socket.on('login', async() => {
+        socket.on('login', async () => {
             /** initialize rooms, get data from db */
             if (Object.keys(rooms).length == 0) {
                 rooms = await dbQuery.initRooms();
@@ -48,7 +48,7 @@ const init = (httpServer, app) => {
             // Broadcast when a user connects
             socket.emit(
                 "message",
-                formatMessage(1, botName, `${ username } has joined the chat `)
+                formatMessage(1, botName, `${username} has joined the chat `)
             );
         });
 
@@ -69,7 +69,7 @@ const init = (httpServer, app) => {
         })
 
 
-        socket.on('new-game-created', async({ user, gameid, gamename, num }) => {
+        socket.on('new-game-created', async ({ user, gameid, gamename, num }) => {
             if (!rooms[gameid]) {
                 rooms[gameid] = {};
                 rooms[gameid].host = user.id;

@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     return queryInterface.createTable(
       'users',
       {
@@ -42,11 +42,21 @@ module.exports = {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()')
         },
+        wins: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0
+        },
+        loses: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: 0
+        }
       }
     );
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     return queryInterface.dropTable('user');
   }
 };
