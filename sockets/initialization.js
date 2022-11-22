@@ -48,9 +48,7 @@ const init = (httpServer, app) => {
             // Broadcast when a user connects
             socket.emit(
                 "message",
-                formatMessage(1, botName, `
-                                        $ { username }
-                                        has joined the chat `)
+                formatMessage(1, botName, `${ username } has joined the chat `)
             );
         });
 
