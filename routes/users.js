@@ -53,6 +53,7 @@ router.get("/reset", function (req, res, next) {
     res.render("reset");
 });
 
+
 router.get("/profile", notLoggedInUser, function (req, res, next) {
     const user = req.user;
     res.render("profile", { user: user });
@@ -64,10 +65,15 @@ router.post("/profile", notLoggedInUser, async (req, res) => {
     const {avatar} = req.body;
 
     try {
-        await dbQuery.changeAvater(avatar, user.id);
-        res.render("profile", { user: user });
+        const returnOfTheAvatar = await dbQuery.changeAvatar(avatar, user.id);
+        res.redirect(req.get('referer'));
+        console.log("redirecting...")
+        //res.render("profile", { user: user });
     } catch {
-        res.render("profile", { user: user });
+        console.log("\ncaught")
+        res.redirect(req.get('referer'));
+        //res.redirect(request.get('referer'));
+        //res.render("profile", { user: user });
     }
 });
 
@@ -82,3 +88,4 @@ router.get("/logout", notLoggedInUser, function (req, res, next) {
 });
 
 module.exports = router;
+
