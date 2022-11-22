@@ -22,15 +22,35 @@
                                 <th>Your Games Here</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {{#each engagedGames}}
-                            <tr id="game-info" class="engaged-game-info" data-gameid="{{this.game.id}}">
+                        <tbody id="started-game">
+                            {{#each startedGames}}
+                            <tr id="game-info" class="engaged-game-info" data-gameid="{{this.game.id}}"
+                                data-gamename="{{this.game.name}}">
                                 <td>
-                                    <p id="game-name" data-gameid="{{this.game.id}}"> {{this.game.name}}: </p>
+                                    <p id="game-name"> {{this.game.name}}: </p>
                                 </td>
                                 <td>
-                                    <p id="player-number" data-gameid="{{this.game.id}}"> {{this.numOfUsers}}/4 </p>
+                                    <p id="player-number"> {{this.numOfUsers}}/4 </p>
                                 </td>
+                                <td>
+                                    <a href="/game/show/{{this.game.id}}" class="btn btn-primary my-3" role="button"
+                                        id="view-game-btn">View</a>
+                                </td>
+                            </tr>
+                            {{/each}}
+
+                        </tbody>
+                        <tbody id="en-game">
+                            {{#each normalGames}}
+                            <tr id="game-info" class="engaged-game-info" data-gameid="{{this.game.id}}"
+                                data-gamename="{{this.game.name}}">
+                                <td>
+                                    <p id="game-name"> {{this.game.name}}: </p>
+                                </td>
+                                <td>
+                                    <p id="player-number"> {{this.numOfUsers}}/4 </p>
+                                </td>
+
                                 <td>
                                     <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"
                                         id="view-game-btn">View</a>
@@ -79,14 +99,20 @@
                                         </div>
                                     </div>
                                 </td>
-                                {{#if this.isFull}}
+                                {{#if this.isCreator}}
+                                <td>
+
+                                    <a href="#" class="btn btn-primary my-3" role="button" id="quit-game-btn"
+                                        onclick="return quitBtn({{this.game.id}})">Quit</a>
+                                </td>
                                 <td>
                                     <a href="/game/show/{{this.game.id}}" target="_blank" class="btn btn-primary my-3"
-                                        role="button" id="start-game-btn" data-gameid="{{this.game.id}}">Start</a>
+                                        role="button" id="start-game-btn"
+                                        onclick="return startBtn({{this.game.id}})">Start</a>
                                 </td>
                                 {{else}}
                                 <td>
-                                    <a href="/lobby" class="btn btn-primary my-3" role="button" id="quit-game-btn"
+                                    <a href="#" class="btn btn-primary my-3" role="button" id="quit-game-btn"
                                         onclick="return quitBtn({{this.game.id}})">Quit</a>
                                 </td>
                                 {{/if}}
@@ -108,17 +134,19 @@
                             </tr>
                         </thead>
                         <tbody id="no-en-game">
-                            {{#each notEngagedGames as | notEngagedGames |}}
+                            {{!-- {{#each notEngagedGames as | notEngagedGames |}} --}}
+                            {{#each notEngagedGames}}
+
                             <tr id="game-info" class="not-en-game-info" data-gameid="{{this.game.id}}"
                                 data-gamename="{{this.game.name}}">
                                 <td>
-                                    <p id="game-name" data-gameid="{{this.game.id}}"> {{this.game.name}}: </p>
+                                    <p id="game-name"> {{this.game.name}}: </p>
                                 </td>
                                 <td>
-                                    <p id="player-number" data-gameid="{{this.game.id}}"> {{this.numOfUsers}}/4 </p>
+                                    <p id="player-number"> {{this.numOfUsers}}/4 </p>
                                 </td>
                                 <td>
-                                    <a href="/lobby" class="btn btn-primary my-3" role="button" id="join-game-btn"
+                                    <a href="#" class="btn btn-primary my-3" role="button" id="join-game-btn"
                                         onclick="return joinBtn({{this.game.id}})">Join</a>
                                 </td>
                                 <td>
@@ -135,9 +163,10 @@
                         </thead>
                         <tbody id="full-game">
                             {{#each fullGames}}
-                            <tr id="game-info" class="full-game-info" data-gameid="{{this.game.id}}">
+                            <tr id="game-info" class="full-game-info" data-gameid="{{this.game.id}}"
+                                data-gamename="{{this.game.name}}">
                                 <td>
-                                    <p id="game-name" data-gameid="{{this.game.id}}"> {{this.game.name}}: </p>
+                                    <p id="game-name"> {{this.game.name}}: </p>
                                 </td>
                                 <td>
                                     <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3" role="button"

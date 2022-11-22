@@ -7,15 +7,24 @@ const dbQuery = require('../db/dbquery');
 /* PAGE: /lobby */
 router.get('/', notLoggedInUser, async function (req, res, next) {
     const user = req.user;
-    const engagedGames = await dbQuery.engagedGames(user.id);
-    const { notEngagedGames, fullGames } = await dbQuery.notEnOrFullGames(user.id);
+    const {startedGames, normalGames} = await dbQuery.enOrStartedGames(user.id);
+    const {notEngagedGames, fullGames} = await dbQuery.notEnOrFullGames(user.id);
+    for(let i = 0; i < normalGames.length; i++) {
+        let creator = normalGames[i].game.creator;
+        normalGames[i].isCreator = false;
+        if(user.id == creator && normalGames[i].isFull){
+            normalGames[i].isCreator = true;
+        }
+    }
+   
     /*
-    console.log('en:',engagedGames);
+    console.log('en-started:', startedGames)
+    console.log('en-normal:', normalGames)
     console.log('not-en:',notEngagedGames);
     console.log('not-en-full:',fullGames);
-    */
-
-    res.render('lobby', { user, engagedGames, notEngagedGames, fullGames });
+   */
+  
+    res.render('lobby', { user, startedGames, normalGames, notEngagedGames, fullGames });
 });
 
 /* API: /lobby/send 

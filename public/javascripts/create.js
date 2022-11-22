@@ -6,32 +6,64 @@ const createGameName = document.getElementById("gamename");
 
 socket.on("connect", () => {
     id = socket.id;
-    // console.log("user socket id", id)
+    socket.emit('get-creator-info');
+    console.log("user socket id", id)
 })
 
-createGameForm.addEventListener('submit', e => {
-    e.preventDefault();
-    let gamename = createGameName.value;
-    fetch(`/game/create`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "Application/json"
-        },
-        body: JSON.stringify({
-            gamename: gamename
-        })
+socket.on('creator-info', user => {
+    console.log('userinfo', user)
+    createGameForm.addEventListener('submit', e => {
+        e.preventDefault();
+        let gamename = createGameName.value;
+        fetch(`/game/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "Application/json"
+                },
+                body: JSON.stringify({
+                    gamename: gamename,
+                    user: user
+                })
+            })
+            .then(response => response.json())
+            .then(json => {
+                if (json.code === 1) {
+                    let { user, gameid } = json;
+                    socket.emit('new-game-created', { user, gameid, gamename, num: 1 });
+                    setTimeout(function() {
+                        window.location.href = `/game/created/${gameid}`;
+                    }, 1000)
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
     })
-    .then(response => response.json())
-    .then(json => {
-        if(json.code === 1){
-            let {user, gameid} = json;
-            socket.emit('new-game-created', {user, gameid, gamename, num: 1});
-            setTimeout(function(){
-                window.location.href = `/game/created/${gameid}`;
-            }, 1000)
-        }  
-    })
-    .catch(error => {
-        console.log(error)
-    })
-})
+});
+
+// createGameForm.addEventListener('submit', e => {
+//     e.preventDefault();
+//     let gamename = createGameName.value;
+//     fetch(`/game/create`, {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "Application/json"
+//             },
+//             body: JSON.stringify({
+//                 gamename: gamename
+//             })
+//         })
+//         .then(response => response.json())
+//         .then(json => {
+//             if (json.code === 1) {
+//                 let { user, gameid } = json;
+//                 socket.emit('new-game-created', { user, gameid, gamename, num: 1 });
+//                 setTimeout(function() {
+//                     window.location.href = `/game/created/${gameid}`;
+//                 }, 1000)
+//             }
+//         })
+//         .catch(error => {
+//             console.log(error)
+//         })
+// })
