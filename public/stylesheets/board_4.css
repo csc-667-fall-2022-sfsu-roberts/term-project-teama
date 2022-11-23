@@ -191,8 +191,8 @@
     background-color: var(--deco-space-color);
     border-radius: 10px;
     position: absolute;
-    min-width: 37%;
-    min-height: 37%;
+    min-width: 39%;
+    min-height: 39%;
     margin-top: 6%;
     margin-left: 6%;
 }
@@ -201,7 +201,7 @@
     border-radius: 10px;
     position: absolute;
     min-width: 45%;
-    min-height: 15%;
+    min-height: 17%;
     margin-top: 87%;
     margin-left: 12%;
 }

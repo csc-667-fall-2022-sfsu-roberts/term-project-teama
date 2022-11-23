@@ -41,6 +41,22 @@ const findGamesByGameId = (gameid) => {
     return db.oneOrNone('SELECT * FROM "games" WHERE "id"=${gameid}', { gameid });
 }
 
+const findGamePlayer = (game_id, user_id) => {
+    return db.oneOrNone('SELECT * FROM "game_players" WHERE "game_id"=${game_id} AND "player_id"=${user_id}', { game_id, user_id });
+}
+
+const countHands = (game_id) => {
+    return db.any('SELECT COUNT(card_id) AS "amount", location_id FROM game_players GROUP BY location_id ORDER BY location_id ASC', {game_id});
+}
+
+const getHand = (game_id, player_index) => {
+    return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM game_cards WHERE game_id=${game_id} AND location_id=${player_index} INNER JOIN cards ON game_cards.card_id=cards.id', { game_id, player_index });
+}
+
+const getMarbles = (game_id) => {
+    return db.any('SELECT marbles.id AS id, game_players.player_index AS player_index, marbles.current_spot AS current_spot FROM marbles INNER JOIN game_players ON marbles.game_player_id=game_players.id WHERE marbles.game_player_id IN { SELECT id FROM game_players WHERE game_players.game_id=${game_id} }', { game_id });
+}
+
 const updateGamestate = (gameid, state) => {
     db.any('UPDATE "games" SET "state"=${state} WHERE "id"=${gameid}', { gameid, state })
 }

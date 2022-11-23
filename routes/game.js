@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const dbQuery = require("../db/dbquery");
 const { notLoggedInUser } = require('../config/authenticated');
+const { request } = require("express");
 /* Game */
 
 /* PAGE: /game/:id */
@@ -14,25 +15,65 @@ router.get("/show/:id", function (req, res, next) {
         '<link rel="stylesheet" href="/stylesheets/board_' + numPlayers + '.css">\n' +
         '<script src="/javascripts/game_board.js" defer="true" > </script>\n' +
         '<script src="/javascripts/game_chat.js" defer="true" > </script>\n';
-    console.log('gamepage, game', req.game)
-    console.log('gamepage players', req.players)
-    res.render("game", {
+    let attributes = {
         title: "Tock",
         gameId: gameId,
         siteCSS: false,
         head: head,
-        numPlayers: 4,
-        curPlayerIndex: 1,
-        player: req.players,
-        hands: [5, 5, 5, 5],
-        curHand: [
+        numPlayers: numPlayers,
+    };
+    if (gameId===-1){ // If this is not tied to the database and is a test game
+        attributes.curPlayerIndex = 1;
+        attributes.players = [
+            { name: "tryHard2012", avatar: 4 },
+            { name: "wjplachno", avatar: 10 },
+            { name: "jStangle", avatar: 3 },
+            { name: "rubySoho1998", avatar: 5}
+        ];
+        attributes.hands = [
+            { location_id: -1, amount: 0 },
+            { location_id: 0, amount: 5 },
+            { location_id: 1, amount: 5 },
+            { location_id: 2, amount: 5 },
+            { location_id: 3, amount: 5 },
+            { location_id: 18, amount: 34 }
+        ];
+        attributes.curHand = [
             { category: "Spade", value: 2 },
             { category: "Heart", value: 6 },
             { category: "Red", value: 0 },
             { category: "Heart", value: 11 },
             { category: "Club", value: 13 }
-        ]
-    });
+        ];
+        attributes.marbles = [
+            { id: 1, player_index: 3, current_spot: 16},
+            { id: 2, player_index: 2, current_spot: 12},
+            { id: 3, player_index: 1, current_spot: 8},
+            { id: 4, player_index: 0, current_spot: 33},
+            { id: 5, player_index: 3, current_spot: 15},
+            { id: 6, player_index: 2, current_spot: 11},
+            { id: 7, player_index: 1, current_spot: 7},
+            { id: 8, player_index: 0, current_spot: 3},
+            { id: 9, player_index: 3, current_spot: 14},
+            { id: 10, player_index: 2, current_spot: 10},
+            { id: 11, player_index: 1, current_spot: 6},
+            { id: 12, player_index: 0, current_spot: 2},
+            { id: 13, player_index: 3, current_spot: 13},
+            { id: 14, player_index: 2, current_spot: 9},
+            { id: 15, player_index: 1, current_spot: 5},
+            { id: 16, player_index: 0, current_spot: 1}
+        ];
+    } else {
+        console.log('gamepage, game', req.game)
+        console.log('gamepage players', req.players)
+        attributes.players = req.players;
+        let gamePlayer = dbQuery.findGamePlayer(gameId, req.user.id);
+        attributes.curPlayerIndex = gamePlayer.player_index;
+        attributes.hands = dbQuery.countHands(gameId);
+        attributes.curHands = dbQuery.getHand(gameId, gamePlayer.player_index);
+        attributes.marbles = dbQuery.getMarbles(gameId);
+    }
+    res.render("game", attributes);
 });
 
 /* PAGE: /game/summary/:id */

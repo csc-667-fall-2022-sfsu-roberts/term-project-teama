@@ -35,6 +35,15 @@ module.exports = {
             key: "id"
           },
         },
+        dealer: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            defaultValue: 3
+        },
+        turn: {
+            type:Sequelize.INTEGER,
+            defaultValue: 0
+        },
         date_created: {
           type: Sequelize.DATE,
           defaultValue: Sequelize.literal('NOW()'),

@@ -31,7 +31,7 @@
     --spot_size_actual: 90px;
     --spot_size: calc( var(--spot_size_actual) / var(--spot_scale) );
     --spot_index_0: 0px;
-    --spot_index_1: 0 - var(--spot_size);
+    --spot_index_1: calc(var(--spot_size) * -1);
     --spot_index_2: calc(var(--spot_size) * -2);
     --spot_index_3: calc(var(--spot_size) * -3);
     --spot_index_4: calc(var(--spot_size) * -4);
@@ -55,26 +55,36 @@
     width: var(--spot_size);
     height: var(--spot_size);
 }
-empty { background-position-x:   var(--spot_index_0); }
+.empty { background-position-x:   var(--spot_index_0); }
 
-highlightRed {      background-position-x:   var(--spot_index_1); animation: rotation 1s infinite linear; }
-highlightGreen {    background-position-x:   var(--spot_index_2); animation: rotation 1s infinite linear; }
-highlightPurple {   background-position-x:   var(--spot_index_3); animation: rotation 1s infinite linear; }
-highlightBlue {     background-position-x:   var(--spot_index_4); animation: rotation 1s infinite linear; }
-highlightBlack {    background-position-x:   var(--spot_index_5); animation: rotation 1s infinite linear; }
+.highlightRed {      background-position-x:   var(--spot_index_1); }
+.highlightGreen {    background-position-x:   var(--spot_index_2); }
+.highlightPurple {   background-position-x:   var(--spot_index_3); }
+.highlightBlue {     background-position-x:   var(--spot_index_4); }
+.highlightBlack {    background-position-x:   var(--spot_index_5); }
 
-player1 {       background-position-x:   var(--spot_index_6); }
-player1CB {     background-position-x:   var(--spot_index_7); }
+.player1 {       background-position-x:   var(--spot_index_6); }
+.player1CB {     background-position-x:   var(--spot_index_7); }
 
-player2 {       background-position-x:   var(--spot_index_8); }
-player2CB {     background-position-x:   var(--spot_index_9); }
+.player2 {       background-position-x:   var(--spot_index_8); }
+.player2CB {     background-position-x:   var(--spot_index_9); }
 
-player3 {       background-position-x:   var(--spot_index_10); }
-player3CB {     background-position-x:   var(--spot_index_11); }
+.player3 {       background-position-x:   var(--spot_index_10); }
+.player3CB {     background-position-x:   var(--spot_index_11); }
 
-player4 {       background-position-x:   var(--spot_index_12); }
-player4CB {     background-position-x:   var(--spot_index_13); }
+.player4 {       background-position-x:   var(--spot_index_12); }
+.player4CB {     background-position-x:   var(--spot_index_13); }
+
+.tshl_1{background-position-x:   var(--spot_index_5); }
+@keyframes rotate {
+ 0% { 
+   transform: rotate(0); 
+ }
+ 100% { 
+   transform: rotate(360deg);
+ }
+}
 
 .consider{
-    animation: rotation 1s infinite linear;
+    animation: rotate 3s linear infinite;
 }
