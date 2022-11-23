@@ -23,14 +23,25 @@
         numPlayers: {{numPlayers}},
         curPlayer: {{curPlayerIndex}},
         players: [
-            {{#each player}}
+            {{#each players}}
             { name: "{{this.name}}", avatar: "{{this.avatar}}" },
             {{/each}}
         ],
-        hands:[ {{#each hands}}{{this}},{{/each}} ],
-        curHand: [ {{#each curHand}}{ category: "{{this.category}}", value: {{this.value}} }, {{/each}} ],
-        marbles: [ {{#each marbles}}{id: {{this.id}}, player_index:{{this.player_index}}, current_spot: {{this.current_spot}} }, {{/each}}]
-
+        hands:[ 
+            {{#each hands}} 
+            { location_id:{{this.location_id}}, amount:{{this.amount}} },
+            {{/each}} 
+        ],
+        curHand: [ 
+            {{#each curHand}}
+            { category: "{{this.category}}", value: {{this.value}} }, 
+            {{/each}} 
+        ],
+        marbles: [ 
+            {{#each marbles}}
+            {id: {{this.id}}, player_index:{{this.player_index}}, current_spot: {{this.current_spot}} }, 
+            {{/each}}
+        ]
     };
 
 </script>

@@ -9,6 +9,7 @@ const { request } = require("express");
 router.get("/show/:id", function (req, res, next) {
     let numPlayers = 4;
     let gameId = req.params.id;
+
     let head = '<link rel="stylesheet" href="/stylesheets/cards.css">\n' +
         '<link rel="stylesheet" href="/stylesheets/spots.css">\n' +
         '<link rel="stylesheet" href="/stylesheets/gameChatAvatar.css">\n' +
@@ -22,7 +23,7 @@ router.get("/show/:id", function (req, res, next) {
         head: head,
         numPlayers: numPlayers,
     };
-    if (gameId===-1){ // If this is not tied to the database and is a test game
+    if (gameId == -1){ // If this is not tied to the database and is a test game
         attributes.curPlayerIndex = 1;
         attributes.players = [
             { name: "tryHard2012", avatar: 4 },
@@ -39,8 +40,8 @@ router.get("/show/:id", function (req, res, next) {
             { location_id: 18, amount: 34 }
         ];
         attributes.curHand = [
-            { category: "Spade", value: 2 },
-            { category: "Heart", value: 6 },
+            { category: "Spade", value: 1 },
+            { category: "Heart", value: 7 },
             { category: "Red", value: 0 },
             { category: "Heart", value: 11 },
             { category: "Club", value: 13 }
