@@ -20,6 +20,7 @@ router.get("/show/:id", async function(req, res, next) {
         title: "Tock",
         gameId: gameId,
         siteCSS: false,
+        user: req.user,
         head: head,
         numPlayers: numPlayers,
     };
@@ -73,14 +74,11 @@ router.get("/show/:id", async function(req, res, next) {
         attributes.players = req.players;
         attributes.curPlayerIndex = req.game.curPlayerIndex;
         attributes.hands = await dbQuery.countHands(gameId);
-        attributes.curHands = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
+        attributes.curHand = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
         attributes.marbles = await dbQuery.getMarbles(gameId);
         console.log(attributes);
     }
-    res.render("game", {
-        user: req.user,
-        attributes
-    });
+    res.render("game", attributes);
 });
 
 /* PAGE: /game/summary/:id */
@@ -151,7 +149,7 @@ router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
 router.param("id", async(req, res, next, id) => {
     try {
         if (id > 0) {
-            // console.log('userinfo', req.user);
+            console.log('userinfo', req);
             let currentUser = req.user.id;
             let game = await dbQuery.findGamesByGameId(id);
             if (game) {
