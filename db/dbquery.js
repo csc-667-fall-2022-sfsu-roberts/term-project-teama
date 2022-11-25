@@ -19,7 +19,7 @@ const concedeGame = (gameId, userId) => {
     // set Game.state = 2 and game.DateEnded = now
 }
 
-const createNewGame = async (gamename, userid) => {
+const createNewGame = async(gamename, userid) => {
     let game = await db.one('INSERT INTO "games" ("name") VALUES ( ${gamename}) RETURNING "id"', { gamename })
     createNewGameUsers(game.id, userid, true);
     return game.id;
@@ -46,15 +46,20 @@ const findGamePlayer = (game_id, user_id) => {
 }
 
 const countHands = (game_id) => {
-    return db.any('SELECT COUNT(card_id) AS "amount", location_id FROM game_players GROUP BY location_id ORDER BY location_id ASC', {game_id});
+    return db.any('SELECT COUNT(card_id) AS "amount", location_id FROM game_cards WHERE game_id=${game_id} GROUP BY location_id ORDER BY location_id ASC', { game_id });
 }
 
 const getHand = (game_id, player_index) => {
-    return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM game_cards WHERE game_id=${game_id} AND location_id=${player_index} INNER JOIN cards ON game_cards.card_id=cards.id', { game_id, player_index });
+    // return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM game_cards WHERE game_id=${game_id} AND location_id=${player_index} INNER JOIN cards ON game_cards.card_id=cards.id', { game_id, player_index });
+    return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM cards WHERE cards.id IN (SELECT card_id from game_cards WHERE game_id=${game_id} AND location_id=${player_index})', { game_id, player_index });
 }
 
+// const getMarbles = (game_id) => {
+//     return db.any('SELECT marbles.id AS id, game_players.player_index AS player_index, marbles.current_spot AS current_spot FROM marbles INNER JOIN game_players ON marbles.game_player_id=game_players.id WHERE marbles.game_player_id IN { SELECT id FROM game_players WHERE game_players.game_id=${game_id} }', { game_id });
+// }
+
 const getMarbles = (game_id) => {
-    return db.any('SELECT marbles.id AS id, game_players.player_index AS player_index, marbles.current_spot AS current_spot FROM marbles INNER JOIN game_players ON marbles.game_player_id=game_players.id WHERE marbles.game_player_id IN { SELECT id FROM game_players WHERE game_players.game_id=${game_id} }', { game_id });
+    return db.any("SELECT id, player_index, current_spot FROM (SELECT m.game_id AS game_id, m.id AS id, gp.player_index AS player_index, m.spot_id AS current_spot FROM marbles m INNER JOIN game_players gp ON m.game_id=gp.game_id AND m.player_id=gp.player_id) AS rs WHERE game_id=${game_id}", { game_id });
 }
 
 const updateGamestate = (gameid, state) => {
@@ -74,9 +79,9 @@ const checkGameStarted = (gameId) => {
 }
 
 // Game_Player
-const createNewGameUsers = async (gameid, userid, iscreator) => {
+const createNewGameUsers = async(gameid, userid, iscreator) => {
     const results = await findAllUsersByGameId(gameid);
-    const playerIndex = results.length + 1;
+    const playerIndex = results.length;
     if (iscreator) {
         await setCreator(gameid, userid);
     }
@@ -118,7 +123,7 @@ const numOfPlayers = (gameid) => {
 }
 
 /* routes/lobby */
-const playersInGame = async (gameid) => {
+const playersInGame = async(gameid) => {
     let gameusers = await findAllUsersByGameId(gameid);
     let game_players = [];
     for (let k = 0; k < gameusers.length; k++) {
@@ -126,7 +131,7 @@ const playersInGame = async (gameid) => {
         game_players[k] = {
             name: userinfo.username,
             avatar: userinfo.avatar,
-            iscreator: gameusers[k].player_index === 1
+            iscreator: gameusers[k].player_index === 0
         };
     }
     return game_players;
@@ -140,7 +145,7 @@ const notEngagedGames = (userid) => {
     return db.any('SELECT * FROM "games" WHERE "id" NOT IN (SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}) ORDER BY "id" DESC', { userid })
 }
 
-const enOrStartedGames = async (userid) => {
+const enOrStartedGames = async(userid) => {
     let rs = {
         startedGames: [],
         normalGames: []
@@ -173,7 +178,7 @@ const enOrStartedGames = async (userid) => {
     return rs;
 }
 
-const notEnOrFullGames = async (userid) => {
+const notEnOrFullGames = async(userid) => {
     let rs = {
         fullGames: [],
         notEngagedGames: []
@@ -205,7 +210,7 @@ const notEnOrFullGames = async (userid) => {
 }
 
 /* socket/initialization */
-const initRooms = async () => {
+const initRooms = async() => {
     let rooms = {};
     let games = await findAllGames();
     if (games) {
@@ -216,9 +221,10 @@ const initRooms = async () => {
             rooms[game.id].host = game.creator;
             let players = await findAllUsersByGameId(game.id);
             if (players) {
-                rooms[game.id].players = [];
+                rooms[game.id].players = {};
                 for (let j = 0; j < players.length; j++) {
-                    rooms[game.id].players[j] = players[j].player_id;
+                    let index = players[j].player_index;
+                    rooms[game.id].players[index] = players[j].player_id;;
                 }
             }
         }
@@ -226,9 +232,25 @@ const initRooms = async () => {
     return rooms;
 }
 
-const joinGame = async (gameid, userid) => {
+const initPlayers = async(gameid, roomPlayers) => {
+    let players = {};
+    for (let i = 0; i < roomPlayers.length; i++) {
+        let user = await findUserById(roomPlayers[i]);
+        players[i] = {};
+        players[i].id = user.id,
+            players[i].username = user.username;
+        players[i].avatar = user.avatar;
+        players[i].player_index = i;
+        // players[i].cards = [];
+        // players[i].handCards = [];
+
+    }
+    return players;
+}
+
+const joinGame = async(gameid, userid) => {
     const results = await findAllUsersByGameId(gameid);
-    const playerIndex = results.length + 1;
+    const playerIndex = results.length;
     db.one('INSERT INTO "game_players" ("game_id", "player_id", "player_index") VALUES (${gameid}, ${userid}, ${playerIndex}) RETURNING id', { gameid, userid, playerIndex });
     return;
 }
@@ -251,6 +273,59 @@ const getRanking = () => {
     return db.any('SELECT * FROM "users" ORDER BY "wins" DESC LIMIT 10');
 }
 
+
+/* dbQuery.addMarbles(game_player_id, startingSpotID, marbleIndex) */
+const addMarbles = (game_id, player_id, spot_id, marbleIndex) => {
+    db.oneOrNone('INSERT INTO marbles (game_id, player_id, spot_id, marble_index) VALUES (${game_id}, ${player_id}, ${spot_id}, ${marbleIndex})', { game_id, player_id, spot_id, marbleIndex });
+}
+
+const shuffle = () => {
+    let cards = Array.from({ length: 54 }, (_, i) => i + 1);
+    let currentIndex = cards.length,
+        randomIndex;
+    while (currentIndex != 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [cards[currentIndex], cards[randomIndex]] = [cards[randomIndex], cards[currentIndex]];
+    }
+    return cards;
+}
+
+const insertCard = (game_id, value, index) => {
+    db.oneOrNone('INSERT INTO game_cards(game_id, card_id, location_id, index) VALUES(${game_id}, ${value}, 18, ${index})', { game_id, value, index });
+}
+
+/** initialize cards for a game when game start or game_cards all used */
+const initialCards = (game_id) => {
+    let cards = shuffle();
+    for (let i = 0; i < cards.length; i++) {
+        insertCard(game_id, cards[i], i);
+    }
+}
+
+/* dbQuery.dealCardsToPlayer(game_id, player_index, handSize) */
+const HANDCARDS =
+    "UPDATE game_cards SET location_id = ${ player_index } WHERE id IN (SELECT id FROM game_cards WHERE location_id = 18 AND game_id = ${ game_id } ORDER BY index ASC OFFSET ${offset} FETCH FIRST ${handSize} ROWS ONLY)";
+
+const dealCardsToPlayer = (game_id) => {
+    for (let player_index = 0; player_index < 4; player_index++) {
+        db.oneOrNone(HANDCARDS, { player_index, game_id, offset: 5 * player_index, handSize: 5 });
+    }
+    return true;
+}
+
+const handCards = (player_index) => {
+    let cards = [];
+    db.any("select card_id from game_cards where location_id = ${player_index}", { player_index })
+        .then(rs => {
+            console.log('get players cards', rs);
+            for (let i = 0; i < rs.length; i++) {
+                cards[i] = rs.card_id;
+            }
+            console.log(player_index, cards);
+        })
+    return cards;
+}
 module.exports = {
     createNewUser,
     findUser,
@@ -275,5 +350,14 @@ module.exports = {
     quitGame,
     deleteGame,
     initRooms,
-    getRanking
+    getRanking,
+    findGamePlayer,
+    countHands,
+    getHand,
+    getMarbles,
+    initPlayers,
+    addMarbles,
+    initialCards,
+    dealCardsToPlayer,
+    handCards
 };

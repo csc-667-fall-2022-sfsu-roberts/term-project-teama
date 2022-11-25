@@ -5,24 +5,32 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         return queryInterface.createTable("marbles", {
             id: {
-              type: Sequelize.INTEGER,
-              primaryKey: true,
-              autoIncrement: true
+                type: Sequelize.INTEGER,
+                primaryKey: true,
+                autoIncrement: true
             },
-            game_player_id: {
+            // game_player_id: {
+            //     type: Sequelize.INTEGER,
+            //     allowNull: false,
+            //     references: {
+            //         model: "game_players",
+            //         key: "id"
+            //     },
+            // },
+            game_id: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
+            player_id: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
+            spot_id: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
                 references: {
-                  model: "game_players",
-                  key: "id"
-                },
-            },
-            current_spot: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-                references: {
-                  model: "spots",
-                  key: "id"
+                    model: "spots",
+                    key: "id"
                 },
             },
             marble_index: {

@@ -118,9 +118,6 @@ function quitBtn(gameid) {
 function startBtn(gameid) {
     console.log(socket.id, 'wants to start game', gameid);
     socket.emit('start-game', gameid);
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
 }
 
 /*

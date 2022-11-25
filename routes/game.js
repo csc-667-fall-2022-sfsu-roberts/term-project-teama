@@ -6,7 +6,7 @@ const { request } = require("express");
 /* Game */
 
 /* PAGE: /game/:id */
-router.get("/show/:id", function (req, res, next) {
+router.get("/show/:id", async function(req, res, next) {
     let numPlayers = 4;
     let gameId = req.params.id;
 
@@ -23,13 +23,13 @@ router.get("/show/:id", function (req, res, next) {
         head: head,
         numPlayers: numPlayers,
     };
-    if (gameId == -1){ // If this is not tied to the database and is a test game
+    if (gameId == -1) { // If this is not tied to the database and is a test game
         attributes.curPlayerIndex = 1;
         attributes.players = [
             { name: "tryHard2012", avatar: 4 },
             { name: "wjplachno", avatar: 10 },
             { name: "jStangle", avatar: 3 },
-            { name: "rubySoho1998", avatar: 5}
+            { name: "rubySoho1998", avatar: 5 }
         ];
         attributes.hands = [
             { location_id: -1, amount: 0 },
@@ -47,38 +47,44 @@ router.get("/show/:id", function (req, res, next) {
             { category: "Club", value: 13 }
         ];
         attributes.marbles = [
-            { id: 1, player_index: 3, current_spot: 16},
-            { id: 2, player_index: 2, current_spot: 12},
-            { id: 3, player_index: 1, current_spot: 8},
-            { id: 4, player_index: 0, current_spot: 33},
-            { id: 5, player_index: 3, current_spot: 15},
-            { id: 6, player_index: 2, current_spot: 11},
-            { id: 7, player_index: 1, current_spot: 7},
-            { id: 8, player_index: 0, current_spot: 3},
-            { id: 9, player_index: 3, current_spot: 14},
-            { id: 10, player_index: 2, current_spot: 10},
-            { id: 11, player_index: 1, current_spot: 6},
-            { id: 12, player_index: 0, current_spot: 2},
-            { id: 13, player_index: 3, current_spot: 13},
-            { id: 14, player_index: 2, current_spot: 9},
-            { id: 15, player_index: 1, current_spot: 5},
-            { id: 16, player_index: 0, current_spot: 1}
+            { id: 1, player_index: 3, current_spot: 16 },
+            { id: 2, player_index: 2, current_spot: 12 },
+            { id: 3, player_index: 1, current_spot: 8 },
+            { id: 4, player_index: 0, current_spot: 33 },
+            { id: 5, player_index: 3, current_spot: 15 },
+            { id: 6, player_index: 2, current_spot: 11 },
+            { id: 7, player_index: 1, current_spot: 7 },
+            { id: 8, player_index: 0, current_spot: 3 },
+            { id: 9, player_index: 3, current_spot: 14 },
+            { id: 10, player_index: 2, current_spot: 10 },
+            { id: 11, player_index: 1, current_spot: 6 },
+            { id: 12, player_index: 0, current_spot: 2 },
+            { id: 13, player_index: 3, current_spot: 13 },
+            { id: 14, player_index: 2, current_spot: 9 },
+            { id: 15, player_index: 1, current_spot: 5 },
+            { id: 16, player_index: 0, current_spot: 1 }
         ];
     } else {
+        /*
         console.log('gamepage, game', req.game)
         console.log('gamepage players', req.players)
+        // let gamePlayer = dbQuery.findGamePlayer(gameId, req.user.id); 
+        */
         attributes.players = req.players;
-        let gamePlayer = dbQuery.findGamePlayer(gameId, req.user.id);
-        attributes.curPlayerIndex = gamePlayer.player_index;
-        attributes.hands = dbQuery.countHands(gameId);
-        attributes.curHands = dbQuery.getHand(gameId, gamePlayer.player_index);
-        attributes.marbles = dbQuery.getMarbles(gameId);
+        attributes.curPlayerIndex = req.game.curPlayerIndex;
+        attributes.hands = await dbQuery.countHands(gameId);
+        attributes.curHands = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
+        attributes.marbles = await dbQuery.getMarbles(gameId);
+        console.log(attributes);
     }
-    res.render("game", attributes);
+    res.render("game", {
+        user: req.user,
+        attributes
+    });
 });
 
 /* PAGE: /game/summary/:id */
-router.get("/summary/:id", async function (req, res, next) {
+router.get("/summary/:id", async function(req, res, next) {
     const user = req.user;
     const id = req.params.id;
     const game = await dbQuery.findGamesByGameId(id);
@@ -91,7 +97,7 @@ router.get("/summary/:id", async function (req, res, next) {
 });
 
 /* PAGE: /game/rules */
-router.get("/rules", function (req, res, next) {
+router.get("/rules", function(req, res, next) {
     res.render("rules", {
         title: "Tock",
         as_page: true,
@@ -100,12 +106,12 @@ router.get("/rules", function (req, res, next) {
 });
 
 /* PAGE: /game/create */
-router.get("/create", notLoggedInUser, function (req, res, next) {
+router.get("/create", notLoggedInUser, function(req, res, next) {
     const user = req.user;
     res.render("create", { user: user });
 });
 
-router.post("/create", async function (req, res, next) {
+router.post("/create", async function(req, res, next) {
     try {
         const { gamename, user } = req.body;
         const gameid = await dbQuery.createNewGame(gamename, user.id)
@@ -120,7 +126,7 @@ router.post("/create", async function (req, res, next) {
 });
 
 /* PAGE: /game/created/:id */
-router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
+router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
     try {
         /*
         const gameInfo = findGamesByGameId(req.game.id);
@@ -142,32 +148,41 @@ router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
     }
 });
 
-router.param("id", async (req, res, next, id) => {
+router.param("id", async(req, res, next, id) => {
     try {
-        let currentUser = req.user.id;
-        let game = await dbQuery.findGamesByGameId(id);
-        req.game = {
-            id: id,
-            name: game.name,
-            state: game.state,
-            isPlayer: false
-        };
-        let gameusers = await dbQuery.findAllUsersByGameId(id);
-        req.players = [];
-        for (let i = 0; i < gameusers.length; i++) {
-            const userinfo = await dbQuery.findUserById(gameusers[i].player_id);
-            if (currentUser === userinfo.id) {
-                req.game.isPlayer = true;
+        if (id > 0) {
+            // console.log('userinfo', req.user);
+            let currentUser = req.user.id;
+            let game = await dbQuery.findGamesByGameId(id);
+            if (game) {
+                req.game = {
+                    id: id,
+                    name: game.name,
+                    state: game.state,
+                    isPlayer: false
+                };
+                let gameusers = await dbQuery.findAllUsersByGameId(id);
+                req.players = [];
+                for (let i = 0; i < gameusers.length; i++) {
+                    const userinfo = await dbQuery.findUserById(gameusers[i].player_id);
+                    if (currentUser === userinfo.id) {
+                        req.game.isPlayer = true;
+                        req.game.curPlayerIndex = gameusers[i].player_index;
+                    }
+                    req.players[i] = {
+                        id: userinfo.id,
+                        name: userinfo.username,
+                        avatar: userinfo.avatar,
+                        iscreator: gameusers[i].player_index === 0,
+                        player_index: gameusers[i].player_index
+                    };
+                }
+
+                req.game.num = req.players.length;
+                next();
             }
-            req.players[i] = {
-                name: userinfo.username,
-                avatar: userinfo.avatar,
-                iscreator: gameusers[i].player_index === 1
-            };
         }
 
-        req.game.num = req.players.length;
-        next();
     } catch (err) {
         console.log(err)
     }

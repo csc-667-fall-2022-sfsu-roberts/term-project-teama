@@ -2,7 +2,7 @@ const socketIO = require("socket.io");
 const passport = require("passport");
 const formatMessage = require("../public/javascripts/messages")
 const botName = "Chat Bot";
-const dbQuery = require("../db/dbquery")
+const dbQuery = require("../db/dbquery");
 // whats the use of express-session & middleware?
 // next step: how to create a session for room and add players into the room
 const sessionMiddleware = require("../config/session");
@@ -35,11 +35,13 @@ const init = (httpServer, app) => {
 
         const username = socket.request.user.username;
         const avatar = socket.request.user.avatar;
-        socket.on('login', async () => {
-            /** initialize rooms, get data from db */
+        socket.on('login', async() => {
+            /** initialize rooms, get data from db
+             * rooms[gameid] = { state, host, players[player_index] = player_id }
+             */
             if (Object.keys(rooms).length == 0) {
                 rooms = await dbQuery.initRooms();
-                console.log('init rooms:', rooms)
+                console.log('init rooms:', rooms);
             }
 
             console.log(`${username} logged  in....`);
@@ -62,14 +64,12 @@ const init = (httpServer, app) => {
             console.log("disconnect => socket.id : ", socket.id);
         });
 
-
         socket.on('get-creator-info', () => {
             user = socket.request.user;
             socket.emit('creator-info', user);
         })
 
-
-        socket.on('new-game-created', async ({ user, gameid, gamename, num }) => {
+        socket.on('new-game-created', async({ user, gameid, gamename }) => {
             if (!rooms[gameid]) {
                 rooms[gameid] = {};
                 rooms[gameid].host = user.id;
@@ -115,18 +115,23 @@ const init = (httpServer, app) => {
             }
         });
 
-        socket.on('start-game', gameid => {
+        socket.on('start-game', async gameid => {
+            /* shuffle */
+            dbQuery.initialCards(gameid);
+            dbQuery.dealCardsToPlayer(gameid);
+            /* initial marbles */
+            let spot_id = 1;
+            for (let playerIndex = 0; playerIndex < 4; playerIndex++) {
+                for (let marbleIndex = 0; marbleIndex < 4; marbleIndex++) {
+                    dbQuery.addMarbles(gameid, rooms[gameid].players[playerIndex], spot_id, marbleIndex);
+                    spot_id++;
+                }
+            }
+            /** update game state=1 start */
             dbQuery.updateGamestate(gameid, 1);
             rooms[gameid].state = 1;
-            socket.broadcast.emit('play-game', gameid);
+            io.emit('play-game', gameid);
         });
-
-        socket.on('get-current-user', (gameid) => {
-            let userid = socket.request.user.id;
-            let creator = rooms[gameid].host;
-            let playerNumber = rooms[gameid].players.length;
-            socket.emit('start-game', { gameid, userid, creator, playerNumber });
-        })
 
     });
 
