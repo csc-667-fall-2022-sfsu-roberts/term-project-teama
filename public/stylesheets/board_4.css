@@ -42,6 +42,15 @@
 .playerArea div div{
     position: absolute;
 }
+.playerArea div div div {
+    transform: rotate(0deg);
+}
+.debugSpotID{
+    font-size: 0.6em;
+    margin-left: 5px;
+    margin-top: 5px;
+
+}
 .startArea {}
 .homeArea {}
 .boardArea {}
@@ -223,7 +232,10 @@
     margin-top: 1%;
     margin-left: 1%;
 }
-
+.debugSpotID{
+    position: absolute;
+    text-shadow: 1px 1px #ffffff;
+}
 .decoPlayer_0{
     border: var(--deco_border) var(--player1) solid;
 }

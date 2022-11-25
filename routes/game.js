@@ -149,7 +149,10 @@ router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
 router.param("id", async(req, res, next, id) => {
     try {
         if (id > 0) {
-            console.log('userinfo', req);
+            // console.log('userinfo', req.user);
+            if (req.user == undefined) {
+                res.redirect('/users/login');
+            }
             let currentUser = req.user.id;
             let game = await dbQuery.findGamesByGameId(id);
             if (game) {

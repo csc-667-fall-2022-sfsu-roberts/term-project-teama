@@ -76,6 +76,9 @@
 .player4CB {     background-position-x:   var(--spot_index_13); }
 
 .tshl_1{background-position-x:   var(--spot_index_5); }
+.tshl_2{background-position-x:   var(--spot_index_2); }
+.tshl_3{background-position-x:   var(--spot_index_1); }
+.tshl_4{background-position-x:   var(--spot_index_3); }
 @keyframes rotate {
  0% { 
    transform: rotate(0); 
