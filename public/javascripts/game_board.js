@@ -351,7 +351,9 @@ class CurrentHand {
         this.map((index, card) => {
             let cardClasses = "tockCard ";
             cardClasses += card.category.toLocaleLowerCase() + " ";
-            cardClasses += cardValueClasses[card.value];
+            cardClasses += cardValueClasses[card.value] + " Card";
+            if (!card.valid) { cardClasses += 'Not'; }
+            cardClasses += 'Valid';
             handHTML += '<div class="'+cardClasses+'" id="playerHand_'+(index+1)+'" onclick="tockHistory.setSelectedCard('+index+');"></div>\n';
         });
         handHTML += "</div>\n";
@@ -374,6 +376,15 @@ class CurrentHand {
         newCards.push(selectedCard);
         this.cards = newCards;
         this.loadHTML();
+    }
+    sortByValidity() { 
+        let valid = [], invalid = [];
+        this.map((cardIndex, card)=>{
+            let arr = invalid;
+            if (card.valid) { arr = valid; }
+            arr.push(card);
+        });
+        this.cards = invalid.concat(valid);
     }
 }
 
@@ -662,6 +673,7 @@ class Strategy {
         possibility.possibilityIndex = this.possibilities[possibility.marbleIndex].length;
         this.possibilities[possibility.marbleIndex].push(possibility);
     }
+    hasPossibilities() { return this.possibilityKey !== 0; }
     selectMarble(marbleId){
         // Copy board and log click
         this.setBoardCopy();
@@ -724,35 +736,47 @@ class Strategy {
         this.currentBoard.AttachDivs();
     }
 }
-
-class GameEvent {
-    constructor(name, state, handler) {
-        this.name = name;
+class ConfirmHandler {
+    constructor(buttonID){
+        this.buttonId = buttonID;
+        this.buttonElement = document.getElementById(this.buttonId);
+        this.State = {
+            Hidden: "hidden",
+            WasteCard: "Waste Current Card",
+            StartMarble: "Start Marble",
+            MoveMarble: "Move Marble",
+            MoveMarbles: "Move Marble",
+            TockMarble: "Tock That Marble!",
+            SwitchMarble: "Switch Marbles"
+        };
+        this.setState(this.State.Hidden);        
+    }
+    setState(state) {
         this.state = state;
-        this.handler = handler;
-    }
-    show() {
-        this.state.AttachDivs();
-    }
-    handle(props) {
-        this.handler(props);
+        if (this.state === this.State.Hidden) {
+            this.buttonElement.hidden = true;
+        } else {
+            this.buttonElement.hidden = false;
+            this.buttonElement.textContent = this.state;
+        }
     }
 }
 class TockHistory {
     constructor(gameState){
         this.gameState = gameState;
         this.hand = new CurrentHand(this.gameState.curHand);
-        this.hand.loadHTML();
         this.startBoard = new Board(this.gameState.numPlayers, this.gameState.curPlayer);
+        this.confirm = new ConfirmHandler("confirm");
         this.parseMarbles();
         this.parseOpponents();
+        this.prepareStrategies();
         this.setSelectedCard(this.hand.selected);
     }
     setSelectedCard(newSelection) {
         this.hand.select(newSelection);
         let newCard = this.hand.getSelected();
-        this.strategy = new Strategy(this.startBoard, newCard);
-        this.currentBoard = this.strategy.makeBoard();
+        this.strategy = this.strategies[newCard.value];
+        this.currentBoard = this.strategy.currentBoard;
         this.currentBoard.AttachDivs();
     }
     parseMarbles(){
@@ -812,14 +836,57 @@ class TockHistory {
         }
         this.cardCounts = newHands;
     }
+    prepareStrategies() {
+        this.strategies = [];
+        this.canWaste = true;
+        this.hand.map((cardIndex, card)=>{
+            let curStrat;
+            if (this.strategies[card.value]){
+                curStrat = this.strategies[card.value];
+            } else {
+                curStrat = new Strategy(this.startBoard, card);
+                curStrat.makeBoard();
+                this.strategies[card.value] = curStrat;
+            }
+            if (curStrat.hasPossibilities()) { card.valid = true; this.canWaste = false; }
+            else { card.valid = false; }
+        });
+        this.hand.sortByValidity();
+    }
     selectMarble(marbleId) {
         this.strategy.selectMarble(marbleId);
+
     }
     selectPossibility(marbleId, possibilityIndex) {
         this.strategy.selectPossibility(marbleId, possibilityIndex);
     }
     selectPrevious() {
         this.strategy.setPreviousBoard();
+    }
+    setConfirm(possibility) {
+        if (possibility == undefined) {
+            if (this.canWaste) {
+                this.confirm.setState(this.confirm.State.WasteCard);
+            } else {
+                this.confirm.setState(this.confirm.State.Hidden);
+            }
+        } else {
+            if (possibility.moveType == MoveType.Start) {
+                this.confirm.setState(this.confirm.State.StartMarble);
+            } else if (possibility.moveType == MoveType.Switch) {
+                this.confirm.setState(this.confirm.State.SwitchMarble);
+            } else {
+                if (possibility.subMoves.length == 0) {
+                    this.confirm.setState(this.confirm.State.MoveMarble);
+                } else {
+                    if (possibility.subMoves[0].moveType == MoveType.Propel) {
+                        this.confirm.setState(this.confirm.State.MoveMarbles);
+                    } else if (possibility.subMoves[0].moveType == MoveType.Tock) {
+                        this.confirm.setState(this.confirm.State.TockMarble);
+                    }
+                }
+            }
+        }
     }
     triggerDebug() {
         debug = true;

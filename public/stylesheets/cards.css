@@ -90,6 +90,8 @@
     width: var(--hand_card_width);
     height: var(--hand_card_height);
 }
+.CardValid { border: 1px solid green; }
+.CardNotValid { border: 1px solid red; }
 
 .diamond { background-position-y: var(--card_h_0); }
 .heart   { background-position-y: var(--card_h_1); }
