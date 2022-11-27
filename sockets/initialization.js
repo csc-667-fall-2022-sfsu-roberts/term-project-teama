@@ -44,7 +44,7 @@ const init = (httpServer, app) => {
                 console.log('init rooms:', rooms);
             }
 
-            console.log(`${username} logged  in....`);
+            console.log(`${username} logged in lobby`);
             // Welcome current user
             // socket.emit("message", formatMessage(botName, "Welcome to ChatCord!"));
             // Broadcast when a user connects
@@ -58,6 +58,19 @@ const init = (httpServer, app) => {
         socket.on("chatMessage", (msg) => {
             //const user = getCurrentUser(socket.id);
             io.emit("message", formatMessage(avatar, username, msg));
+        });
+
+        // Listen for game chat login signal
+        socket.on('game-page', async(gameId) => {
+            console.log(`${username} logged in game page`);
+            socket.join(gameId);
+            io.emit("gameMessage", formatMessage(1, botName, `Hi, ${username}! Welcom to Tock!`));
+        });
+
+        // Listen for game chat message
+        socket.on('gameChatMessage', async({msg, gameId}) => {
+            console.log(`received game message and gameid are: ${msg} and ${gameId}`);
+            io.to(gameId).emit("gameMessage", formatMessage(avatar, username, msg));
         });
 
         socket.on('disconnect', () => {
@@ -88,7 +101,7 @@ const init = (httpServer, app) => {
             if (rooms[gameid]) {
                 const userid = socket.request.user.id;
                 dbQuery.joinGame(gameid, userid);
-                rooms[gameid].players.push(userid);
+                rooms[gameid].players['3'] = userid;
                 let playerNumber = rooms[gameid].players.length;
                 socket.broadcast.emit('lobby-join-new-game', { gameid, playerNumber });
             }
