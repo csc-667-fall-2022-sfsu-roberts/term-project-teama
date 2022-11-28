@@ -326,6 +326,15 @@ const handCards = (player_index) => {
         })
     return cards;
 }
+
+const marblePlayerId = (game_id, spot_id) => {
+    return db.one('SELECT id, player_id, marble_index from marbles WHERE game_id=${game_id} AND spot_id=${spot_id}', {spot_id, game_id});
+}
+
+const updateMarbles = (id, spot_id) => {
+    return db.one('UPDATE marbles SET spot_id=${spot_id} WHERE id=${id}', {spot_id, id});
+}
+
 module.exports = {
     createNewUser,
     findUser,
@@ -359,5 +368,7 @@ module.exports = {
     addMarbles,
     initialCards,
     dealCardsToPlayer,
-    handCards
+    handCards,
+    marblePlayerId,
+    updateMarbles
 };
