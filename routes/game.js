@@ -21,11 +21,13 @@ router.get("/show/:id", async function(req, res, next) {
         gameId: gameId,
         siteCSS: false,
         user: req.user,
+        userId: req.user.id,
         head: head,
         numPlayers: numPlayers,
     };
     if (gameId == -1) { // If this is not tied to the database and is a test game
         attributes.curPlayerIndex = 1;
+        attributes.gamePlayerId = 1;
         attributes.players = [
             { name: "tryHard2012", avatar: 4 },
             { name: "wjplachno", avatar: 10 },
@@ -41,11 +43,11 @@ router.get("/show/:id", async function(req, res, next) {
             { location_id: 18, amount: 34 }
         ];
         attributes.curHand = [
-            { category: "Spade", value: 1 },
-            { category: "Heart", value: 7 },
-            { category: "Red", value: 0 },
-            { category: "Heart", value: 11 },
-            { category: "Club", value: 13 }
+            { id: 1,cardID: 1, category: "Spade", value: 1 },
+            { id: 2,cardID: 20, category: "Heart", value: 7 },
+            { id: 3,cardID: 54, category: "Red", value: 0 },
+            { id: 4,cardID: 24, category: "Heart", value: 11 },
+            { id: 5,cardID: 52, category: "Club", value: 13 }
         ];
         attributes.marbles = [
             { id: 1, player_index: 3, current_spot: 16 },
@@ -72,6 +74,7 @@ router.get("/show/:id", async function(req, res, next) {
         // let gamePlayer = dbQuery.findGamePlayer(gameId, req.user.id); 
         */
         attributes.players = req.players;
+        attributes.gamePlayerId = req.user.gamePlayerId;
         attributes.curPlayerIndex = req.game.curPlayerIndex;
         attributes.hands = await dbQuery.countHands(gameId);
         attributes.curHand = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
@@ -169,6 +172,7 @@ router.param("id", async(req, res, next, id) => {
                     if (currentUser === userinfo.id) {
                         req.game.isPlayer = true;
                         req.game.curPlayerIndex = gameusers[i].player_index;
+                        req.user.gamePlayerId = gameusers[1].id;
                     }
                     req.players[i] = {
                         id: userinfo.id,

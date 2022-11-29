@@ -50,8 +50,8 @@ const countHands = (game_id) => {
 }
 
 const getHand = (game_id, player_index) => {
-    // return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM game_cards WHERE game_id=${game_id} AND location_id=${player_index} INNER JOIN cards ON game_cards.card_id=cards.id', { game_id, player_index });
-    return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM cards WHERE cards.id IN (SELECT card_id from game_cards WHERE game_id=${game_id} AND location_id=${player_index})', { game_id, player_index });
+    return db.any('SELECT cards.suite AS "category", cards.value AS "value", cards.id AS "card_id", game_cards.id AS "id" FROM game_cards INNER JOIN cards ON game_cards.card_id=cards.id WHERE game_id=${game_id} AND location_id=${player_index}', { game_id, player_index });
+    // return db.any('SELECT cards.suite AS "category", cards.value AS "value" FROM cards WHERE cards.id IN (SELECT card_id from game_cards WHERE game_id=${game_id} AND location_id=${player_index})', { game_id, player_index });
 }
 
 // const getMarbles = (game_id) => {

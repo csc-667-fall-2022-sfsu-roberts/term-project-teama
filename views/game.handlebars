@@ -19,6 +19,8 @@
 -->
 <script>
     let gameSetup = {
+        userID: {{userId}},
+        gamePlayer: {{gamePlayerId}},
         gameID: {{gameId}},
         numPlayers: {{numPlayers}},
         curPlayer: {{curPlayerIndex}},
@@ -34,7 +36,7 @@
         ],
         curHand: [ 
             {{#each curHand}}
-            { category: "{{this.category}}", value: {{this.value}} }, 
+            { id: {{this.id}}, cardID: {{this.card_id}}, category: "{{this.category}}", value: {{this.value}} }, 
             {{/each}} 
         ],
         marbles: [ 
@@ -187,7 +189,7 @@
                     -->
                     <div class="opponentDash" id="opponentLeft"> </div>
                     <div class="confirmOrg" id="confirmOrg">
-                        <button class="btn btn-primary me-2" type="button" id="confirm" >Confirm</button>
+                        <button class="btn btn-primary me-2" type="button" id="confirm" onclick="tockHistory.confirmMove();">Confirm</button>
                     </div>
                     
                 </div>
