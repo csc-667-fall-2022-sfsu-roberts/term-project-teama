@@ -34,6 +34,7 @@ router.get("/show/:id", async function(req, res, next) {
             { name: "jStangle", avatar: 3 },
             { name: "rubySoho1998", avatar: 5 }
         ];
+        attributes.activePlayer = true;
         attributes.hands = [
             { location_id: -1, amount: 0 },
             { location_id: 0, amount: 5 },
@@ -76,6 +77,7 @@ router.get("/show/:id", async function(req, res, next) {
         attributes.players = req.players;
         attributes.gamePlayerId = req.user.gamePlayerId;
         attributes.curPlayerIndex = req.game.curPlayerIndex;
+        attributes.activePlayer = req.game.activePlayerIndex == req.game.curPlayerIndex;
         attributes.hands = await dbQuery.countHands(gameId);
         attributes.curHand = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
         attributes.marbles = await dbQuery.getMarbles(gameId);
@@ -149,6 +151,26 @@ router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
     }
 });
 
+/** API: /game/move
+*  req = {user_id, game_id, player_index, hand, card_used(card_id), moves(marble_id, from_spot_id, to_spot_id)}
+*/
+router.post("/move", function(req, res, next) {
+   console.log("Move reached");
+   let data = req.body;
+   console.log("Request Data: ");
+   console.log(data);
+   res.json({
+       code: 6,
+       message: "validator unfinished.",
+       user: req.user.id
+   })
+   // let validator = new Validator(req.body);
+   // let rs = validator.validate();
+   // if rs is -1,  error, cannot move
+   // rs = 0, move successful
+   // rs == others, card seven restDis curPlayer can move
+})
+
 router.param("id", async(req, res, next, id) => {
     try {
         if (id > 0) {
@@ -163,7 +185,8 @@ router.param("id", async(req, res, next, id) => {
                     id: id,
                     name: game.name,
                     state: game.state,
-                    isPlayer: false
+                    isPlayer: false,
+                    activePlayerIndex: game.turn
                 };
                 let gameusers = await dbQuery.findAllUsersByGameId(id);
                 req.players = [];

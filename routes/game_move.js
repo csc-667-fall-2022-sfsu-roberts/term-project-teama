@@ -2,6 +2,7 @@
  *  req = {user_id, game_id, player_index, hand, card_used(card_id), moves(marble_id, from_spot_id, to_spot_id)}
  */
 router.post("move", function (req, res, next) {
+    console.log("Move reached in game_move.js");
     let validator = new Validator(req.body);
     let rs = validator.validate();
     // if rs is -1,  error, cannot move

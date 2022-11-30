@@ -43,7 +43,8 @@
             {{#each marbles}}
             {id: {{this.id}}, player_index:{{this.player_index}}, current_spot: {{this.current_spot}} }, 
             {{/each}}
-        ]
+        ],
+        active: {{activePlayer}}
     };
 
 </script>
