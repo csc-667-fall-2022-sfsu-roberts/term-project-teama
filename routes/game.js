@@ -77,7 +77,7 @@ router.get("/show/:id", async function(req, res, next) {
         attributes.players = req.players;
         attributes.gamePlayerId = req.user.gamePlayerId;
         attributes.curPlayerIndex = req.game.curPlayerIndex;
-        attributes.activePlayer = req.game.activePlayerIndex == req.game.curPlayerIndex;
+        attributes.activePlayer = false;// req.game.activePlayerIndex == req.game.curPlayerIndex;
         attributes.hands = await dbQuery.countHands(gameId);
         attributes.curHand = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
         attributes.marbles = await dbQuery.getMarbles(gameId);

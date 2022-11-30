@@ -379,11 +379,12 @@ let cardText = [
     (suite) => { return "<p>King of " + suite + "s</p><p>Start a marble, or propel a marble you control 13 spaces.</p>"; },
 ];
 class CurrentHand {
-    constructor(data) {
+    constructor(data, active) {
         this.cards = data;
         this.selected = this.cards.length - 1;
         this.parent = document.getElementById("currentHand");
         this.text = document.getElementById("selectedCardText");
+        this.active = active;
     }
     loadHTML() {
         let handHTML = '<div class="hHand">\n';
@@ -391,13 +392,23 @@ class CurrentHand {
             let cardClasses = "tockCard ";
             cardClasses += card.category.toLocaleLowerCase() + " ";
             cardClasses += cardValueClasses[card.value] + " Card";
-            if (!card.valid) { cardClasses += 'Not'; }
-            cardClasses += 'Valid';
-            handHTML += '<div class="' + cardClasses + '" id="playerHand_' + (index + 1) + '" onclick="tockHistory.setSelectedCard(' + index + ');"></div>\n';
+            if (this.active){
+                if (!card.valid) { cardClasses += 'Not'; }
+                cardClasses += 'Valid';
+            }
+            handHTML += '<div class="' + cardClasses + '" id="playerHand_' + (index + 1) + '" ';
+            if (this.active){
+                handHTML += 'onclick="tockHistory.setSelectedCard(' + index + ');"';
+            }
+            handHTML += '></div>\n';
         });
         handHTML += "</div>\n";
         this.parent.innerHTML = handHTML;
-        this.text.innerHTML = cardText[this.cards[this.selected].value](this.cards[this.selected].category);
+        let curCardText = "Please wait for your turn.";
+        if (this.active) {
+            curCardText = cardText[this.cards[this.selected].value](this.cards[this.selected].category);
+        }
+        this.text.innerText = curCardText;
     }
     map(mapFunction) {
         for (let cardIndex = 0; cardIndex < this.cards.length; cardIndex++) {
@@ -1023,21 +1034,27 @@ class ConfirmHandler {
 class TockHistory {
     constructor(gameState) {
         this.gameState = gameState;
-        this.active = gameState.activePlayer;
+        this.active = gameState.active;
         this.hand = new CurrentHand(this.gameState.curHand);
         this.startBoard = new Board(this.gameState.numPlayers, this.gameState.curPlayer);
         this.confirm = new ConfirmHandler("confirm");
         this.parseMarbles();
         this.parseOpponents();
-        this.prepareStrategies();
+        if (this.active){
+            this.prepareStrategies();
+            if (this.canWaste) { this.setConfirm(); }
+        } 
         this.setSelectedCard(this.hand.selected);
-        if (this.canWaste) { this.setConfirm(); }
     }
     setSelectedCard(newSelection) {
         this.hand.select(newSelection);
         let newCard = this.hand.getSelected();
-        this.strategy = this.strategies[newCard.value];
-        this.currentBoard = this.strategy.currentBoard;
+        let newBoard = this.startBoard;
+        if (this.active) {
+            this.strategy = this.strategies[newCard.value];
+            newBoard = this.strategy.currentBoard;
+        }
+        this.currentBoard = newBoard;
         this.currentBoard.AttachDivs();
     }
     parseMarbles() {
