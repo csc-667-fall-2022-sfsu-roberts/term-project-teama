@@ -404,11 +404,11 @@ class CurrentHand {
         });
         handHTML += "</div>\n";
         this.parent.innerHTML = handHTML;
-        let curCardText = "Please wait for your turn.";
+        let curCardText = "<p>Please wait for your turn.</p>";
         if (this.active) {
             curCardText = cardText[this.cards[this.selected].value](this.cards[this.selected].category);
         }
-        this.text.innerText = curCardText;
+        this.text.innerHTML = curCardText;
     }
     map(mapFunction) {
         for (let cardIndex = 0; cardIndex < this.cards.length; cardIndex++) {
@@ -1035,7 +1035,7 @@ class TockHistory {
     constructor(gameState) {
         this.gameState = gameState;
         this.active = gameState.active;
-        this.hand = new CurrentHand(this.gameState.curHand);
+        this.hand = new CurrentHand(this.gameState.curHand, this.active);
         this.startBoard = new Board(this.gameState.numPlayers, this.gameState.curPlayer);
         this.confirm = new ConfirmHandler("confirm");
         this.parseMarbles();

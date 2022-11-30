@@ -239,7 +239,7 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     <a class="dropdown-item" href="/game/rules" target="_blank">Open Rules</a>
                     <a class="dropdown-item" href="#" id="cbSettingElement"></a>
-                    <a class="dropdown-item" href="#">Leave the Game</a>
+                    <a class="dropdown-item" href="/game/concede/{{gameId}}">Leave the Game</a>
                 </div>
             </div>
             <div class="card mt-2 mx-2" id="chat1" style="border-radius: 15px;">
@@ -303,58 +303,3 @@
         -->
     </div>
 </div>
-<!--
-{{> navbar}}
-<div class="container h-100 mt-1 test1">
-    <div class="row align-items-stretch test2">
-        <div class="col-md-9 test1" id="gameContainer">
-        </div>
-        <div class="col-md-3 d-flex flex-column justify-contents-end test2" id="chatContainer">
-            <div class="row chatDisplay test1">
-
-            </div>
-            <div class="row chatEntry mb-1 test3">
-                <input id="chatInput" class="col-xs-10" type="text" />
-                <input id="chatSend" class="tockBtn col-xs-2" type="button" value="Send">
-            </div>
-        </div>
-    </div>
-</div>
--->
-<!--
-
-<div class="container-fluid fillHeight">
-    <div class="row no-gutters fillHeight">
-        <div class="col-lg-10 gameContainer" id="gameContainer">
-
-        </div>
-        <div class="col-lg-2 d-flex flex-column justify-content-end chatContainer">
-            <div class="chatDisplay" id="chatDisplay">
-
-                <div class="chatMsg">
-                    <div class="chatMsgHeader">
-                        <div class="chat_avatar avatar_base"> </div>
-                        <div class="chat_userName name_player1">testUser1</div>
-                        <div class="chat_timeStamp">yesterday at 2:45pm</div>
-                    </div>
-                    <p>Message test right here: Blah blah blah, testing, 1, 2, and... yup! You are confirmed to be awesome!</p>
-                </div>
-
-                <div class="chatMsgSys">
-                    <p>testUser1 left the game!</p>
-                </div>
-
-                <div class="chatMsgSys">
-                    <p>The game has been canceled due to no current players.</p>
-                </div>
-
-            </div>
-            <div class="chatEntry">
-                <input id="chatInput" class="col-xs-10" type="text" />
-                <input id="chatSend" class="tockBtn col-xs-2" type="button" value="Send">
-            </div>
-        </div>
-    </div>
-</div>
-
--->
