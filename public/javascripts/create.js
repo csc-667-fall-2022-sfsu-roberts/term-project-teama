@@ -31,8 +31,8 @@ socket.on('creator-info', user => {
                     let { user, gameid } = json;
                     socket.emit('new-game-created', { user, gameid, gamename });
                     setTimeout(function() {
-                        window.location.href = `/game/created/${gameid}`;
-                    }, 1000)
+                        window.location.href = `/lobby`;
+                    }, 500)
                 }
             })
             .catch(error => {

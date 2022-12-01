@@ -1,6 +1,6 @@
 const { DatabaseError } = require("sequelize");
 const dbQuery = require("../db/dbquery");
-const wasteValidator = require("boardLogic");
+const wasteValidator = require("./boardLogic");
 
 let MoveType = {
     Start: 0,

@@ -1,10 +1,12 @@
 const socket = io();
 
+const tBodyEnGames = document.getElementById('en-game')
 const tBodyNotEnGames = document.getElementById('no-en-game');
 const tBodyStartedGames = document.getElementById('started-game');
 const tBodyFullGames = document.getElementById("full-game");
 const chatForm = document.getElementById('chat-form');
 const chatMessages = document.querySelector('.chat-message');
+let curUserID;
 
 socket.emit('login');
 
@@ -68,98 +70,58 @@ socket.on("connect", () => {
     console.log("lobby user socket id", id)
 })
 
-/* join/quit/start => users in lobby refresh lobby page */
-socket.on('lobby-add-new-game', data => {
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
+socket.on('userInfo', user => {
+    curUserID = user.userid;
+    console.log("userInfo", user);
 })
 
-socket.on('lobby-join-new-game', ({ gameid, playerNumber }) => {
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
-})
-
-socket.on('lobby-delete-game', gameid => {
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
-})
-
-socket.on('lobby-quit-game', ({ gameid, playerNumber }) => {
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
-})
-
-socket.on('play-game', gameid => {
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
-})
-
-function joinBtn(gameid) {
-    console.log(socket.id, 'wants to join game', gameid);
-    socket.emit('join-game', gameid);
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
-}
-
-function quitBtn(gameid) {
-    console.log(socket.id, 'wants to quit game', gameid);
-    socket.emit('quit-game', gameid);
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
-}
-
-function startBtn(gameid) {
-    console.log(socket.id, 'wants to start game', gameid);
-    socket.emit('start-game', gameid);
-}
-
-/*
-// join/quit/start => refresh sender lobby page, others in lobby update game info
+// join/quit/start => update game info in lobby page dynamically
 socket.on('lobby-add-new-game', data => {
     addRowToNotEnGame(data);
 })
 
-socket.on('lobby-join-new-game', ({ gameid, playerNumber }) => {
-    // if game full, not engaged user(move game row to full games list), enuser(playernumber, new startbtn)
-    console.log('join-game', playerNumber)
-    if (playerNumber == 4) {
-        // notEnUser(delete no-en-game row, add fullgame row)
-        console.log('game full, update not-en-game-info')
+socket.on('lobby-join-new-game', (data) => {
+    let { gameid, playerNumber, reqUser } = data;
+    // socket is req user => move from not-en to en
+    if (curUserID == reqUser) {
         document.querySelectorAll(".not-en-game-info").forEach(row => {
+            if (row.dataset.gameid == gameid) {
+                console.log('JOIN ,move from not-en to en', gameid);
+                row.remove();
+                addRowToEnGame(data);
+            }
+        })
+    } else {
+        // if game full, not engaged user(move game row to full games list), enuser(playernumber, new startbtn)
+        console.log('join-game', playerNumber)
+        if (playerNumber == 4) {
+            // notEnUser(delete no-en-game row, add fullgame row)
+            console.log('game full, update not-en-game-info')
+            document.querySelectorAll(".not-en-game-info").forEach(row => {
                 if (row.dataset.gameid == gameid) {
                     row.remove();
-                    let data = {
-                        gameid: gameid,
-                        gamename: row.dataset.gamename,
-                    }
                     addRowToFullGame(data);
                 }
             })
             // user in this game => change playernumber, add start button(only creator)
-        socket.emit('get-current-user', gameid);
-    } else {
-        // if game not full, same gameid(update playernumber)
-        document.querySelectorAll("#game-info").forEach(row => {
-            let id = row.dataset.gameid;
-            console.log('join, not full gameid:', id)
-            if (id == gameid) {
-                console.log('update playernum:', id, row)
-                let pNum = row.cells[1];
-                pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
-            }
-        })
+            socket.emit('get-current-user', gameid);
+        } else {
+            // if game not full, same gameid(update playernumber)
+            document.querySelectorAll("#game-info").forEach(row => {
+                let id = row.dataset.gameid;
+                console.log('join, not full gameid:', id)
+                if (id == gameid) {
+                    console.log('update playernum:', id, row)
+                    let pNum = row.cells[1];
+                    pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
+                }
+            })
+        }
     }
+
 })
 
 socket.on('start-game', ({ gameid, userid, creator, playerNumber }) => {
-    console.log('add startBTN', userid, creator)
     document.querySelectorAll(".engaged-game-info").forEach(row => {
         if (row.dataset.gameid == gameid) {
             let pNum = row.cells[1];
@@ -167,7 +129,7 @@ socket.on('start-game', ({ gameid, userid, creator, playerNumber }) => {
             // if is creator, add start 
             if (userid == creator) {
                 let startBtn = row.insertCell(4);
-                startBtn.innerHTML = `<a href="#" class="btn btn-primary my-3" role="button"
+                startBtn.innerHTML = `<a href="/game/show/${gameid}" target="_blank" class="btn btn-primary my-3" role="button"
     id="start-game-btn" onclick="return startBtn(${gameid})">Start</a>`;
             }
         }
@@ -178,7 +140,6 @@ socket.on('start-game', ({ gameid, userid, creator, playerNumber }) => {
 socket.on('lobby-delete-game', gameid => {
     document.querySelectorAll("#game-info").forEach(row => {
         let id = row.dataset.gameid;
-        console.log('delete game', gameid, 'row id', id)
         if (id == gameid) {
             console.log('deleted gameid', id)
             row.remove();
@@ -186,34 +147,21 @@ socket.on('lobby-delete-game', gameid => {
     })
 })
 
-// if playerNumber from 4 to 3, move game row from fullgame to not game
-socket.on('lobby-quit-game', ({ gameid, playerNumber }) => {
+socket.on('lobby-quit-game', (data) => {
+    let { gameid, playerNumber, reqUser } = data;
     console.log('quit game playernum', playerNumber);
     // playernumber==3, notEnUser(fullgame delete row, not-en-game add row) 
     if (playerNumber == 3) {
-        console.log('quit full game')
         document.querySelectorAll(".full-game-info").forEach(row => {
-                let id = row.dataset.gameid;
-                // console.log('delete full game', gameid, 'row id', id)
-                if (id == gameid) {
-                    console.log('deleted full gameid', id);
-                    row.remove();
-                    row.remove();
-                    row.remove();
-                    let data = {
-                        gameid: id,
-                        gamename: row.dataset.gamename,
-                        playerNumber: 3
-                    };
-                    addRowToNotEnGame(data);
-                    addRowToNotEnGame(data);
-                    addRowToNotEnGame(data);
-                }
-            })
-            // enUser(update playernum, delete startBtn)
+            if (row.dataset.gameid == gameid) {
+                console.log('deleted full gameid', gameid);
+                row.remove();
+                addRowToNotEnGame(data);
+            }
+        })
+        // enUser(update playernum, delete startBtn)
         document.querySelectorAll(".engaged-game-info").forEach(row => {
-            let id = row.dataset.gameid;
-            if (id == gameid) {
+            if (row.dataset.gameid == gameid) {
                 let pNum = row.cells[1];
                 console.log('lobby-quit-game', pNum)
                 pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
@@ -222,16 +170,26 @@ socket.on('lobby-quit-game', ({ gameid, playerNumber }) => {
                 }
             }
         })
-    } else {
-        // not full, only change player number
-        document.querySelectorAll("#game-info").forEach(row => {
-            let id = row.dataset.gameid;
-            if (id == gameid) {
-                let pNum = row.cells[1];
-                console.log('lobby-quit-game', pNum)
-                pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
-            }
-        })
+    } else {            
+        // socket is reqUser => move game from en to not-en; others update palyernumber
+        if (curUserID == reqUser) {
+            document.querySelectorAll(".engaged-game-info").forEach(row => {
+                if (row.dataset.gameid == gameid) {
+                    console.log('QUIT, requser move from en to not-en', gameid);
+                    row.remove();
+                    addRowToNotEnGame(data);
+                }
+            })
+        } else {
+            document.querySelectorAll("#game-info").forEach(row => {
+                if (row.dataset.gameid == gameid) {
+                    let pNum = row.cells[1];
+                    console.log('lobby-quit-game', pNum);
+                    pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
+                }
+            })
+        }
+
     }
 })
 
@@ -240,20 +198,37 @@ socket.on('play-game', gameid => {
     document.querySelectorAll(".engaged-game-info").forEach(row => {
         let gamename = row.dataset.gamename
         let id = row.dataset.gameid;
-        console.log('row gameid', id, 'gameid', gameid);
         if (id == gameid) {
-            row.remove();
             console.log('update started game', gameid)
             let data = {
                 gameid: gameid,
                 gamename: gamename
             }
+            row.remove();
             addRowToStartedGame(data);
         }
     })
 })
 
+/**  
+     * data = {
+     * gamename,
+     * gameid, 
+     * playerNumber:
+     * players=[id, username, avatar],
+     * reqUser }
+     */
+function viewGameDetailHTML(data) {
+    let { gameid, gamename, players, playerNumber } = data;
+    let html = `<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+    id="viewGameDetails" data-bs-target="#gameDetails">
+    View Game Details
+    </button>`;
+    return html;
+}
+
 function addRowToFullGame(data) {
+    console.log('addRowToFullGame', data);
     let { gameid, gamename } = data;
     let newRow = tBodyFullGames.insertRow(0);
     newRow.setAttribute("id", "game-info");
@@ -263,11 +238,11 @@ function addRowToFullGame(data) {
     let cell1 = newRow.insertCell(0);
     let cell2 = newRow.insertCell(1);
     cell1.innerHTML = `<p id="game-name" data-gameid="${gameid}"> ${gamename}: </p>`;
-    cell2.innerHTML = `<a href="/game/created/${gameid}" class="btn btn-primary my-3" role="button"
-                id="view-game-btn" data-gameid="${gameid}">View</a>`;
+    cell2.innerHTML = viewGameDetailHTML(data);
 }
 
 function addRowToNotEnGame(data) {
+    console.log('addRowToNotEnGame', data)
     let row = tBodyNotEnGames.insertRow(0);
     row.setAttribute("id", "game-info");
     row.setAttribute("class", "not-en-game-info");
@@ -279,16 +254,15 @@ function addRowToNotEnGame(data) {
     let cell4 = row.insertCell(3);
     cell1.innerHTML = `<p id="game-name"> ${data.gamename}: </p>`;
     cell2.innerHTML = `<p id="player-number"> ${data.playerNumber}/4 </p>`;
-    cell3.innerHTML = `<a href="#" class="btn btn-primary my-3" role="button"
-    id="join-game-btn" onclick="return joinBtn(${data.gameid})">Join</a>`;
-    cell4.innerHTML = `<a href="/game/created/${data.gameid}" class="btn btn-primary my-3" role="button"
-    id="view-game-btn">View</a>`;
+    cell3.innerHTML = viewGameDetailHTML(data);
+    cell4.innerHTML = `<button type="button" class="btn btn-primary" id="join-game-btn"
+    onclick="return joinBtn(${data.gameid})">Join</button>`
 }
 
 function addRowToStartedGame(data) {
     let row = tBodyStartedGames.insertRow(0);
     row.setAttribute("id", "game-info");
-    row.setAttribute("class", "not-en-game-info");
+    row.setAttribute("class", "engaged-game-info");
     row.setAttribute("data-gameid", `${data.gameid}`)
     row.setAttribute("data-gamename", `${data.gamename}`);
     let cell1 = row.insertCell(0);
@@ -296,9 +270,75 @@ function addRowToStartedGame(data) {
     let cell3 = row.insertCell(2);
     cell1.innerHTML = `<p id="game-name"> ${data.gamename}: </p>`;
     cell2.innerHTML = `<p id="player-number"> 4/4 </p>`;
-    cell3.innerHTML = `<a href="/game/show/${data.gameid}" class="btn btn-primary my-3" role="button"
+    cell3.innerHTML = `<a href="/game/show/${data.gameid}" target="_blank" class="btn btn-primary my-3" role="button"
     id="view-game-btn">View</a>`;
 }
+
+function addRowToEnGame(data) {
+    console.log('addRowToEnGame', data, data.players)
+    let row = tBodyEnGames.insertRow(0);
+    row.setAttribute("id", "game-info");
+    row.setAttribute("class", "engaged-game-info");
+    row.setAttribute("data-gameid", `${data.gameid}`)
+    row.setAttribute("data-gamename", `${data.gamename}`);
+    let cell1 = row.insertCell(0);
+    let cell2 = row.insertCell(1);
+    let cell3 = row.insertCell(2);
+    let cell4 = row.insertCell(3);
+    cell1.innerHTML = `<p id="game-name"> ${data.gamename}: </p>`;
+    cell2.innerHTML = `<p id="player-number"> ${data.playerNumber}/4 </p>`;
+    cell3.innerHTML = viewGameDetailHTML(data);
+    cell4.innerHTML = `<button type="button" class="btn btn-primary" id="quit-game-btn"
+    onclick="return quitBtn(${data.gameid})">Quit</button>`;
+}
+
+function joinBtn(gameid) {
+    console.log(curUserID, 'wants to join game', gameid);
+    socket.emit('join-game', gameid);
+}
+
+function quitBtn(gameid) {
+    console.log(curUserID, 'wants to quit game', gameid);
+    socket.emit('quit-game', gameid);
+}
+
+function startBtn(gameid) {
+    console.log(socket.id, 'wants to start game', gameid);
+    socket.emit('start-game', gameid);
+}
+
+
+/* join/quit/start => users in lobby refresh lobby page */
+/*
+socket.on('lobby-add-new-game', data => {
+    setTimeout(function() {
+        window.location.href = `/lobby`;
+    }, 500)
+})
+
+socket.on('lobby-join-new-game', ({ gameid, playerNumber }) => {
+    setTimeout(function() {
+        window.location.href = `/lobby`;
+    }, 500)
+})
+
+socket.on('lobby-delete-game', gameid => {
+    setTimeout(function() {
+        window.location.href = `/lobby`;
+    }, 500)
+})
+
+socket.on('lobby-quit-game', ({ gameid, playerNumber }) => {
+    setTimeout(function() {
+        window.location.href = `/lobby`;
+    }, 500)
+})
+
+socket.on('play-game', gameid => {
+    setTimeout(function() {
+        window.location.href = `/lobby`;
+    }, 500)
+})
 
 function joinBtn(gameid) {
     console.log(socket.id, 'wants to join game', gameid);
@@ -319,8 +359,5 @@ function quitBtn(gameid) {
 function startBtn(gameid) {
     console.log(socket.id, 'wants to start game', gameid);
     socket.emit('start-game', gameid);
-    setTimeout(function() {
-        window.location.href = `/lobby`;
-    }, 500)
 }
 */

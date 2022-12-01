@@ -218,7 +218,7 @@ router.param("id", async(req, res, next, id) => {
                     if (currentUser === userinfo.id) {
                         req.game.isPlayer = true;
                         req.game.curPlayerIndex = gameusers[i].player_index;
-                        req.user.gamePlayerId = gameusers[1].id;
+                        req.user.gamePlayerId = gameusers[i].id;
                     }
                     req.players[i] = {
                         id: userinfo.id,
