@@ -3,6 +3,7 @@ const router = express.Router();
 const dbQuery = require("../db/dbquery");
 const { notLoggedInUser } = require('../config/authenticated');
 const { request } = require("express");
+const { validator } = require("../models/validator");
 /* Game */
 
 /* PAGE: /game/:id */
@@ -167,6 +168,8 @@ router.post("/move", function(req, res, next) {
    let data = req.body;
    console.log("Request Data: ");
    console.log(data);
+   validator.loadData(req.body, req.user.id);
+   validator.test();
    res.json({
        code: 6,
        message: "validator unfinished.",
