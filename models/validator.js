@@ -51,7 +51,7 @@ class Validator {
                 movementType: moveData.type
             });
         });
-        this.truth.user_id = user_id;
+        this.truth = {user_id: user_id};
     }
 
     test() { console.log("validator reached."); }
