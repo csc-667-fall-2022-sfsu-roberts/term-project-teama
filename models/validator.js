@@ -112,8 +112,8 @@ class Validator {
     }
 
     async retrieveGameTruth() {
-        this.truth.cards = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
-        this.truth.marbles = await dbQuery.getMarbles(gameId);
+        this.truth.cards = await dbQuery.getHand(this.truth.game_id, req.game.curPlayerIndex);
+        this.truth.marbles = await dbQuery.getMarbles(this.truth.game_id);
         console.log("Validation: retrieved hand and marbles");
     }
 
