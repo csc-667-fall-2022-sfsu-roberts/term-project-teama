@@ -342,11 +342,27 @@ const handCards = (player_index) => {
 };
 
 const marblePlayerId = (game_id, spot_id) => {
-    return db.one('SELECT id, player_id, marble_index from marbles WHERE game_id=${game_id} AND spot_id=${spot_id}', {spot_id, game_id});
+    return db.any('SELECT id, player_id, marble_index from marbles WHERE game_id=${game_id} AND spot_id=${spot_id}', {spot_id, game_id});
 };
 
-const updateMarbles = (id, spot_id) => {
-    return db.one('UPDATE marbles SET spot_id=${spot_id} WHERE id=${id}', {spot_id, id});
+const updateMarbles = (marble_id, spot_id) => {
+    return db.one('UPDATE marbles SET spot_id=${spot_id} WHERE id=${id}', {spot_id, marble_id});
+};
+
+const marblePlayerIndex = (game_id, marble_id) => {
+    return db.one('SELECT player_index, marble_index FROM ((SELECT game_id, player_id, marble_index FROM marbles WHERE game_id=${game_id} and id=${marble_id}) AS m INNER JOIN game_players gp ON m.game_id=gp.game_id AND m.player_id=gp.player_id) AS rs', {game_id, marble_id})
+};
+
+const discardGameCards = (id) => {
+    return db.one('UPDATE game_cards SET location_id = -1 WHERE id=${id}', {id});
+};
+
+const updateGameTurn = (game_id, player_index) => {
+    return db.one('UPDATE games SET turn=${player_index} WHERE game_id=${game_id}', {player_index, game_id});
+};
+
+const getANewCard = (game_id, player_index) => {
+    return db.one('UPDATE game_cards SET location_id=${player_index} WHERE id IN (SELECT id FROM game_cards WHERE location_id = 18 AND game_id = ${ game_id } ORDER BY index ASC FETCH FIRST 1 ROWS ONLY) RETURNING card_id', {player_index, game_id});
 };
 
 module.exports = {
@@ -385,5 +401,9 @@ module.exports = {
     marblePlayerId,
     updateMarbles,
     setPlayerAsConceded,
-    endGameByConcession
+    endGameByConcession,
+    marblePlayerIndex,
+    discardGameCards,
+    updateGameTurn,
+    getANewCard
 };

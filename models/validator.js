@@ -23,7 +23,7 @@ class Validator {
         this.isValid = false;
     }
 
-    loadData(data, user_id){
+    loadData(data, user_id) {
         this.valid = false;
         this.submission = {
             user_id: data.user_id,
@@ -37,13 +37,13 @@ class Validator {
             moves: [],
             hand: []
         };
-        data.hand.forEach((cardData, index)=>{
+        data.hand.forEach((cardData, index) => {
             this.submission.hand.push({
                 game_cards_id: cardData.id,
                 hand_index: cardData.index
             });
         });
-        data.moves.forEach((moveData, index)=>{
+        data.moves.forEach((moveData, index) => {
             this.submission.moves.push({
                 marble_id: moveData.marble_id,
                 from_spot_id: moveData.from_spot_id,
@@ -54,34 +54,34 @@ class Validator {
         this.truth.user_id = user_id;
     }
 
-    test() { console.log ("validator reached.");}
+    test() { console.log("validator reached."); }
 
-    async validateAccess(){
-        if (this.truth.user_id === this.submission.user_id){
+    async validateAccess() {
+        if (this.truth.user_id === this.submission.user_id) {
             console.log("Validation: valid user_id");
             this.truth.game = await dbQuery.findGamesByGameId(this.submission.game_id);
-            if (this.truth.game){
+            if (this.truth.game) {
                 this.truth.game_id = this.submission.game_id;
                 console.log("Validation: valid game_id");
                 this.truth.game_player = await dbQuery.findGamePlayer(this.truth.game_id, this.truth.user_id);
                 if (this.truth.game_player) {
                     this.truth.player_index = this.truth.game_player.player_index;
-                    if (this.truth.player_index === this.truth.game.turn){
+                    if (this.truth.player_index === this.truth.game.turn) {
                         console.log("Validation: valid player_index");
                         this.retrieveGameTruth();
                         let handIsValid = true;
-                        this.submission.hand.forEach((card)=>{
+                        this.submission.hand.forEach((card) => {
                             let isValidCard = false;
-                            this.truth.cards.forEach((actualCard)=>{
-                                if (card.game_cards_id === actualCard.id){
+                            this.truth.cards.forEach((actualCard) => {
+                                if (card.game_cards_id === actualCard.id) {
                                     isValidCard = true;
                                 }
                             });
                             handIsValid = handIsValid && isValidCard;
                         });
                         let currentCardIsValid = false;
-                        this.truth.cards.forEach((card)=>{
-                            if (card.id === this.submission.card_used.game_cards_id){
+                        this.truth.cards.forEach((card) => {
+                            if (card.id === this.submission.card_used.game_cards_id) {
                                 this.truth.card_used = card;
                                 currentCardIsValid = true;
                             }
@@ -90,16 +90,16 @@ class Validator {
                         if (handIsValid) {
                             console.log("Validation: valid cards");
                             let marbleIDs = [];
-                            this.truth.marbles.forEach((marble)=>{
+                            this.truth.marbles.forEach((marble) => {
                                 marbleIDs[marble.id] = true;
                             });
                             let movedMarblesAreValid = true;
-                            this.submission.moves.forEach((move)=>{
-                                if (marbleIDs[move.marble_id] !== true){
+                            this.submission.moves.forEach((move) => {
+                                if (marbleIDs[move.marble_id] !== true) {
                                     movedMarblesAreValid = false;
                                 }
                             });
-                            if (movedMarblesAreValid){
+                            if (movedMarblesAreValid) {
                                 console.log("Validation: valid marbles");
                                 return true;
                             }
@@ -111,198 +111,302 @@ class Validator {
         return false;
     }
 
-    async retrieveGameTruth(){        
+    async retrieveGameTruth() {
         this.truth.cards = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
         this.truth.marbles = await dbQuery.getMarbles(gameId);
         console.log("Validation: retrieved hand and marbles");
     }
 
-    async validate() {
-        if (this.validateAccess()){
-            /** card_id find card value => check if it has special func */
-            let card_id = this.submission.card_used.card_id;
-            let from_spot_id = this.submission.moves[0].from_spot_id;
-            let to_spot_id = this.submission.moves[0].to_spot_id;
-            let marble_id = this.submission.moves[0].marble_id;
+    /** response = {
+     * status(0: success, 1: fail),
+     * current_player_index,
+     * seven_rest_dis (only for card 7),
+     * new_card_id (only for joker)
+     * } */
+    validate() {
+        console.log('validate reached')
+        if (this.validateAccess())
+         {
+            console.log('validate access succeed.')
+            let response = {
+                current_player_index: this.submission.player_index,
+            }
+
+            let card_id = this.submission.card_used.cards_id;
+            let moves = this.submission.moves;
             if (card_id > 52) {
-                joker();
+                this.joker(response);
             } else {
                 let card_value = card_id % 13;
                 if (card_value === 0) {
                     card_value += 13;
                 }
+                console.log('card value', card_value);
                 if (card_value === 13 || card_value === 1) {
-                    /** card = A/K
-                     *  1. special fun: move to startSpot(to_spot_id==board_1st; from_spot_id==start_area)
-                     *  2. normal func: move forward (from_spot_id == board_id) 
-                     * */
-                    if (this.isStartArea(from_spot_id)) {
-                        this.startEvent(to_spot_id, marble_id);
+                    if (moves[0].movementType === 0) {
+                        this.startEvent(moves, card_value, response);
+                    } else if (moves[0].movementType === 1) {
+                        this.moveForward(moves, card_value, response);
                     } else {
-                        this.moveForward(from_spot_id, to_spot_id, marble_id, card_value);
+                        return -1;
                     }
-                } else if (card_value === 7) {
+                } else if (card_value === 4) {
+                    if (moves[0].movementType === 1) {
+                        this.moveBackward(moves, card_value, response);
+                    }
+                    return -1;
+                }
+                else if (card_value === 7) {
                     // card = 7, can seperate move
-                    this.sevenEvent(from_spot_id, to_spot_id, marble_id);
+                    if (moves[0].movementType === 1) {
+                        this.sevenEvent(moves, response);
+                    }
+                    return -1;
                 } else if (card_value == 11) {
                     // card = J, switch cards with others marble on board
-                    this.switchMarbles(from_spot_id, to_spot_id, marble_id);
+                    this.switchMarbles(this.submission.moves, response);
                 } else {
-                    this.moveForward(from_spot_id, to_spot_id, marble_id, card_value);
+                    if (moves[0].movementType === 1) {
+                        this.moveForward(moves, card_value, response);
+                    }
+                    return -1;
                 }
             }
-        }   
-    }
-
-    async startEvent(to_spot_id, marble_id) {
-        /** move marble_id to to_spot_id if there is empty */
-        let rs = await dbQuery.marblePlayerId(this.submission.game_id, to_spot_id);
-        if (!rs) {
-            dbQuery.updateMarbles(marble_id, to_spot_id);
-            return 0;
-        } else {
-            // error, start spot was occupied by other marble
-            return -1;
         }
     }
 
-    async switchMarbles(from_spot_id, to_spot_id, marble_id) {
-        let toSpotMarble = await this.switchMarbleId(to_spot_id);
-        if (toSpotMarble && toSpotMarble.player_id != user_id) {
-            let toSpotMarbleId = toSpotMarble.id;
-            dbQuery.updateMarbles(marble_id, to_spot_id);
-            dbQuery.updateMarbles(toSpotMarbleId, from_spot_id);
-            return 0;
-        } else {
-            // error, cur_player own marble cannot switch
-            return -1;
+    joker(response) {
+        console.log('joker event reached.')
+        let card_value = 15;
+        /** 1. same as start, but card value== 15 */
+        if (moves[0].movementType === 0) {
+            this.startEvent(this.submission.moves, card_value, response);
+        } else if (moves[0].movementType === 1) {
+            this.moveForward(this.submission.moves, card_value, response);
         }
     }
 
-    isStartArea(spot_id) {
-        if ((this.submission.player_index + 1) * 1 <= spot_id <= (this.submission.player_index + 1) * 4) {
+    startEvent(moves, card_value, response) {
+        console.log('start event reached.')
+
+        /** 1. length=1, [0]start
+         *  2. length=2, [0]start+ [1]tock
+         */
+        if (moves.length === 1) {
+            if (moves[0].movementType === 0) {
+                return this.startEventDB(moves, card_value, response);
+            }
+        }
+        if (moves.length === 2) {
+            if (moves[0].movementType === 0 && moves[1].movementType === 2) {
+                return this.startEventDB(moves, card_value, response);
+            }
+        }
+        return this.errorResponse(response);
+    }
+
+    startEventDB(moves, card_value, response) {
+        this.updateMarbles(moves);
+        this.discardGameCards();
+        if (card_value === 15) {
+            /** 0. give user one more card
+             *  1. curPlayer still this player
+             */
+            let card_id = this.drawACard();
+            response.new_card_id = card_id;
+            response.status = 0;
+        } else {
+            let next_player_index = this.updateCurPlayerIndex();
+            response.current_player_index = next_player_index;
+            // update current player to next player
+        }
+        return response;
+    }
+
+    moveForward(moves, card_value, response) {
+        console.log('move forward event reached.')
+
+        /** 1. [0] propel \/
+         *  2.  dis == card_value
+         *  3. length == 1, move
+         *  4. length == 2, [1] tock => move
+         */
+        if (moves[0].to_spot_id > 16) {
+            if (moves[0].to_spot_id > 32) {
+                let validSpotID = this.spotOfValidDis(moves[0].from_spot_id, card_value, 0);
+                if (moves[0].to_spot_id === validSpotID) {
+                    if (moves.length === 1) {
+                        return this.normalEventDB(moves, response);
+                    }
+                    if (moves.length === 2 && moves[1].movementType === 2) {
+                        return this.normalEventDB(moves, response);
+                    }
+                }
+            } else {
+                // to_spot_id is home area, valid dis
+                if (moves.length === 1) {
+                    if (this.isHomeArea(moves[0].to_spot_id)) {
+                        if (this.validHomeBoardDis(moves[0].from_spot_id, moves[0].to_spot_id, card_value)) {
+                            return this.normalEventDB(moves, response);
+                        }
+                    }
+                }
+            }
+        }
+        return this.errorResponse(response);
+    }
+
+    normalEventDB(moves, response) {
+        this.updateMarbles(moves);
+        this.discardGameCards();
+        let next_player_index = this.updateCurPlayerIndex();
+        response.current_player_index = next_player_index;
+        response.status = 0;
+        return response;
+    }
+
+    moveBackward(moves, card_value, response) {
+        console.log('move backward event reached.')
+
+        /** 0. propel => on board
+         *  1. valid distance => length=1, move; length==2, [1]tock move
+         */
+        let validSpotID = this.spotOfValidDis(moves[0].from_spot_id, card_value, 0);
+        if (moves[0].to_spot_id === validSpotID) {
+            if (moves.length === 1) {
+                return this.normalEventDB(moves, response);
+            }
+            if (moves.length === 2) {
+                if (moves[1].movementType === 2) {
+                    return this.normalEventDB(moves, response);
+                }
+            }
+        }
+        return this.errorResponse(response);
+    }
+
+    sevenEvent(moves, response) {
+        console.log('seven event reached.')
+
+        let dis = -1;
+        if (moves[0].from_spot_id > 32) {
+            if (moves[0].to_spot_id > 32) {
+                // to_spot_id is on board
+                dis = moves[0].to_spot_id - moves[0].from_spot_id;
+            }
+            if (moves[0].to_spot_id > 16) {
+                // to_spot_id is home-area
+                dis = this.homeBoardDis(moves[0].from_spot_id, moves[0].to_spot_id);
+            }
+        }
+        if (0 < dis < 7) {
+            restDis = 7 - dis;
+            if (this.validSevenMove(moves)) {
+                // curPlayer not change, card not discard, card_value === restDis
+                this.updateMarbles(moves);
+                response.status = 0;
+                response.seven_rest_dis = restDis;
+                return response;
+            } else {
+                return this.errorResponse(response);
+            }
+        }
+        if (dis === 7) {
+            if (this.validSevenMove(moves)) {
+                return this.normalEventDB(moves, response);
+            } else {
+                return this.errorResponse(response);
+            }
+        }
+    }
+
+    switchMarbles(moves) {
+        console.log('switch event reached.')
+
+        /** moves length ==2, all switch type */
+        if (moves.length === 2 && moves[0].movementType === 3 && moves[0].movementType === 3) {
+            this.normalEventDB(moves, response);
+        }
+        return this.errorResponse(response);
+    }
+
+    errorResponse(response){
+        response.status = -1;
+        return response;
+    }
+
+    updateMarbles() {
+        for (let i = 0; i < moves.length; i++) {
+            dbQuery.updateMarbles(moves[i].marble_id, moves[i].to_spot_id);
+        }
+    }
+
+    discardGameCards() {
+        dbQuery.discardGameCards(this.submission.card_used.game_cards_id);
+    }
+
+    updateCurPlayerIndex() {
+        // find next player, update db games.turn to next player_id
+        // return playerIndex****
+        /** curplayer index + 1 next player index, if > 3 nextIndex == result - 3 */
+        let nextPlayerIndex = this.submission.player_index + 1;
+        if (nextPlayerIndex > 3) {
+            nextPlayerIndex = nextPlayerIndex - 4;
+        }
+        dbQuery.updateGameTurn(this.submission.game_id, nextPlayerIndex);
+        return nextPlayerIndex;
+    }
+
+    async drawACard() {
+        let card = await dbQuery.getANewCard(this, this.submission.game_id, this.submission.player_index);
+        console.log('joker, draw new card-id', card.card_id);
+        return card.card_id;
+    }
+
+    spotOfValidDis(spot_id, card_value, type) {
+        let validSpot;
+        if (type === 0) {
+            // forward, to - from + 1 = card
+            validSpot = spot_id + card_value - 1;
+        }
+        if (type === 1) {
+            // back, from - to + 1 = card
+            validSpot = spot_id - card_value + 1;
+        }
+
+        if (validSpot < 33) {
+            validSpot = validSpot - 33 + 104;
+        }
+        if (validSpot > 104) {
+            validSpot = validSpot - 104 + 33;
+        }
+        return validSpot;
+    }
+
+    isHomeArea(spot_id) {
+        let player_index = this.submission.player_index;
+        if (player_index + 17 <= spot_id <= player_index + 20) {
             return true;
         }
         return false;
     }
 
-    // return to_spot_id marble id
-    async switchMarbleId(spot_id) {
-        // 1st: check if this is at the board and not start spot
-        if (spot_id > 32 && spot_id != 33 && spot_id != 51 && spot_id != 69 && spot_id != 87) {
-            // marbles table find marble with spot_id
-            let rs = await dbQuery.marblePlayerId(this.submission.game_id, spot_id);
-            return rs;
+    validHomeBoardDis(from_spot_id, to_spot_id, card_value) {
+        let dis = this.homeBoardDis(from_spot_id, to_spot_id);
+        if (dis === card_value) {
+            return true;
         }
-    }
-
-    async sevenEvent(from_spot_id, to_spot_id, marble_id) {
-        let dis;
-        if (from_spot_id > 32) {
-            if (to_spot_id > 16) {
-                dis = this.homeBoardDis(from_spot_id, to_spot_id);
-            } else if (to_spot_id > 32) {
-                dis = to_spot_id - from_spot_id;
-            } else {
-                dis = -1;
-            }
+        return false;
+        /*
+        if (base * 18 + 33 <= from_spot_id <= base * 18 + 50) {   
         }
-        if (0 < dis <= 7) {
-            // not discard card7, select another marble to move
-            restDis = 7 - dis;
-            dbQuery.updateMarbles(marble_id, to_spot_id);
-            if (restDis > 0) {
-                return restDis;
-            } else {
-                // discard this card, next player move
-                return 0;
-            }
-        } else {
-            // error, dis > valid
-            return -1;
-        }
-    }
-
-    async moveForward(from_spot_id, to_spot_id, marble_id, card_value) {
-        /** to_spot_id occupied by others, move others marble back to start_area
-         *  1. to_spot_id > 32: board_area, dis = to - from
-         *  2. to_spot_id > 16: home_area
-         */
-        if (to_spot_id > 16) {
-            let rs = dbQuery.marblePlayerId(this.submission.game_id, this.submission.spot_id);
-            if (to_spot_id > 32) {
-                let dis = to_spot_id - from_spot_id;
-                if (dis === card_value) {
-                    if (rs) {
-                        if (rs.player_id != this.submission.user_id) {
-                            // if to_spot being occupied by others marble, to_spot marble return to start_area
-                            let toSpotMarble = {
-                                marble_id: rs.id,
-                                player_id: rs.player_id,
-                                marble_index: rs.marble_index
-                            }
-                            /** to_spot_id occupied by other player
-                             * 1st: get to_spot_id player_index, marble_index
-                             * 2nd: move this marble back to home (home_spot_id = player_index * 4 + marble_index) 
-                             * 3th: move curPlayer marble
-                             * 4rd: from_end update
-                             **/
-                            let game_player = await dbQuery.findGamePlayer(this.submission.game_id, toSpotMarble.player_id);
-                            let home_spot_id = (game_player.player_index + 1) * 4 + toSpotMarble.marble_index;
-                            dbQuery.updateMarbles(toSpotMarble.marble_id, home_spot_id);
-                            dbQuery.updateMarbles(marble_id, to_spot_id);
-                            return 0;
-                        } else {
-                            // error, to_spot_id is curplayer's marble, cannot move
-                            return -1;
-                        }
-                    } else {
-                        // to_spot_id is empty, move and update marbles
-                        dbQuery.updateMarbles(marble_id, to_spot_id);
-                        return 0;
-                    }
-                } else {
-                    // error, move dis not valid
-                    return -1;
-                }
-            } else {
-                /** 1st: is to_spot_id player_index home_area
-                 *  2nd: is this spot occupied by others, is dis valid
-                 *  3rd: move
-                 */
-                if (this.validEndPlace(to_spot_id)) {
-                    if (!rs) {
-                        if (this.validDistance(from_spot_id, to_spot_id, card_value)) {
-                            dbQuery.updateMarbles(marble_id, to_spot_id);
-                            return 0;
-                        } else {
-                            // card != dis
-                            return -1;
-                        }
-                    } else {
-                        // error, home spot is being occupied
-                        return -1;
-                    }
-                } else {
-                    // error: invalid end area
-                    return -1;
-                }
-            }
-        }
-        return -1;
+        */
     }
 
     homeBoardDis(from_spot_id, to_spot_id) {
         let base = base();
         let index = this.getHomeSpotIndex(to_spot_id);
         return (base * 18 + 50 - from_spot_id + 1) + (index + 1);
-    }
-
-    validEndPlace(spot_id) {
-        if ((this.submission.player_index + 1) * 1 + 16 <= spot_id <= (this.submission.player_index + 1) * 4 + 16) {
-            return true;
-        }
-        return false;
     }
 
     base() {
@@ -318,18 +422,6 @@ class Validator {
         }
     }
 
-    validDistance(from_spot_id, to_spot_id, card_value) {
-        let dis = this.homeBoardDis(from_spot_id, to_spot_id);
-        if (dis === card_value) {
-            return true;
-        }
-        return false;
-        /*
-        if (base * 18 + 33 <= from_spot_id <= base * 18 + 50) {   
-        }
-        */
-    }
-
     getHomeSpotIndex(spot_id) {
         let index = (spot_id - 16) % 4 - 1;
         if (index < 0) {
@@ -338,8 +430,19 @@ class Validator {
         return index;
     }
 
+    validSevenMove(moves) {
+        /** length == 1, move; others all tock => move */
+        if (moves.length > 1) {
+            for (let i = 1; i < moves.length; i++) {
+                if (moves[i].movementType != 2) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
 
 const validator = new Validator();
 
-module.exports = {validator};
+module.exports = { validator };
