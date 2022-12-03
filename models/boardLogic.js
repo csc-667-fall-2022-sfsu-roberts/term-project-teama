@@ -104,9 +104,9 @@ class Spot {
     }
 }
 class Board {
-    constructor(numPlayers, currentPlayer) {
+    constructor(numPlayers, currentPlayerIndex) {
         this.numPlayers = numPlayers;
-        this.localPlayer = currentPlayer;
+        this.player = currentPlayerIndex;
         this.marbles = null;
         let spots = [];
         for (let playerIndex = 0; playerIndex < numPlayers; playerIndex++) {
@@ -140,19 +140,13 @@ class Board {
         }
         this.spots = spots;
     }
-    copy() {
-        let newBoard = new Board(this.numPlayers, this.localPlayer);
-        newBoard.placeMarbles(this.marbles);
-        return newBoard;
-    }
     filterMarbles(trueIfKeep) {
         let keepers = [];
         if (this.marbles !== null) {
-            for (let playerIndex = 0; playerIndex < this.marbles.length; playerIndex++) {
-                for (let marbleIndex = 0; marbleIndex < this.marbles[playerIndex].length; marbleIndex++) {
-                    if (trueIfKeep(this.marbles[playerIndex][marbleIndex], playerIndex, marbleIndex, this)) {
-                        keepers.push(this.marbles[playerIndex][marbleIndex]);
-                    }
+            for (let marbleIndex = 0; marbleIndex < this.marbles.length; marbleIndex++) {
+                let marble = this.marbles[marbleIndex];
+                if (trueIfKeep(marble, marble.player_index, marbleIndex, this)) {
+                    keepers.push(marble);
                 }
             }
         }
@@ -176,7 +170,8 @@ class Board {
         }
         this.marbles = marbles;
         this.filterMarbles((marble, player, index, board) => {
-            board.getSpotFromMarble(marble).setMarble(player);
+            marble.spot = this.getSpotFromID(marble.current_spot);
+            marble.spot.marble = player;
         });
     }
     getOnBoardMarbles() {
@@ -208,6 +203,21 @@ class Board {
         }
         return null;
     }
+    getFlowValues() {
+        const numSpaces = 76;
+        let count = 0;
+        let flow = {
+            to: [],
+            from: []
+        };
+        let currentPosition = this.spots[this.player][2][0];
+        while (currentPosition != null){
+            flow.to[currentPosition.spotID] = count;
+            flow.from[count++] = currentPosition.spotID;
+            currentPosition = this.getSpot(currentPosition.getNext(this.player));
+        }
+        return flow;
+    }
     fromHomeToStart(spotFunction) {
         let currentSpot = this.spots[this.localPlayer][1][3];
         let cancelFlag = false;
@@ -218,6 +228,18 @@ class Board {
             else {
                 currentSpot = this.getSpotFromSpecs(nextSpotSpecs);
             }
+        }
+    }
+    traverse(fromSpotSpecs, amount, mapFunction) {
+        let spot = this.getSpot(fromSpotSpecs);
+        mapFunction(spot);
+        if (amount == 0) { return spot; }
+        else if (amount > 0) {
+            let nextSpot = spot.getNext(this.player);
+            if (nextSpot === null) { return null; }
+            return this.traverse(nextSpot, amount - 1);
+        } else {
+            return this.traverse(spot.getPrevious(this.player), amount + 1);
         }
     }
     getBoardBlockers() {
@@ -252,6 +274,15 @@ class Board {
     getSpotFromMarble(marble) {
         return this.getSpot(marble.spot);
     }
+    getMarbleByID(marble_id) {
+        let marble = null;
+        this.marbles.forEach((currentMarble)=>{
+            if (currentMarble.id == marble_id){
+                marble = currentMarble;
+            }
+        });
+        return marble;
+    }
 }
 let MoveType = {
     Start: 0,
@@ -265,7 +296,7 @@ let MoveType = {
 };
 class Strategy {
     constructor(board, card) {
-        this.currentBoard = board.copy();
+        this.currentBoard = board;
         this.card = card;
         this.player = this.currentBoard.localPlayer;
         this.activeMarbles = this.currentBoard.getOnBoardMarbles();
@@ -351,7 +382,7 @@ class Strategy {
     }
     validatePropel(spotSpecs, amount) {
         let spot = this.getCurrentSpot(spotSpecs);
-        if (spot.isBlocking()) {
+        if (spot.isBlocking(this.player)) {
             return null;
         }
         if (amount == 0) { return spot; }
@@ -476,12 +507,11 @@ class Strategy {
     }
 }
 class WasteValidator {
-    loadState(numPlayers, currentPlayerIndex, currentHand, currentMarbles) {
-        this.player = currentPlayerIndex;
+    constructor(board, currentHand) {
         this.hand = currentHand;
-        this.board = new Board(numPlayers, this.player);
-        this.marbles = currentMarbles;
-        this.board.placeMarbles(currentMarbles);
+        this.board = board;
+        this.player = board.player;
+        this.marbles = board.marbles;
         this.prepareStrategies();
     }
     parseMarbles(marbles) {
@@ -512,7 +542,8 @@ class WasteValidator {
     prepareStrategies() {
         this.strategies = [];
         this.canWaste = true;
-        this.hand.forEach((cardIndex, card) => {
+        this.possibilities = [];
+        this.hand.forEach((card) => {
             let curStrat;
             if (this.strategies[card.value]) {
                 curStrat = this.strategies[card.value];
@@ -521,10 +552,22 @@ class WasteValidator {
                 curStrat.makeBoard();
                 this.strategies[card.value] = curStrat;
             }
-            if (curStrat.hasPossibilities()) { card.valid = true; this.canWaste = false; }
+            if (curStrat.hasPossibilities()) { 
+                card.valid = true; 
+                this.canWaste = false; 
+                this.possibilities.push(card.id); 
+            }
             else { card.valid = false; }
         });
     }
 }
-let wasteValidator = new WasteValidator();
-module.exports = {wasteValidator};
+const makeBoard = (numPlayers, currentPlayerIndex, marbles)=>{
+    let board = new Board(numPlayers, currentPlayerIndex);
+    board.placeMarbles(marbles);
+    return board;
+};
+const validateWaste = (board, hand)=>{
+    let wasteValidator = new WasteValidator(board, hand);
+    return wasteValidator;
+};
+module.exports = { makeBoard, validateWaste };

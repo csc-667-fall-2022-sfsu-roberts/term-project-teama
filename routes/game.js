@@ -3,7 +3,7 @@ const router = express.Router();
 const dbQuery = require("../db/dbquery");
 const { notLoggedInUser } = require('../config/authenticated');
 const { request } = require("express");
-const { validator } = require("../models/validator");
+const { makeValidator } = require("../models/validator");
 /* Game */
 
 /* PAGE: /game/:id */
@@ -163,23 +163,17 @@ router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
 /** API: /game/move
 *  req = {user_id, game_id, player_index, hand, card_used(card_id), moves(marble_id, from_spot_id, to_spot_id)}
 */
-router.post("/move", function(req, res, next) {
+router.post("/move", async function(req, res, next) {
    console.log("Move reached");
    let data = req.body;
    console.log("Request Data: ");
    console.log(data);
-   validator.loadData(req.body, req.user.id);
-   validator.test();
-   res.json({
-       code: 6,
-       message: "validator unfinished.",
-       user: req.user.id
-   })
-   // let validator = new Validator(req.body);
-   // let rs = validator.validate();
-   // if rs is -1,  error, cannot move
-   // rs = 0, move successful
-   // rs == others, card seven restDis curPlayer can move
+   let validator = makeValidator(data, req.user.id);
+   let isValid = await validator.validate();
+   if (isValid){
+       console.log("Valid!");
+   }
+   res.json(validator.getStatus());
 })
 
 /* PAGE: /game/concede/:id */

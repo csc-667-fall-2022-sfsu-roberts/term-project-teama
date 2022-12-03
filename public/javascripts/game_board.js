@@ -595,7 +595,7 @@ class Strategy {
     }
     validatePropel(spotSpecs, amount) {
         let spot = this.getCurrentSpot(spotSpecs);
-        if (spot.isBlocking()) {
+        if (spot.isBlocking(this.player)) {
             return null;
         }
         if (amount == 0) { return spot; }

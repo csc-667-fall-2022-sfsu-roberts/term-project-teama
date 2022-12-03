@@ -1,6 +1,6 @@
 const { DatabaseError } = require("sequelize");
 const dbQuery = require("../db/dbquery");
-const wasteValidator = require("./boardLogic");
+const {makeBoard, validateWaste} = require("../models/boardLogic");
 
 let MoveType = {
     Start: 0,
@@ -12,6 +12,34 @@ let MoveType = {
         return this.strings[moveType];
     }
 };
+let ValidationStatus = {
+    NotValidated: { id:-1, text: "Validation not yet run.", valid: false },
+    Valid: {id: 0, text: "Validation successful.", valid: true },
+    Impersonation: { id: 1, text: "The user_id of the user is different than the user_id of the player.", valid: false },
+    GameDoesNotExist: { id: 2, text: "The game_id supplied does not exist.", valid: false },
+    GameNotInProgress: { id: 3, text: "The game is not in progress.", valid: false },
+    UserNotPlayingGame: { id: 4, text: "The given user is not playing the given game.", valid: false },
+    NotPlayerTurn: { id: 5, text: "It is not this player's turn.", valid: false },
+    InvalidCardInfo: { id: 6, text: "The cards given were incorrect.", valid: false },
+    InvalidMarbles: { id: 7, text: "The marbles given were incorrect.", valid: false },
+    CannotWasteWhenValidExists: { id: 8, text: "Cannot waste a card if a valid move exists.", valid: false },
+    ExtraMoves: { id: 9, text: "Extra moves were given.", valid: false },
+    PropelBlocked: { id: 10, text: "There is another marble blocking the way.", valid: false },
+    IncorrectPropelEnd: { id: 11, text: "The marble would land on a space different than provided.", valid: false},
+    ExtraTockProvided: { id: 12, text: "An invalid tock was attached to moves.", valid: false },
+    IncorrectTockMarble: { id: 13, text: "The marble id being tocked was incorrect.", valid: false },
+    IncorrectTockLocation: { id: 14, text: "The location the tocked marble was sent to was incorrect.", valid: false },
+    MissingTock: { id: 15, text: "The move would tock a marble but no tock is provided.", valid: false },
+    InvalidMovementType: { id:16, text: "A move had an invalid movement type.", valid: false },
+    InvalidMarbleMoved: { id: 17, text: "Tried to move a marble that cannot be moved.", valid: false },
+    IncorrectStartEnd: { id: 18, text: "The marble would land on a space different than provided.", valid: false},
+    InvalidMarbleLocation: { id: 19, text: "The marble listed in a move was at an incorrect location.", valid: false},
+    InvalidMoveMarble: { id: 20, text: "The marble listed in a move does not belong to this game.", valid: false },
+    IncorrectTockMove: { id: 21, text: "A tock move was either missing or extra.", valid: false},
+    NotEnoughMoves: {id: 22, text: "There were not enough moves represented.", valid:false},
+    InvalidMoveAmount: {id:23, text: "The total amount of moved spaces were not 7 spaces", valid:false},
+    InvalidSwitch: {id:24, text: "Attempted an illegal switch.", valid:false},
+};
 
 class Validator {
     constructor() {
@@ -20,7 +48,22 @@ class Validator {
         this.player_index = -1;
         this.card_used = -1;
         this.moves = null;
-        this.isValid = false;
+        this.status = ValidationStatus.NotValidated;
+    }
+    setStatus(validationStatus, extra) {
+        console.log("Validation: Status Set: " + validationStatus.text);
+        console.log(extra);
+        this.status = validationStatus;
+        if (extra !== undefined) {
+            this.extra = extra;
+        }
+        return this.status.valid;
+    }
+    getStatus() {
+        return {
+            status: this.status,
+            data: JSON.stringify(this.extra)
+        };
     }
 
     loadData(data, user_id) {
@@ -31,8 +74,8 @@ class Validator {
             player_index: data.player_index,
             game_player_id: data.game_player_id,
             card_used: {
-                game_cards_id: data.game_card_id,
-                cards_id: data.card_id
+                game_cards_id: data.card_used.game_card_id,
+                cards_id: data.card_used.card_id
             },
             moves: [],
             hand: []
@@ -52,61 +95,63 @@ class Validator {
             });
         });
         this.truth = {user_id: user_id};
+        console.log("Data loaded: ");
+        console.log(this.submission);
     }
-
-    test() { console.log("validator reached."); }
 
     async validateAccess() {
         if (this.truth.user_id === this.submission.user_id) {
-            console.log("Validation: valid user_id");
             this.truth.game = await dbQuery.findGamesByGameId(this.submission.game_id);
             if (this.truth.game) {
                 this.truth.game_id = this.submission.game_id;
-                console.log("Validation: valid game_id");
-                this.truth.game_player = await dbQuery.findGamePlayer(this.truth.game_id, this.truth.user_id);
-                if (this.truth.game_player) {
-                    this.truth.player_index = this.truth.game_player.player_index;
-                    if (this.truth.player_index === this.truth.game.turn) {
-                        console.log("Validation: valid player_index");
-                        this.retrieveGameTruth();
-                        let handIsValid = true;
-                        this.submission.hand.forEach((card) => {
-                            let isValidCard = false;
-                            this.truth.cards.forEach((actualCard) => {
-                                if (card.game_cards_id === actualCard.id) {
-                                    isValidCard = true;
-                                }
-                            });
-                            handIsValid = handIsValid && isValidCard;
-                        });
-                        let currentCardIsValid = false;
-                        this.truth.cards.forEach((card) => {
-                            if (card.id === this.submission.card_used.game_cards_id) {
-                                this.truth.card_used = card;
-                                currentCardIsValid = true;
-                            }
-                        });
-                        handIsValid = handIsValid && currentCardIsValid;
-                        if (handIsValid) {
-                            console.log("Validation: valid cards");
-                            let marbleIDs = [];
-                            this.truth.marbles.forEach((marble) => {
-                                marbleIDs[marble.id] = true;
-                            });
-                            let movedMarblesAreValid = true;
-                            this.submission.moves.forEach((move) => {
-                                if (marbleIDs[move.marble_id] !== true) {
-                                    movedMarblesAreValid = false;
-                                }
-                            });
-                            if (movedMarblesAreValid) {
-                                console.log("Validation: valid marbles");
-                                return true;
-                            }
-                        }
-                    }
+                if (this.truth.game.state === 1) {
+                    this.truth.game_player = await dbQuery.findGamePlayer(this.truth.game_id, this.truth.user_id);
+                    if (this.truth.game_player) {
+                        this.truth.player_index = this.truth.game_player.player_index;
+                        if (this.truth.player_index === this.truth.game.turn) {
+                            return this.setStatus(ValidationStatus.Valid);
+                        } else { return this.setStatus(ValidationStatus.NotPlayerTurn, { player_index: this.truth.player_index, turn: this.truth.game.turn }); }
+                    } else { return this.setStatus(ValidationStatus.UserNotPlayingGame, { user_id: this.truth.user_id, game_id: this.truth.game_id }); }
+                } else { return this.setStatus(ValidationStatus.GameNotInProgress, { actual: this.truth.game.state }); }
+            } else { return this.setStatus(ValidationStatus.GameDoesNotExist, { given: this.submission.game_id }); }
+        } else { return this.setStatus(ValidationStatus.Impersonation, { given: this.submission.user_id, expected: this.truth.user_id }); }
+    }
+
+    async validateData(){
+        await this.retrieveGameTruth();
+        let handIsValid = true;
+        this.submission.hand.forEach((card) => {
+            let isValidCard = false;
+            this.truth.cards.forEach((actualCard) => {
+                if (card.game_cards_id === actualCard.id) {
+                    isValidCard = true;
                 }
+            });
+            if (!isValidCard) {
+                this.setStatus(ValidationStatus.InvalidCardInfo, { missingCard: card.game_cards_id });
             }
+        });
+        let currentCardIsValid = false;
+        this.truth.cards.forEach((card) => {
+            if (card.id === this.submission.card_used.game_cards_id) {
+                this.truth.card_used = card;
+                currentCardIsValid = true;
+            }
+        });
+        if (!currentCardIsValid) {
+            this.setStatus(ValidationStatus.InvalidCardInfo, { missingCardID: this.submission.card_used.game_cards_id });
+        }
+        if (this.status === ValidationStatus.Valid) {
+            this.truth.marbleIDs = [];
+            this.truth.marbles.forEach((marble) => {
+                this.truth.marbleIDs[marble.id] = marble;
+            });
+            this.submission.moves.forEach((move) => {
+                if (this.truth.marbleIDs[move.marble_id] === undefined) {
+                    this.setStatus(ValidationStatus.InvalidMarbles, { missingMarbleID: move.marble_id });
+                }
+            });
+            return this.status.valid;
         }
         return false;
     }
@@ -116,333 +161,275 @@ class Validator {
         this.truth.marbles = await dbQuery.getMarbles(this.truth.game_id);
         console.log("Validation: retrieved hand and marbles");
     }
-
-    /** response = {
-     * status(0: success, 1: fail),
-     * current_player_index,
-     * seven_rest_dis (only for card 7),
-     * new_card_id (only for joker)
-     * } */
-    validate() {
+    async validate() {
         console.log('validate reached')
-        if (this.validateAccess())
-         {
-            console.log('validate access succeed.')
-            let response = {
-                current_player_index: this.submission.player_index,
+        let validAccess = await this.validateAccess();
+        let validData = await this.validateData();
+        if (validAccess && validData)
+        {
+            this.board = makeBoard(4, this.truth.player_index, this.truth.marbles);
+            if (this.submission.moves.length == 0){
+                let wasteValidator = validateWaste(this.board, this.truth.hand);
+                if (wasteValidator.canWaste) { return true; }
+                else { return this.setStatus(ValidationStatus.CannotWasteWhenValidExists, { possibleCardIDs: wasteValidator.possibilities }); }
+            } 
+            switch (this.truth.card_used.value) {
+                case 0: return this.validateMoves() && (this.validatePropel(15) || this.validateStart()); 
+                case 1: return this.validateMoves() && (this.validatePropel(1) || this.validateStart());
+                case 4: return this.validateMoves() && (this.validatePropel(-4)); 
+                case 7: return this.validateIncrementalMoves() && this.validatePropelIncremental(); 
+                case 11: return this.validateMoves() && (this.validatePropel(11) || this.validateSwitch());
+                case 13: return this.validateMoves() && (this.validatePropel(13) || this.validateStart()); 
+                default: return this.validateMoves() && (this.validatePropel(this.truth.card_used.value));
             }
-
-            let card_id = this.submission.card_used.cards_id;
-            let moves = this.submission.moves;
-            if (card_id > 52) {
-                this.joker(response);
-            } else {
-                let card_value = card_id % 13;
-                if (card_value === 0) {
-                    card_value += 13;
-                }
-                console.log('card value', card_value);
-                if (card_value === 13 || card_value === 1) {
-                    if (moves[0].movementType === 0) {
-                        this.startEvent(moves, card_value, response);
-                    } else if (moves[0].movementType === 1) {
-                        this.moveForward(moves, card_value, response);
-                    } else {
-                        return -1;
-                    }
-                } else if (card_value === 4) {
-                    if (moves[0].movementType === 1) {
-                        this.moveBackward(moves, card_value, response);
-                    }
-                    return -1;
-                }
-                else if (card_value === 7) {
-                    // card = 7, can seperate move
-                    if (moves[0].movementType === 1) {
-                        this.sevenEvent(moves, response);
-                    }
-                    return -1;
-                } else if (card_value == 11) {
-                    // card = J, switch cards with others marble on board
-                    this.switchMarbles(this.submission.moves, response);
+        }
+    }
+    validatePropel(distance){
+        // check mvoementType
+        let propelMove = this.submission.moves[0];
+        if (propelMove.movementType !== MoveType.Propel){
+            return false;
+        }
+        let folio = { 
+            blocking: null, 
+            expectTock: false,
+            fromSpot: this.board.getSpotFromID(propelMove.from_spot_id)
+        };
+        folio.endSpot = this.board.traverse(fromSpot, distance, (spot)=>{
+            if (spot.isBlocking(this.truth.player_index)){
+                if (spot.spotID == propelMove.to_spot_id) {
+                    folio.expectTock = true;
                 } else {
-                    if (moves[0].movementType === 1) {
-                        this.moveForward(moves, card_value, response);
-                    }
-                    return -1;
+                    folio.blocking = spot;
                 }
             }
+        });
+        // Propel blocked
+        if (blocking !== null) {
+            let data = { spot_id: blocking.spotID, marble: this.board.getMarbleOnSpot(blocking).id };
+            return this.setStatus(ValidationStatus.PropelBlocked, data);
         }
-    }
-
-    joker(response) {
-        console.log('joker event reached.')
-        let card_value = 15;
-        /** 1. same as start, but card value== 15 */
-        if (moves[0].movementType === 0) {
-            this.startEvent(this.submission.moves, card_value, response);
-        } else if (moves[0].movementType === 1) {
-            this.moveForward(this.submission.moves, card_value, response);
+        // Propel inaccurate
+        if (endSpot.spotID !== propelMove.to_spot_id){
+            let data = { actual: endSpot.spotID, provided: propelMove.to_spot_id};
+            return this.setStatus(ValidationStatus.IncorrectPropelEnd, data);
         }
-    }
-
-    startEvent(moves, card_value, response) {
-        console.log('start event reached.')
-
-        /** 1. length=1, [0]start
-         *  2. length=2, [0]start+ [1]tock
-         */
-        if (moves.length === 1) {
-            if (moves[0].movementType === 0) {
-                return this.startEventDB(moves, card_value, response);
+        if (folio.expectTock == this.submission.moves.length == 2){
+            if (folio.expectTock){
+                return this.validateTock(endSpot, this.submission.moves[1]);
             }
-        }
-        if (moves.length === 2) {
-            if (moves[0].movementType === 0 && moves[1].movementType === 2) {
-                return this.startEventDB(moves, card_value, response);
-            }
-        }
-        return this.errorResponse(response);
-    }
-
-    startEventDB(moves, card_value, response) {
-        this.updateMarbles(moves);
-        this.discardGameCards();
-        if (card_value === 15) {
-            /** 0. give user one more card
-             *  1. curPlayer still this player
-             */
-            let card_id = this.drawACard();
-            response.new_card_id = card_id;
-            response.status = 0;
         } else {
-            let next_player_index = this.updateCurPlayerIndex();
-            response.current_player_index = next_player_index;
-            // update current player to next player
-        }
-        return response;
-    }
-
-    moveForward(moves, card_value, response) {
-        console.log('move forward event reached.')
-
-        /** 1. [0] propel \/
-         *  2.  dis == card_value
-         *  3. length == 1, move
-         *  4. length == 2, [1] tock => move
-         */
-        if (moves[0].to_spot_id > 16) {
-            if (moves[0].to_spot_id > 32) {
-                let validSpotID = this.spotOfValidDis(moves[0].from_spot_id, card_value, 0);
-                if (moves[0].to_spot_id === validSpotID) {
-                    if (moves.length === 1) {
-                        return this.normalEventDB(moves, response);
-                    }
-                    if (moves.length === 2 && moves[1].movementType === 2) {
-                        return this.normalEventDB(moves, response);
-                    }
-                }
-            } else {
-                // to_spot_id is home area, valid dis
-                if (moves.length === 1) {
-                    if (this.isHomeArea(moves[0].to_spot_id)) {
-                        if (this.validHomeBoardDis(moves[0].from_spot_id, moves[0].to_spot_id, card_value)) {
-                            return this.normalEventDB(moves, response);
-                        }
-                    }
-                }
-            }
-        }
-        return this.errorResponse(response);
-    }
-
-    normalEventDB(moves, response) {
-        this.updateMarbles(moves);
-        this.discardGameCards();
-        let next_player_index = this.updateCurPlayerIndex();
-        response.current_player_index = next_player_index;
-        response.status = 0;
-        return response;
-    }
-
-    moveBackward(moves, card_value, response) {
-        console.log('move backward event reached.')
-
-        /** 0. propel => on board
-         *  1. valid distance => length=1, move; length==2, [1]tock move
-         */
-        let validSpotID = this.spotOfValidDis(moves[0].from_spot_id, card_value, 0);
-        if (moves[0].to_spot_id === validSpotID) {
-            if (moves.length === 1) {
-                return this.normalEventDB(moves, response);
-            }
-            if (moves.length === 2) {
-                if (moves[1].movementType === 2) {
-                    return this.normalEventDB(moves, response);
-                }
-            }
-        }
-        return this.errorResponse(response);
-    }
-
-    sevenEvent(moves, response) {
-        console.log('seven event reached.')
-
-        let dis = -1;
-        if (moves[0].from_spot_id > 32) {
-            if (moves[0].to_spot_id > 32) {
-                // to_spot_id is on board
-                dis = moves[0].to_spot_id - moves[0].from_spot_id;
-            }
-            if (moves[0].to_spot_id > 16) {
-                // to_spot_id is home-area
-                dis = this.homeBoardDis(moves[0].from_spot_id, moves[0].to_spot_id);
-            }
-        }
-        if (0 < dis < 7) {
-            restDis = 7 - dis;
-            if (this.validSevenMove(moves)) {
-                // curPlayer not change, card not discard, card_value === restDis
-                this.updateMarbles(moves);
-                response.status = 0;
-                response.seven_rest_dis = restDis;
-                return response;
-            } else {
-                return this.errorResponse(response);
-            }
-        }
-        if (dis === 7) {
-            if (this.validSevenMove(moves)) {
-                return this.normalEventDB(moves, response);
-            } else {
-                return this.errorResponse(response);
-            }
+            let data = { tockExpected: folio.expectTock, tockMove: this.submission.moves[1] };
+            return this.setStatus(ValidationStatus.IncorrectTockMove, data);
         }
     }
-
-    switchMarbles(moves) {
-        console.log('switch event reached.')
-
-        /** moves length ==2, all switch type */
-        if (moves.length === 2 && moves[0].movementType === 3 && moves[0].movementType === 3) {
-            this.normalEventDB(moves, response);
+    validateTock(tockSpot, tockMove){
+        let tockMarble = this.board.getMarbleOnSpot(tockSpot);
+        if (tockMarble.player_index == this.board.player){
+            return this.setStatus(validationStatus.IncorrectTockMarble, { given: tockMove.marble_id, player_index: this.board.player});
         }
-        return this.errorResponse(response);
-    }
-
-    errorResponse(response){
-        response.status = -1;
-        return response;
-    }
-
-    updateMarbles() {
-        for (let i = 0; i < moves.length; i++) {
-            dbQuery.updateMarbles(moves[i].marble_id, moves[i].to_spot_id);
-        }
-    }
-
-    discardGameCards() {
-        dbQuery.discardGameCards(this.submission.card_used.game_cards_id);
-    }
-
-    updateCurPlayerIndex() {
-        // find next player, update db games.turn to next player_id
-        // return playerIndex****
-        /** curplayer index + 1 next player index, if > 3 nextIndex == result - 3 */
-        let nextPlayerIndex = this.submission.player_index + 1;
-        if (nextPlayerIndex > 3) {
-            nextPlayerIndex = nextPlayerIndex - 4;
-        }
-        dbQuery.updateGameTurn(this.submission.game_id, nextPlayerIndex);
-        return nextPlayerIndex;
-    }
-
-    async drawACard() {
-        let card = await dbQuery.getANewCard(this, this.submission.game_id, this.submission.player_index);
-        console.log('joker, draw new card-id', card.card_id);
-        return card.card_id;
-    }
-
-    spotOfValidDis(spot_id, card_value, type) {
-        let validSpot;
-        if (type === 0) {
-            // forward, to - from + 1 = card
-            validSpot = spot_id + card_value - 1;
-        }
-        if (type === 1) {
-            // back, from - to + 1 = card
-            validSpot = spot_id - card_value + 1;
-        }
-
-        if (validSpot < 33) {
-            validSpot = validSpot - 33 + 104;
-        }
-        if (validSpot > 104) {
-            validSpot = validSpot - 104 + 33;
-        }
-        return validSpot;
-    }
-
-    isHomeArea(spot_id) {
-        let player_index = this.submission.player_index;
-        if (player_index + 17 <= spot_id <= player_index + 20) {
-            return true;
-        }
-        return false;
-    }
-
-    validHomeBoardDis(from_spot_id, to_spot_id, card_value) {
-        let dis = this.homeBoardDis(from_spot_id, to_spot_id);
-        if (dis === card_value) {
-            return true;
-        }
-        return false;
-        /*
-        if (base * 18 + 33 <= from_spot_id <= base * 18 + 50) {   
-        }
-        */
-    }
-
-    homeBoardDis(from_spot_id, to_spot_id) {
-        let base = base();
-        let index = this.getHomeSpotIndex(to_spot_id);
-        return (base * 18 + 50 - from_spot_id + 1) + (index + 1);
-    }
-
-    base() {
-        switch (this.submission.player_index) {
-            case 0:
-                return 3
-            case 1:
-                return 0
-            case 2:
-                return 1
-            case 3:
-                return 2
-        }
-    }
-
-    getHomeSpotIndex(spot_id) {
-        let index = (spot_id - 16) % 4 - 1;
-        if (index < 0) {
-            index = 3;
-        }
-        return index;
-    }
-
-    validSevenMove(moves) {
-        /** length == 1, move; others all tock => move */
-        if (moves.length > 1) {
-            for (let i = 1; i < moves.length; i++) {
-                if (moves[i].movementType != 2) {
-                    return false;
-                }
-            }
+        let tockLocation = this.board.getSpotFromID(tockMove.to_spot_id);
+        if (tockLocation.player !== tockMarble.player_index || tockLocation.area !== 0){
+            return this.setStatus(ValidationStatus.IncorrectTockLocation, { givenMove: tockMove});
         }
         return true;
     }
+    validateMoves(){
+        // check 2 moves or less
+        if (this.submission.moves.length > 2){
+            return this.setStatus(ValidationStatus.ExtraMoves, {moves: this.submission.moves});
+        }
+        // check each marble of marbleid is at from spot
+        this.submission.moves.forEach((move)=>{
+            let marbleFound = false;
+            this.truth.marbles.forEach((marble)=>{
+                if (marble.id === move.marble_id){
+                    marbleFound = true;
+                    if (marble.current_spot !== move.from_spot_id){
+                        return this.setStatus(ValidationStatus.InvalidMarbleLocation, {actual: marble.current_spot, given: move.from_spot_id});
+                    }
+                }
+            });
+            if (!marbleFound){
+                return this.setStatus(ValidationStatus.InvalidMoveMarble, {given: move.marble_id});
+            }
+        });
+
+    }
+    validateIncrementalMoves(){
+        // check at least 7 moves
+        if (this.submission.moves.length < 7){
+            return this.setStatus(ValidationStatus.NotEnoughMoves, { number: this.submission.moves.length, expected: "At least 7"});
+        }
+        // separate propel from tock
+        this.inc = {
+            start_spot_id: [],
+            end_spot_id: [],
+            marbles: [],
+            marble_ids: [],
+            flow: this.board.getFlowValues(),
+            tocks: {
+                marbles: []
+            },
+            moves: []
+        };
+        let surviveParse = true;
+        this.submission.moves.forEach((move)=>{
+            if (move.movementType !== MoveType.Propel && move.movementType !== MoveType.Tock){
+                surviveParse = false;
+                return this.setStatus(ValidationStatus.InvalidMovementType, {move: move});
+            } else if (move.movementType == MoveType.Propel){
+                if (this.inc.marbles[move.marble_id] === undefined){
+                    this.inc.marble_ids.push(move.marble_id);
+                    this.inc.marbles[move.marble_id] = this.board.getMarbleByID(move.marble_id);
+                    if (this.inc.marbles[move.marble_id] === null){
+                        surviveParse = false;
+                        return this.setStatus(ValidationStatus.InvalidMoveMarble, { marble_id: move.marble_id});
+                    }
+                    let flowVals = this.convertMoveToFlow(move);
+                    this.inc.start_spot_id[move.marble_id] = flowVals.start;
+                    this.inc.end_spot_id[move.marble_id] = flowVals.end;
+                } else {
+                    let flowVals = this.convertMoveToFlow(move);
+                    this.inc.start_spot_id[move.marble_id] = Math.min(this.inc.start_spot_id[move.marble_id], flowVals.start);
+                    this.inc.end_spot_id[move.marble_id] = Math.max(this.inc.end_spot_id[move.marble_id], flowVals.end);
+                }
+            } else {
+                if (this.validateTock(this.board.getSpotFromID(move.from_spot_id), move)){
+                    this.inc.tocks.marbles.push(this.board.getMarbleByID(move.marble_id));
+                    this.inc.moves.push(move);
+                } else {
+                    surviveParse = false;
+                    return false;
+                }
+            }
+
+        });
+        this.inc.marble_ids.forEach((marble_id)=>{
+            this.inc.moves.push({
+                marble_id: marble_id,
+                from_spot_id: this.inc.flow.from[this.inc.start_spot_id[marble_id]],
+                to_spot_id: this.inc.flow.from[this.inc.end_spot_id[marble_id]],
+                movement_type: MoveType.Propel
+            });
+        });
+
+        return surviveParse;
+    }
+    convertMoveToFlow(move){
+        return { 
+            start: this.inc.flow.to[move.from_spot_id], 
+            end: this.inc.flow.to[move.to_spot_id]
+        };
+    }
+
+    validateStart(){
+        // check marble is correct (owned by player, in start)
+        // check to is portal
+        //check tock
+        let startMove = this.submission.moves[0];
+        // Movement type was inaccurate.
+        if (startMove.movementType !== MoveType.Start) {
+            let data = { givenType: startMove.movementType };
+            return this.setStatus(ValidationStatus.InvalidMovementType, data);
+        }
+        let fromSpot = this.board.getSpotFromID(startMove.from_spot_id);
+        let toSpot = this.board.getSpotFromID(startMove.to_spot_id);
+        // Invalid Marble Moved, wrong from spot 
+        if (fromSpot.player !== this.truth.player_index){
+            return this.setStatus(ValidationStatus.InvalidMarbleMoved, { fromSpot: fromSpot });
+        }
+        let expectedToID = (this.truth.player_index * 18) + 33;
+        if (toSpot.id !== expectedToID) {
+            return this.setStatus(ValidationStatus.IncorrectStartEnd, { expected: expectedToID, given: toSpot.id});
+        }
+        return true;
+    }
+    validatePropelIncremental(){
+        // check that relations between marbles match before and after
+        let count = 0;
+        let previousMarbleID = null;
+        let valid = true;
+        this.inc.marble_ids.forEach((marble_id, marbleIndex)=>{
+            if (previousMarbleID){
+                let startRelation = this.inc.start_spot_id[marble_id] < this.inc.start_spot_id[previousMarbleID];
+                let endRelation = this.inc.end_spot_id[marble_id] < this.inc.end_spot_id[previousMarbleID];
+                if (startRelation !== endRelation){
+                    valid = false;
+                    return this.setStatus(ValidationStatus.InvalidMarbleLocation, { marble_id: marble_id, startRelation: startRelation, endRelation: endRelation});
+                }
+            }
+            count += this.inc.end_spot_id[marble_id] - this.inc.start_spot_id[marble_id];
+            previousMarbleID = marble_id;
+        });
+        if (!valid){ return false; }
+        if (count !== 7){
+            return this.setStatus(ValidationStatus.InvalidMoveAmount, { givenAmount: count});
+        }
+
+        // check that tocked marbles existed between start and end of one of the moved marbles
+        this.inc.tocks.marbles.forEach((marble)=>{
+            let flow = this.inc.flow.to[marble.current_spot];
+            let validTock = false;
+            this.inc.marble_ids.forEach((marble_id)=>{
+                if (this.inc.start_spot_id[marble_id] < flow && this.inc.end_spot_id[marble_id] >= flow){
+                    validTock = true;
+                }
+            });
+            if (!validTock){
+                valid = false;
+                return this.setStatus(ValidationStatus.IncorrectTockLocation, { marble: marble });
+            }
+        });
+        return valid;
+    }
+    validateSwitch(){
+        let mainMove = this.submission.moves[0];
+        let subMove = this.submission.moves[1];
+        if (mainMove.movementType !== MoveType.Switch) {
+            return this.setStatus(ValidationStatus.InvalidMovementType, { maintype: mainMove.movementType });
+        }
+        if (subMove.movementType !== MoveType.Switch) {
+            return this.setStatus(ValidationStatus.InvalidMovementType, { subtype: subMove.movementType });
+        }
+        let spots = {
+            mainFrom: mainMove.from_spot_id,
+            mainTo: mainMove.to_spot_id,
+            subFrom: subMove.from_spot_id,
+            subTo: subMove.to_spot_id
+        };
+        if (spots.mainFrom == spots.subTo && spots.mainTo == spots.subFrom){
+            let mainMarble = this.board.getMarbleByID(mainMove.marble_id);
+            let mainSpot = this.board.getSpotFromID(mainMove.from_spot_id);
+            let subMarble = this.board.getMarbleByID(subMove.marble_id);
+            let subSpot = this.board.getSpotFromID(subMove.from_spot_id);
+            if (mainMarble.player_index == subMarble.player_index) {
+                return this.setStatus(ValidationStatus.InvalidSwitch, { mainPlayer: mainMarble.player_index, subPlayer: subMarble.player_index});
+            }
+            if (mainSpot.area != 2) {
+                return this.setStatus(ValidationStatus.InvalidSwitch, { mainArea: mainSpot.area});
+            }
+            if (subSpot.area != 2) {
+                return this.setStatus(ValidationStatus.InvalidSwitch, { subArea: subSpot.area});
+            }
+            return true;
+
+        } else {
+            return this.setStatus(ValidationStatus.InvalidSwitch, {spots: spots });
+        }
+    }
+    getMoves(){
+        if (this.inc){
+            return this.inc.moves;
+        }
+        return this.submission.moves;
+    }
 }
 
-const validator = new Validator();
+const makeValidator = (data, user_id)=>{
+    let validator = new Validator();
+    validator.loadData(data, user_id);
+    return validator;
+};
 
-module.exports = { validator };
+module.exports = { makeValidator };
