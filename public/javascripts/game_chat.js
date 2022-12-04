@@ -1,7 +1,9 @@
 const socket = io();
 
 const gameChatForm = document.getElementById('game-chat-form');
+const sysMsgTestBtn = document.getElementById('sysMsgTest');
 let gameId = $('#game-chat-form').data('gameid');
+let sysMsg = $('#sysMsgTest').attr('data-sysMsg');
 
 socket.emit('game-page', (gameId));
 
@@ -35,30 +37,40 @@ gameChatForm.addEventListener('submit', (e) => {
     e.target.elements.msg.focus();
 });
 
+// System Message submit
+sysMsgTestBtn.addEventListener('click', () => {
+    socket.emit('sysMsg', ({sysMsg, gameId}));
+})
+
 // Output message to DOM
 function outputMessage(message) {
     console.log("outputMessage...");
     console.log(`the received message is: ${message}`);
     const div = document.createElement('div');
-    div.classList.add("message", "d-flex", "flex-row", "justify-content-start", "mb-4");
+    div.classList.add("gameChatMsg", "row", "d-flex", "align-items-center");
+    const div1 = document.createElement('div');
+    div1.classList.add("col-3");
+    const a = document.createElement('a');
     const img = document.createElement('img');
     img.classList.add("mx-1", "avatar", `avatar_${message.avatar}`);
-    img.setAttribute('style', 'width: 40px;');
-    const b = document.createElement('b');
-    b.classList.add('name');
+    a.appendChild(img);
+    const b = document.createElement('p');
+    b.classList.add("username", "small", "text-muted");
     b.innerText = `${message.username}`;
-    const div2 = document.createElement('div');
+    const div2 = document.createElement("div");
+    div2.classList.add("col-9");
     const p = document.createElement('p');
-    p.classList.add('meta', 'mall', 'p-2', 'ms-3', 'mb-1', 'rounded-3');
+    p.classList.add('message', 'mall', 'p-2', 'ms-3', 'mb-1', 'rounded-3');
     p.setAttribute('style', 'background-color: #f5f6f7;');
     p.innerHTML = `${message.text}`;
     const p2 = document.createElement('p');
-    p2.classList.add('small', 'ms-3', 'mb-3', 'rounded-3', 'text-muted');
+    p2.classList.add('small', 'text-muted', 'd-flex', 'flex-row', 'justify-content-end');
     p2.innerHTML = `${message.time}`;
     div2.appendChild(p);
     div2.appendChild(p2);
-    div.appendChild(img);
-    div.appendChild(b);
+    div1.appendChild(a);
+    div1.appendChild(b);
+    div.appendChild(div1);
     div.appendChild(div2);
     document.querySelector('.game-chat-message').appendChild(div);
 }

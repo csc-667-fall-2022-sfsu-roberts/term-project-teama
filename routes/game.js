@@ -100,12 +100,14 @@ router.get("/summary/:id", async function(req, res, next) {
     const user = req.user;
     const id = req.params.id;
     const game = await dbQuery.findGamesByGameId(id);
+    const gameUser = await dbQuery.findUserByGameUserId(id, user.id);
     const rank = await dbQuery.getRanking();
     let win = false;
+    let concede = gameUser.has_conceded;
     if (game.winner === user.id) {
         win = true;
     }
-    res.render("summary", { title: "Tock", game: game, win: win, user: user, rankings: rank });
+    res.render("summary", { title: "Tock", game: game, concede: concede ,win: win, user: user, rankings: rank });
 });
 
 /* PAGE: /game/rules */

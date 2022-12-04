@@ -1,7 +1,7 @@
 const socketIO = require("socket.io");
 const passport = require("passport");
 const formatMessage = require("../public/javascripts/messages")
-const botName = "Chat Bot";
+const botName = "ChatBot";
 const dbQuery = require("../db/dbquery");
 // whats the use of express-session & middleware?
 // next step: how to create a session for room and add players into the room
@@ -72,6 +72,12 @@ const init = (httpServer, app) => {
             console.log(`received game message and gameid are: ${msg} and ${gameId}`);
             io.to(gameId).emit("gameMessage", formatMessage(avatar, username, msg));
         });
+
+        // Listen for game system message
+        socket.on('sysMsg', async ({sysMsg, gameId}) => {
+            console.log(`received system message and gameid are: ${sysMsg} and ${gameId}`);
+            io.to(gameId).emit("gameMessage", formatMessage(1, botName, sysMsg));
+        })
 
         socket.on('disconnect', () => {
             console.log("disconnect => socket.id : ", socket.id);

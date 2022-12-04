@@ -46,7 +46,6 @@
         ],
         active: {{activePlayer}}
     };
-
 </script>
 
 <style>
@@ -192,7 +191,7 @@
                     <div class="confirmOrg" id="confirmOrg">
                         <button class="btn btn-primary me-2" type="button" id="confirm" onclick="tockHistory.confirmMove();">Confirm</button>
                     </div>
-                    
+                    <button type="submit" id="sysMsgTest" data-sysMsg="this is a test system message" class="btn btn-primary my-3">SysMsgTest</button>
                 </div>
                 <!-- 4B: Center -->
                 <div class="d-flex flex-row">
@@ -242,17 +241,16 @@
                     <a class="dropdown-item" href="/game/concede/{{gameId}}">Leave the Game</a>
                 </div>
             </div>
-            <div class="card mt-2 mx-2" id="chat1" style="border-radius: 15px;">
-                <div class="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
-                    style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
-                    <p class="mb-0 fw-bold">Lobby Live chat</p>
+            <div class="card mt-2 mx-2" id="chat" >
+                <div class="card-header d-flex justify-content-between align-items-center bg-secondary text-white border-bottom-0">
+                    <p class="mb-0 fw-bold">Game Live chat</p>
                 </div>
                 <div class="game-chat-message card-body" style="height: 500px; overflow-y: scroll;">
                 </div>
                 <div class="chat-form-container">
                     <form id="game-chat-form" class="form-outline" data-gameid="{{gameId}}">
                         <div class="card-footer text-muted d-flex justify-content-start align-items-center p-1">
-                            <img class="mx-1 avatar avatar_{{user.avatar}}" style="width: 60px;">
+                            <a><img class="mx-1 avatar avatar_{{user.avatar}}"></a>
                             <input id="msg" type="text" class="form-control form-control-lg mx-2"
                                 placeholder="Type message" required autocomplete="off">
                             <button type="submit" class="btn btn-primary my-3">Send</button>
