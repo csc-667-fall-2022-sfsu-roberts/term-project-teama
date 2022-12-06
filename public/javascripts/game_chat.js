@@ -3,6 +3,7 @@ const socket = io();
 const gameChatForm = document.getElementById('game-chat-form');
 const sysMsgTestBtn = document.getElementById('sysMsgTest');
 let gameId = $('#game-chat-form').data('gameid');
+//let myIndex = $('#game-chat-form').data('myIndex');
 let sysMsg = $('#sysMsgTest').attr('data-sysMsg');
 
 socket.emit('game-page', (gameId));
@@ -16,6 +17,21 @@ socket.on('gameMessage', (message) => {
     console.log(message);
     outputMessage(message);
 });
+
+socket.emit('sendNewTurn', {gameId, playerIndex});
+
+socket.on('startTurn', (playerIndex) => {
+    if (myIndex == playerIndex){
+        tockHistory.startTurn(playerIndex);
+    }
+});
+
+socket.emit('sendEndGame', (gameId));
+
+socket.on('endGame', () => {
+    tockHistory.startTurn(playerIndex);
+});
+
 
 // Message submit
 gameChatForm.addEventListener('submit', (e) => {

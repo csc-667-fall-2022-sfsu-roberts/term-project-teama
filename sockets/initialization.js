@@ -77,7 +77,15 @@ const init = (httpServer, app) => {
         socket.on('sysMsg', async ({sysMsg, gameId}) => {
             console.log(`received system message and gameid are: ${sysMsg} and ${gameId}`);
             io.to(gameId).emit("gameMessage", formatMessage(1, botName, sysMsg));
-        })
+        });
+
+        socket.on('sendNewTurn', async ({gameId, playerIndex}) => {
+            io.to(gameId).emit("startTurn", playerIndex);
+        });
+
+        socket.on('sendEndGame', async (gameId) => {
+            io.to(gameId).emit("endGame");
+        });
 
         socket.on('disconnect', () => {
             console.log("disconnect => socket.id : ", socket.id);
