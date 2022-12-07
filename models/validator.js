@@ -91,10 +91,15 @@ class Validator {
                 marble_id: moveData.marble_id,
                 from_spot_id: moveData.from_spot_id,
                 to_spot_id: moveData.to_spot_id,
-                movementType: moveData.type
+                movement_type: moveData.type
             });
         });
-        this.truth = {user_id: user_id};
+        this.truth = {
+            user_id: user_id, 
+            gameOver: false,
+            moves: [], 
+            cardShifts: []
+        };
         console.log("Data loaded: ");
         console.log(this.submission);
     }
@@ -125,6 +130,9 @@ class Validator {
             this.truth.cards.forEach((actualCard) => {
                 if (card.game_cards_id === actualCard.id) {
                     isValidCard = true;
+                    if (card.hand_index !== actualCard.index){
+                        this.truth.cardShifts.push({id: card.game_cards_id, index: card.hand_index });
+                    }
                 }
             });
             if (!isValidCard) {
@@ -138,6 +146,7 @@ class Validator {
                 currentCardIsValid = true;
             }
         });
+        this.truth.numberOfCardsAfterTurn = this.truth.cards.length - 1;
         if (!currentCardIsValid) {
             this.setStatus(ValidationStatus.InvalidCardInfo, { missingCardID: this.submission.card_used.game_cards_id });
         }
@@ -167,6 +176,7 @@ class Validator {
         let validData = await this.validateData();
         if (validAccess && validData)
         {
+            console.log("Valid data and Access");
             this.board = makeBoard(4, this.truth.player_index, this.truth.marbles);
             if (this.submission.moves.length == 0){
                 let wasteValidator = validateWaste(this.board, this.truth.hand);
@@ -183,11 +193,13 @@ class Validator {
                 default: return this.validateMoves() && (this.validatePropel(this.truth.card_used.value));
             }
         }
+        console.log("Something went wrong.");
     }
     validatePropel(distance){
         // check mvoementType
+        console.log("Hit Validate Propel");
         let propelMove = this.submission.moves[0];
-        if (propelMove.movementType !== MoveType.Propel){
+        if (propelMove.movement_type !== MoveType.Propel){
             return false;
         }
         let folio = { 
@@ -204,6 +216,11 @@ class Validator {
                 }
             }
         });
+        if (folio.endSpot.area == 1) {
+            let potential = [];
+            potential[propelMove.marble_id] = propelMove.to_spot_id;
+            this.truth.gameOver = this.board.checkWin(potential);
+        }
         // Propel blocked
         if (blocking !== null) {
             let data = { spot_id: blocking.spotID, marble: this.board.getMarbleOnSpot(blocking).id };
@@ -224,6 +241,7 @@ class Validator {
         }
     }
     validateTock(tockSpot, tockMove){
+        console.log("hit validate tock");
         let tockMarble = this.board.getMarbleOnSpot(tockSpot);
         if (tockMarble.player_index == this.board.player){
             return this.setStatus(validationStatus.IncorrectTockMarble, { given: tockMove.marble_id, player_index: this.board.player});
@@ -235,6 +253,7 @@ class Validator {
         return true;
     }
     validateMoves(){
+        console.log("Hit ValidateMoves");
         // check 2 moves or less
         if (this.submission.moves.length > 2){
             return this.setStatus(ValidationStatus.ExtraMoves, {moves: this.submission.moves});
@@ -253,8 +272,9 @@ class Validator {
             if (!marbleFound){
                 return this.setStatus(ValidationStatus.InvalidMoveMarble, {given: move.marble_id});
             }
+            this.truth.moves.push(move);
         });
-
+        return true;
     }
     validateIncrementalMoves(){
         // check at least 7 moves
@@ -271,14 +291,14 @@ class Validator {
             tocks: {
                 marbles: []
             },
-            moves: []
+            moves: { tocks: [], propels: [] }
         };
         let surviveParse = true;
         this.submission.moves.forEach((move)=>{
-            if (move.movementType !== MoveType.Propel && move.movementType !== MoveType.Tock){
+            if (move.movement_type !== MoveType.Propel && move.movement_type !== MoveType.Tock){
                 surviveParse = false;
                 return this.setStatus(ValidationStatus.InvalidMovementType, {move: move});
-            } else if (move.movementType == MoveType.Propel){
+            } else if (move.movement_type == MoveType.Propel){
                 if (this.inc.marbles[move.marble_id] === undefined){
                     this.inc.marble_ids.push(move.marble_id);
                     this.inc.marbles[move.marble_id] = this.board.getMarbleByID(move.marble_id);
@@ -297,7 +317,7 @@ class Validator {
             } else {
                 if (this.validateTock(this.board.getSpotFromID(move.from_spot_id), move)){
                     this.inc.tocks.marbles.push(this.board.getMarbleByID(move.marble_id));
-                    this.inc.moves.push(move);
+                    this.inc.moves.tocks.push(move);
                 } else {
                     surviveParse = false;
                     return false;
@@ -305,14 +325,19 @@ class Validator {
             }
 
         });
+        let potential=[];
         this.inc.marble_ids.forEach((marble_id)=>{
-            this.inc.moves.push({
+            let moveData = {
                 marble_id: marble_id,
-                from_spot_id: this.inc.flow.from[this.inc.start_spot_id[marble_id]],
-                to_spot_id: this.inc.flow.from[this.inc.end_spot_id[marble_id]],
                 movement_type: MoveType.Propel
-            });
+            };
+            moveData.from_spot_id = this.inc.flow.from[this.inc.start_spot_id[marble_id]];
+            moveData.to_spot_id = this.inc.flow.from[this.inc.end_spot_id[marble_id]];
+            potential[marble_id] = moveData.to_spot_id;
+            this.inc.moves.propels.push(moveData);
         });
+        this.truth.moves = this.inc.moves.propels.concat(this.inc.moves.tocks);
+        this.truth.gameOver = this.board.checkWin(potential);
 
         return surviveParse;
     }
@@ -329,8 +354,8 @@ class Validator {
         //check tock
         let startMove = this.submission.moves[0];
         // Movement type was inaccurate.
-        if (startMove.movementType !== MoveType.Start) {
-            let data = { givenType: startMove.movementType };
+        if (startMove.movement_type !== MoveType.Start) {
+            let data = { givenType: startMove.movement_type };
             return this.setStatus(ValidationStatus.InvalidMovementType, data);
         }
         let fromSpot = this.board.getSpotFromID(startMove.from_spot_id);
@@ -340,7 +365,11 @@ class Validator {
             return this.setStatus(ValidationStatus.InvalidMarbleMoved, { fromSpot: fromSpot });
         }
         let expectedToID = (this.truth.player_index * 18) + 33;
-        if (toSpot.id !== expectedToID) {
+        console.log(startMove);
+        console.log(fromSpot);
+        console.log(toSpot);
+        console.log(expectedToID);
+        if (toSpot.spotID !== expectedToID) {
             return this.setStatus(ValidationStatus.IncorrectStartEnd, { expected: expectedToID, given: toSpot.id});
         }
         return true;
@@ -386,11 +415,11 @@ class Validator {
     validateSwitch(){
         let mainMove = this.submission.moves[0];
         let subMove = this.submission.moves[1];
-        if (mainMove.movementType !== MoveType.Switch) {
-            return this.setStatus(ValidationStatus.InvalidMovementType, { maintype: mainMove.movementType });
+        if (mainMove.movement_type !== MoveType.Switch) {
+            return this.setStatus(ValidationStatus.InvalidMovementType, { maintype: mainMove.movement_type });
         }
-        if (subMove.movementType !== MoveType.Switch) {
-            return this.setStatus(ValidationStatus.InvalidMovementType, { subtype: subMove.movementType });
+        if (subMove.movement_type !== MoveType.Switch) {
+            return this.setStatus(ValidationStatus.InvalidMovementType, { subtype: subMove.movement_type });
         }
         let spots = {
             mainFrom: mainMove.from_spot_id,

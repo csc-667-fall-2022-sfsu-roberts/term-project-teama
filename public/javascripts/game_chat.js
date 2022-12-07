@@ -18,15 +18,9 @@ socket.on('gameMessage', (message) => {
     outputMessage(message);
 });
 
-socket.emit('sendNewTurn', {gameId, playerIndex});
-
 socket.on('startTurn', (playerIndex) => {
-    if (myIndex == playerIndex){
-        tockHistory.startTurn(playerIndex);
-    }
+    tockHistory.startTurn(playerIndex);
 });
-
-socket.emit('sendEndGame', (gameId));
 
 socket.on('endGame', () => {
     tockHistory.startTurn(playerIndex);

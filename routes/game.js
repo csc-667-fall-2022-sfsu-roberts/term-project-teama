@@ -7,14 +7,14 @@ const { makeValidator } = require("../models/validator");
 /* Game */
 
 /* PAGE: /game/:id */
-router.get("/show/:id", async function(req, res, next) {
+router.get("/show/:id", async function (req, res, next) {
     let numPlayers = 4;
     let gameId = req.params.id;
     console.log(req.game.state);
-    if (req.game.state == 0){
-        res.redirect('/game/created/'+gameId);
+    if (req.game.state == 0) {
+        res.redirect('/game/created/' + gameId);
     } else if (req.game.state == 2) {
-        res.redirect('/game/summary'+gameId);
+        res.redirect('/game/summary' + gameId);
     } else {
 
         let head = '<link rel="stylesheet" href="/stylesheets/cards.css">\n' +
@@ -51,11 +51,11 @@ router.get("/show/:id", async function(req, res, next) {
                 { location_id: 18, amount: 34 }
             ];
             attributes.curHand = [
-                { id: 1,cardID: 1, category: "Spade", value: 1 },
-                { id: 2,cardID: 20, category: "Heart", value: 7 },
-                { id: 3,cardID: 54, category: "Red", value: 0 },
-                { id: 4,cardID: 24, category: "Heart", value: 11 },
-                { id: 5,cardID: 52, category: "Club", value: 13 }
+                { id: 1, cardID: 1, category: "Spade", value: 1 },
+                { id: 2, cardID: 20, category: "Heart", value: 7 },
+                { id: 3, cardID: 54, category: "Red", value: 0 },
+                { id: 4, cardID: 24, category: "Heart", value: 11 },
+                { id: 5, cardID: 52, category: "Club", value: 13 }
             ];
             attributes.marbles = [
                 { id: 1, player_index: 3, current_spot: 16 },
@@ -85,7 +85,7 @@ router.get("/show/:id", async function(req, res, next) {
             attributes.players = req.players;
             attributes.gamePlayerId = req.user.gamePlayerId;
             attributes.curPlayerIndex = req.game.curPlayerIndex;
-            attributes.activePlayer =  req.game.activePlayerIndex == req.game.curPlayerIndex;
+            attributes.activePlayer = req.game.activePlayerIndex == req.game.curPlayerIndex;
             attributes.hands = await dbQuery.countHands(gameId);
             attributes.curHand = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
             attributes.marbles = await dbQuery.getMarbles(gameId);
@@ -96,7 +96,7 @@ router.get("/show/:id", async function(req, res, next) {
 });
 
 /* PAGE: /game/summary/:id */
-router.get("/summary/:id", async function(req, res, next) {
+router.get("/summary/:id", async function (req, res, next) {
     const user = req.user;
     const id = req.params.id;
     const game = await dbQuery.findGamesByGameId(id);
@@ -107,11 +107,11 @@ router.get("/summary/:id", async function(req, res, next) {
     if (game.winner === user.id) {
         win = true;
     }
-    res.render("summary", { title: "Tock", game: game, concede: concede ,win: win, user: user, rankings: rank });
+    res.render("summary", { title: "Tock", game: game, concede: concede, win: win, user: user, rankings: rank });
 });
 
 /* PAGE: /game/rules */
-router.get("/rules", function(req, res, next) {
+router.get("/rules", function (req, res, next) {
     res.render("rules", {
         title: "Tock",
         as_page: true,
@@ -120,12 +120,12 @@ router.get("/rules", function(req, res, next) {
 });
 
 /* PAGE: /game/create */
-router.get("/create", notLoggedInUser, function(req, res, next) {
+router.get("/create", notLoggedInUser, function (req, res, next) {
     const user = req.user;
     res.render("create", { user: user });
 });
 
-router.post("/create", async function(req, res, next) {
+router.post("/create", async function (req, res, next) {
     try {
         const { gamename, user } = req.body;
         const gameid = await dbQuery.createNewGame(gamename, user.id)
@@ -140,7 +140,7 @@ router.post("/create", async function(req, res, next) {
 });
 
 /* PAGE: /game/created/:id */
-router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
+router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
     try {
         /*
         const gameInfo = findGamesByGameId(req.game.id);
@@ -162,35 +162,159 @@ router.get("/created/:id", notLoggedInUser, async function(req, res, next) {
     }
 });
 
+/** API: /game/state
+*  req = { user_id, game_id }
+*/
+router.post("/state", async function (req, res, next) {
+    console.log("State reached");
+    console.log("Request Data: ");
+    console.log(req.body);
+    if (req.user == undefined){
+        res.json({ status: "illegal", message: "Please sign in."})
+    } else {
+        let data = {
+            status: "spectator",
+            gameID: req.body.game_id,
+            user: req.user,
+            userID: req.user.id,
+        };
+        let game = await dbQuery.findGamesByGameId(data.gameID);
+        if (game) {
+            data.game = {
+                id: data.gameID,
+                name: game.name,
+                state: game.state,
+                isPlayer: false,
+                activePlayerIndex: game.turn
+            };
+            let gameusers = await dbQuery.findAllUsersByGameId(data.gameID);
+            data.players = [];
+            for (let playerIndex=0; playerIndex<gameusers.length; playerIndex++){
+                let player = gameusers[playerIndex];
+                const userinfo = await dbQuery.findUserById(player.player_id);
+                if (data.userId === userinfo.id) {
+                    data.game.isPlayer = true;
+                    data.game.curPlayerIndex = player.player_index;
+                    data.user.gamePlayerId = player.id;
+                    data.status = "player";
+                }
+                data.players[playerIndex] = {
+                    id: userinfo.id,
+                    name: userinfo.username,
+                    avatar: userinfo.avatar,
+                    isCreator: player.player_index === 0,
+                    player_index: player.player_index
+                };
+            }
+            data.activePlayer = false;
+            data.hands = await dbQuery.countHands(data.gameID);
+            data.marbles = await dbQuery.getMarbles(data.gameID);
+            if (data.game.isPlayer) {
+                if (data.game.curPlayerIndex == data.game.activePlayerIndex) {
+                    data.activePlayer = true;
+                }
+                data.curHand = await dbQuery.getHand(data.gameID, data.game.curPlayerIndex);
+            }
+        }
+        res.json(data);
+    }
+})
+
 /** API: /game/move
 *  req = {user_id, game_id, player_index, hand, card_used(card_id), moves(marble_id, from_spot_id, to_spot_id)}
 */
-router.post("/move", async function(req, res, next) {
-   console.log("Move reached");
-   let data = req.body;
-   console.log("Request Data: ");
-   console.log(data);
-   let validator = makeValidator(data, req.user.id);
-   let isValid = await validator.validate();
-   if (isValid){
-       console.log("Valid!");
-   }
-   res.json(validator.getStatus());
+router.post("/move", async function (req, res, next) {
+    console.log("Move reached");
+    let validator = makeValidator(req.body, req.user.id);
+    let isValid = await validator.validate();
+    if (isValid) {
+        console.log("Valid!");
+        let socketIO = req.app.io;
+        let data = validator.truth;
+        // Log the turn
+        let turnId = await dbQuery.logTurn(data.game_player.id, data.card_used.card_id);
+        console.log("logTurn");
+        // Discard the used card
+        await dbQuery.discardGameCards(data.card_used.id);
+        console.log("Discarded card "+data.card_used.id);
+        // Reorder the cards in hand
+        for ( let cardIndex=0; cardIndex < data.cardShifts.length; cardIndex++){
+            let card = data.cardShifts[cardIndex];
+            console.log("Moving card "+card.id+" to handIndex "+card.index);
+            await dbQuery.setGameCardIndex(card.id, card.index);
+        }
+        // Log the moves and move the marbles
+        for (let moveIndex = 0; moveIndex< data.moves.length; moveIndex++){
+            let move = data.moves[moveIndex];
+            console.log("Logging move and updating marbles for:  (turnID:"+turnId.id+")");
+            console.log(move);
+            await dbQuery.logMove(turnId.id, move.marble_id, move.from_spot_id, move.to_spot_id, move.movement_type);
+            console.log("Move logged...");
+            await dbQuery.updateMarbles(move.marble_id, move.to_spot_id);
+            console.log("Marbles moved.");
+        }
+        // Check for end game
+        if (data.gameOver) {
+            // - - If so, edit the game table to complete the game
+            await dbQuery.endGameByWin(data.game_id, data.user_id);
+            // - - Send everyone to summary
+            socketIO.to(data.game_id).emit("endGame");
+        } else {
+            // If still playing...
+            let newTurn = (data.player_index+1) %4;
+            let newDealer = data.game.dealer;
+            // Check for joker use,
+            if (data.card_used.value == 0) {
+                // - If so, deal another card and decrement turn
+                await dbQuery.getANewCard(data.game_id, data.player_index);
+                newTurn = data.player_index;
+            }
+            // Check for number of cards in hand and who is dealer
+            console.log("Getting card counts...");
+            data.rawCardCounts = await dbQuery.countHands(data.game_id);
+            console.log("Deciphering...");
+            data.cardCounts = [];
+            data.rawCardCounts.forEach((location)=>{
+                data.cardCounts[location.location_id] = location.amount;
+            });
+            console.log("Done.");
+            if (data.game.dealer == data.player_index && data.cardCounts[data.player_index] == 0) {
+                let numberOfCardsToDeal = 4;
+                // - Check number of cards in draw
+                if (data.cardCounts[18] <= 2) {
+                    // - - If 2 or less, reshuffle the deck, 
+                    numberOfCardsToDeal = 5;
+                    await dbQuery.reshuffleCards(data.game_id);
+                    // - - Then increment dealer and set turn to (dealer +1)%4
+                    newDealer = (newDealer+1) %4;
+                    newTurn = (newDealer+1) %4;
+                }
+                // - Deal hand of cards (5 if just shuffled, 4 otherwise)
+                await dbQuery.dealCardsToPlayer(data.game_id, numberOfCardsToDeal);
+            }
+            // Increment turn ( %4 ) and send trigger to new player.
+            console.log("Updating game "+data.game_id+" to "+newTurn+"|"+newDealer);
+            await dbQuery.updateGameTurn(data.game_id, newTurn, newDealer);
+            socketIO.to(data.game_id).emit("startTurn", newTurn);
+        }
+    }
+    console.log("Sending Validator Status.");
+    res.json(validator.getStatus());
 })
 
 /* PAGE: /game/concede/:id */
-router.get("/concede/:id", notLoggedInUser, async function(req, res, next) {
-    console.log ("Hit concede { game_id: %i, user_id: %i", req.game.id, req.user.id);
+router.get("/concede/:id", notLoggedInUser, async function (req, res, next) {
+    console.log("Hit concede { game_id: %i, user_id: %i", req.game.id, req.user.id);
     try {
         dbQuery.setPlayerAsConceded(req.game.id, req.user.id);
         dbQuery.endGameByConcession(req.game.id);
-        res.redirect("/game/summary/"+req.game.id);
+        res.redirect("/game/summary/" + req.game.id);
     } catch (err) {
         console.log(err)
     }
 });
 
-router.param("id", async(req, res, next, id) => {
+router.param("id", async (req, res, next, id) => {
     try {
         if (id > 0) {
             // console.log('userinfo', req.user);

@@ -144,9 +144,6 @@ class Spot {
             if (nextIndex === -1) {
                 let nextSection = (this.player - 1);
                 if (nextSection < 0) { nextSection += 4; }
-                if (this.player === player_index) {
-                    return null;
-                }
                 return { player: nextSection, area: 2, index: 17 };
             }
             return { player: this.player, area: 2, index: nextIndex };
@@ -381,29 +378,34 @@ let cardText = [
 class CurrentHand {
     constructor(data, active) {
         this.cards = data;
-        this.selected = this.cards.length - 1;
+        this.active = false;
+        if (this.cards) {
+            this.selected = this.cards.length - 1;
+            this.active = active;
+        }
         this.parent = document.getElementById("currentHand");
         this.text = document.getElementById("selectedCardText");
-        this.active = active;
     }
     loadHTML() {
-        let handHTML = '<div class="hHand">\n';
-        this.map((index, card) => {
-            let cardClasses = "tockCard ";
-            cardClasses += card.category.toLocaleLowerCase() + " ";
-            cardClasses += cardValueClasses[card.value] + " Card";
-            if (this.active){
-                if (!card.valid) { cardClasses += 'Not'; }
-                cardClasses += 'Valid';
-            }
-            handHTML += '<div class="' + cardClasses + '" id="playerHand_' + (index + 1) + '" ';
-            if (this.active){
-                handHTML += 'onclick="tockHistory.setSelectedCard(' + index + ');"';
-            }
-            handHTML += '></div>\n';
-        });
-        handHTML += "</div>\n";
-        this.parent.innerHTML = handHTML;
+        if (this.cards) {
+            let handHTML = '<div class="hHand">\n';
+            this.map((index, card) => {
+                let cardClasses = "tockCard ";
+                cardClasses += card.category.toLocaleLowerCase() + " ";
+                cardClasses += cardValueClasses[card.value] + " Card";
+                if (this.active) {
+                    if (!card.valid) { cardClasses += 'Not'; }
+                    cardClasses += 'Valid';
+                }
+                handHTML += '<div class="' + cardClasses + '" id="playerHand_' + (index + 1) + '" ';
+                if (this.active) {
+                    handHTML += 'onclick="tockHistory.setSelectedCard(' + index + ');"';
+                }
+                handHTML += '></div>\n';
+            });
+            handHTML += "</div>\n";
+            this.parent.innerHTML = handHTML;
+        } else { this.parent.innerHTML = ""; }
         let curCardText = "<p>Please wait for your turn.</p>";
         if (this.active) {
             curCardText = cardText[this.cards[this.selected].value](this.cards[this.selected].category);
@@ -543,7 +545,7 @@ class Strategy {
             if (marble.spot.area > 0) {
                 let marbleSpot = this.getCurrentSpot(marble.spot);
                 let nextSpot = marbleSpot.getPrevious(this.player);
-                let validPropel = this.validatePropel(nextSpot, propelAmount + 1);
+                let validPropel = this.validatePropel(nextSpot, -3);
                 if (validPropel !== null) {
                     this.addPossibility(MoveType.Propel, marble, validPropel);
                     this.setMarbleAsUnselected(marble);
@@ -1040,10 +1042,24 @@ class TockHistory {
         this.confirm = new ConfirmHandler("confirm");
         this.parseMarbles();
         this.parseOpponents();
-        if (this.active){
+        if (this.active) {
             this.prepareStrategies();
             if (this.canWaste) { this.setConfirm(); }
-        } 
+        }
+        this.setSelectedCard(this.hand.selected);
+    }
+    update(data) {
+        this.gameState = data;
+        this.active = this.gameState.activePlayer;
+        this.hand = new CurrentHand(this.gameState.curHand, this.active);
+        this.startBoard = new Board(this.gameState.numPlayers, this.gameState.game.curPlayerIndex);
+        this.confirm = new ConfirmHandler("Confirm");
+        this.parseMarbles();
+        this.parseOpponents();
+        if (this.active) {
+            this.prepareStrategies();
+            if (this.canWaste) { this.setConfirm(); }
+        }
         this.setSelectedCard(this.hand.selected);
     }
     setSelectedCard(newSelection) {
@@ -1173,8 +1189,7 @@ class TockHistory {
         console.log(possibility.toString());
         let data = this.compileMove(possibility);
         sendPost("/game/move", data)
-        .then((data)=>{ console.log(data); });
-        chatList.addSysMessage(JSON.stringify(data));
+            .then((data) => { console.log(data); });
     }
     compileMove(possibility) {
         let data = {
@@ -1186,7 +1201,7 @@ class TockHistory {
         data.hand = this.hand.compileHand();
         data.card_used = {
             game_card_id: possibility.card.id,
-            card_id: possibility.card.cardID
+            card_id: possibility.card.card_id
         };
         data.moves = [];
         data.moves.push({
@@ -1212,11 +1227,23 @@ class TockHistory {
         debug = true;
         this.strategy.currentBoard.AttachDivs();
     }
+    startTurn() {
+        let data = { game_id: this.gameState.gameID };
+        sendPost("/game/state", data)
+            .then((data) => {
+                console.log(data);
+                this.update(data);
+            });
+
+    }
+    endGame() {
+        document.getElementById("endGame").hidden = false;
+    }
+    leaveEndedGame() {
+        window.location.replace("/game/summary/" + this.gameState.gameID);
+    }
 }
 let tockHistory;
-function sendMoves(data) {
-    
-}
 async function sendPost(url, data) {
     const response = await fetch(url, {
         method: 'POST',

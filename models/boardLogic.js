@@ -127,7 +127,7 @@ class Board {
                         index: spotIndex
                     }));
                 }
-                homeSpaces.push(new Spot({
+                boardSpaces.push(new Spot({
                     player: playerIndex, 
                     area: 2, 
                     index: spotIndex
@@ -218,6 +218,23 @@ class Board {
         }
         return flow;
     }
+    checkWin(potential){
+        let homeCount = 0;
+        let playerMarbles = this.getPlayersMarbles();
+        playerMarbles.forEach((marble)=>{
+            if (potential[marble.id] === undefined) {
+                if (marble.spot.area == 1) {
+                    homeCount++;
+                }
+            }
+            else {
+                if (this.getSpotFromID(potential[marble.id]).area == 1) {
+                    homeCount++;
+                }
+            }
+        });
+        return homeCount == 4;
+    }
     fromHomeToStart(spotFunction) {
         let currentSpot = this.spots[this.localPlayer][1][3];
         let cancelFlag = false;
@@ -261,10 +278,13 @@ class Board {
         return this.spots[player_index][2][0].marble == player_index;
     }
     getSpot(data) {
-        return this.spots[data.player][data.area][data.index];
+        let spot = this.spots[data.player][data.area][data.index];
+        console.log("Spot "+spot.toString());
+        return spot;
     }
     getSpotFromID(spotID) {
         let spotInfo = spotsByID[spotID];
+        console.log("Retrieving spot "+spotID+": ["+spotInfo[0]+","+spotInfo[1]+","+spotInfo[2]+"]");
         return this.getSpot({
             player: spotInfo[0], 
             area: spotInfo[1], 
