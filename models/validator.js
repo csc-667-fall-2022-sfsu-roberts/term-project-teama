@@ -179,7 +179,7 @@ class Validator {
             console.log("Valid data and Access");
             this.board = makeBoard(4, this.truth.player_index, this.truth.marbles);
             if (this.submission.moves.length == 0){
-                let wasteValidator = validateWaste(this.board, this.truth.hand);
+                let wasteValidator = validateWaste(this.board, this.truth.cards);
                 if (wasteValidator.canWaste) { return true; }
                 else { return this.setStatus(ValidationStatus.CannotWasteWhenValidExists, { possibleCardIDs: wasteValidator.possibilities }); }
             } 

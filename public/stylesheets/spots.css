@@ -55,6 +55,11 @@
     width: var(--spot_size);
     height: var(--spot_size);
 }
+
+.fakeTockSpot {
+    width: var(--spot_size);
+    height: var(--spot_size);
+}
 .empty { background-position-x:   var(--spot_index_0); }
 
 .highlightRed {      background-position-x:   var(--spot_index_1); }

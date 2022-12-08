@@ -482,7 +482,7 @@ class Strategy {
         spotFunc(spot, marble);
     }
     getCurrentSpot(specs) {
-        return this.currentBoard.getSpotFromSpecs(specs);
+        return this.currentBoard.getSpot(specs);
     }
     addPossibility(moveType, marble, destinationSpot, otherProperties = {}) {
         let possibility = otherProperties;
@@ -564,6 +564,7 @@ class WasteValidator {
         this.strategies = [];
         this.canWaste = true;
         this.possibilities = [];
+        console.log(this.hand);
         this.hand.forEach((card) => {
             let curStrat;
             if (this.strategies[card.value]) {

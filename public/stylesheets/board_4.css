@@ -83,6 +83,7 @@
 .board_15 { left: 70%; top: 0%; }
 .board_16 { left: 80%; top: 0%; }
 .board_17 { left: 90%; top: 0%; }
+.board_18 { left: 0%; top: 90%; }
 
 /* CurrentPlayer: 1 */
 .player1asCenter {

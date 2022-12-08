@@ -247,6 +247,11 @@ class Board {
             + '';
         return decoHTML;
     }
+    getHomePortalHTML(player_index){
+        let htmlString = '<div class="fakeTockSpot board_18" id="homePortal_' + (player_index) + '"';
+        htmlString += ' onclick="tockHistory.proxyClick('+( (player_index+3) %4)+')"></div>';
+        return htmlString;
+    }
     AttachDivs() {
         let gbElement = document.getElementById("gameBoard");
         let boardHTML = '';
@@ -269,6 +274,7 @@ class Board {
                 }
                 boardSpots += this.spots[playerIndex][2][spotIndex].getHTML();
             }
+            boardSpots += this.getHomePortalHTML(playerIndex);
 
             boardHTML += playerOpen + playerDeco
                 + startOpen + startSpots + closeDiv
@@ -823,7 +829,7 @@ class Strategy {
     setPossibilityAsSelected(possibility) {
         this.onPossibilitySpot(possibility, (spot, possibility) => {
             spot.setHighlight(Highlight.Possibility.Selected);
-            spot.onClick = "tockHistory.deselectPossibilities();";
+            // spot.onClick = "tockHistory.deselectPossibilities();";
         });
     }
     setPossibilityAsUnselected(possibility) {
@@ -1208,7 +1214,7 @@ class TockHistory {
     }
     prepareMoveData() {
         let possibility = this.strategy.getPossibility();
-        if (possibility == null) {
+        if (possibility == null && !this.canWaste) {
             console.log("No possibility selected.");
             return null;
         } else {
@@ -1238,25 +1244,33 @@ class TockHistory {
             game_player_id: this.gameState.gamePlayer
         };
         data.hand = this.hand.compileHand();
-        data.card_used = {
-            game_card_id: possibility.card.id,
-            card_id: possibility.card.card_id
-        };
         data.moves = [];
-        data.moves.push({
-            marble_id: possibility.marble.id,
-            from_spot_id: possibility.sourceSpot.spotID,
-            to_spot_id: possibility.destinationSpot.spotID,
-            type: possibility.moveType
-        });
-        possibility.subMoves.forEach((subMove, index) => {
+        if (!this.canWaste){
+            data.card_used = {
+                game_card_id: possibility.card.id,
+                card_id: possibility.card.card_id
+            };
             data.moves.push({
-                marble_id: subMove.marble.id,
-                from_spot_id: subMove.fromSpot.spotID,
-                to_spot_id: subMove.toSpot.spotID,
-                type: subMove.moveType
+                marble_id: possibility.marble.id,
+                from_spot_id: possibility.sourceSpot.spotID,
+                to_spot_id: possibility.destinationSpot.spotID,
+                type: possibility.moveType
             });
-        });
+            possibility.subMoves.forEach((subMove, index) => {
+                data.moves.push({
+                    marble_id: subMove.marble.id,
+                    from_spot_id: subMove.fromSpot.spotID,
+                    to_spot_id: subMove.toSpot.spotID,
+                    type: subMove.moveType
+                });
+            });
+        } else {
+            let card = this.hand.getSelected();
+            data.card_used = {
+                game_card_id: card.id,
+                card_id: card.card_id 
+            }
+        }
         return data;
     }
     deselectPossibilities() {
@@ -1280,6 +1294,9 @@ class TockHistory {
     }
     leaveEndedGame() {
         window.location.replace("/game/summary/" + this.gameState.gameID);
+    }
+    proxyClick(player_index){
+        document.getElementById("spot_"+player_index+"_board_17").click();    
     }
 }
 let tockHistory;
