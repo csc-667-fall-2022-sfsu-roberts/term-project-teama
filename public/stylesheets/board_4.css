@@ -165,7 +165,7 @@
 .player4asCenter div div { transform: rotate(90deg); }
 .player1asLeft {
     margin-top: 2%;
-    margin-right: 2%;
+    margin-left: 2%;
 }
 .player2asAcross {
     margin-top:-50%;

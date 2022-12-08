@@ -111,7 +111,7 @@ class Spot {
         if (this.area == 0) {
             return { player: this.player, area: 2, index: 0 };
         } else if (this.area === 1) {
-            if (index === 4) {
+            if (this.index === 3) {
                 return null;
             }
             return { player: this.player, area: this.area, index: this.index + 1 };
@@ -131,11 +131,8 @@ class Spot {
         if (this.area == 0) {
             return null;
         } else if (this.area === 1) {
-            if (index === 0) {
-                let prevSection = player_index - 1;
-                if (prevSection < 0) {
-                    prevSection += 4;
-                }
+            if (this.index === 0) {
+                let prevSection = (this.player+3)%4;
                 return { player: prevSection, area: 2, index: 17 };
             }
             return { player: this.player, area: this.area, index: this.index - 1 };
@@ -309,13 +306,17 @@ class Board {
     }
     fromHomeToStart(spotFunction) {
         let currentSpot = this.spots[this.localPlayer][1][3];
+        let endSpot = this.spots[this.localPlayer][2][0];
         let cancelFlag = false;
+        let cancelNext = false;
         while (currentSpot != null && !cancelFlag) {
+            if (cancelNext) { cancelFlag = true; }
             cancelFlag = spotFunction(currentSpot);
-            let nextSpotSpecs = currentSpot.getPrevious();
+            let nextSpotSpecs = currentSpot.getPrevious(this.localPlayer);
             if (nextSpotSpecs == null) { currentSpot = null; }
             else {
                 currentSpot = this.getSpotFromSpecs(nextSpotSpecs);
+                if (currentSpot.spotID == endSpot.spotID){ cancelNext = true; }
             }
         }
     }
@@ -410,7 +411,10 @@ class CurrentHand {
         if (this.active) {
             curCardText = cardText[this.cards[this.selected].value](this.cards[this.selected].category);
         }
-        this.text.innerHTML = curCardText;
+        this.showText(curCardText);
+    }
+    showText(text) {
+        this.text.innerHTML = text;
     }
     map(mapFunction) {
         for (let cardIndex = 0; cardIndex < this.cards.length; cardIndex++) {
@@ -492,9 +496,8 @@ let MoveType = {
 };
 class Strategy {
     constructor(currentBoard, currentCard) {
-        this.startBoard = currentBoard.copy();
-        this.currentBoard = this.startBoard;
-        this.marbleBoard = null;
+        this.startBoard = currentBoard;
+        this.currentBoard = this.startBoard.copy();
         this.card = currentCard;
         this.player = this.currentBoard.localPlayer;
         this.selected = {
@@ -502,6 +505,7 @@ class Strategy {
             possibility: -1
         }
         this.setBoardCopy();
+        this.marbleBoard = this.currentBoard;
         this.possibilities = [];
         for (let stepIndex = 0; stepIndex < 4; stepIndex++) { this.possibilities.push([]); }
         this.possibilityKey = 0;
@@ -635,7 +639,7 @@ class Strategy {
     isBlocked(propelInfo, nextSpace) {
         let spot = nextSpace;
         let marble = propelInfo.marble;
-        if (spot.id == propelInfo.currentSpot.id) { return true; }
+        if (spot.id == propelInfo.currentSpace.id) { return true; }
         if (spot.marble > -1) {
             if (spot.marble == marble.ident) {
                 return false;
@@ -720,6 +724,7 @@ class Strategy {
             };
             this.getTheorySpot(newMarbles[index].spot).marble = newMarbles[index].ident;
         });
+        return newMarbles;
     }
     calculateSpotDistance(from, to) {
         let equal = (from, to) => {
@@ -787,7 +792,7 @@ class Strategy {
                             this.possibility.subMoves.push(tockSubMove);
                         }
                         previousSpot = destination;
-                        currentSpot++;
+                        currentIndex++;
                     }
                 }
             }
@@ -875,6 +880,7 @@ class Strategy {
         keys.forEach((keyName, index) => {
             newPossibility[keyName] = possibility[keyName];
         });
+        newPossibility.subMoves = [];
         return newPossibility;
     }
     getTockSubmove(spot) {
@@ -949,6 +955,7 @@ class Strategy {
         propelInfo.marble.spot.player = newTheory.player;
         propelInfo.marble.spot.area = newTheory.area;
         propelInfo.marble.spot.index = newTheory.index;
+        propelInfo.selected = possibilityIndex;
         this.updateTheory();
         this.possibility = null;
     }
@@ -980,11 +987,14 @@ class Strategy {
         }
     }
     getPossibility() {
-        if (this.theory) {
-            return this.compileTheory();
-        } else {
-            return this.possibilities[this.selected.marble][this.selected.possibility];
+        if (this.isReady()){
+            if (this.theory) {
+                return this.compileTheory();
+            } else {
+                return this.possibilities[this.selected.marble][this.selected.possibility];
+            }
         }
+        return null;
     }
     deselectPossibilities() {
         let oldPossibility = this.possibilities[this.selected.marble][this.selected.probability];
@@ -1006,6 +1016,13 @@ class Strategy {
         this.currentBoard = this.previousBoard;
         this.previousBoard = this.board;
         this.currentBoard.AttachDivs();
+    }
+    setMarbleBoard() {
+        this.currentBoard = this.marbleBoard;
+        this.activeMarbles = this.currentBoard.getOnBoardMarbles();
+        this.myMarbles = this.currentBoard.getPlayersMarbles();
+        this.selected.marble = -1;
+        this.selected.possibility = -1;
     }
 }
 class ConfirmHandler {
@@ -1053,7 +1070,8 @@ class TockHistory {
         this.active = this.gameState.activePlayer;
         this.hand = new CurrentHand(this.gameState.curHand, this.active);
         this.startBoard = new Board(this.gameState.numPlayers, this.gameState.game.curPlayerIndex);
-        this.confirm = new ConfirmHandler("Confirm");
+        this.canWaste = false;
+        this.setConfirm();
         this.parseMarbles();
         this.parseOpponents();
         if (this.active) {
@@ -1067,8 +1085,12 @@ class TockHistory {
         let newCard = this.hand.getSelected();
         let newBoard = this.startBoard;
         if (this.active) {
+            if (this.strategy !== undefined){
+                this.strategy.setMarbleBoard();
+            }
             this.strategy = this.strategies[newCard.value];
             newBoard = this.strategy.currentBoard;
+            this.setConfirm();
         }
         this.currentBoard = newBoard;
         this.currentBoard.AttachDivs();
@@ -1154,7 +1176,7 @@ class TockHistory {
     selectPossibility(marbleId, possibilityIndex) {
         if (this.strategy.selectPossibility(marbleId, possibilityIndex)) {
             this.setConfirm(this.strategy.getPossibility());
-        }
+        } else { this.setConfirm(); }
     }
     selectPrevious() {
         this.strategy.setPreviousBoard();
@@ -1184,12 +1206,29 @@ class TockHistory {
             }
         }
     }
-    confirmMove() {
+    prepareMoveData() {
         let possibility = this.strategy.getPossibility();
-        console.log(possibility.toString());
-        let data = this.compileMove(possibility);
-        sendPost("/game/move", data)
-            .then((data) => { console.log(data); });
+        if (possibility == null) {
+            console.log("No possibility selected.");
+            return null;
+        } else {
+            let data = this.compileMove(possibility);
+            console.log("Prepared move: ");
+            console.log(data);
+            return data;
+        }
+    }
+    confirmMove() {
+        let data = this.prepareMoveData();
+        if (data !== null) {
+            sendPost("/game/move", data)
+                .then((data) => { 
+                    console.log(data); 
+                    if (data.status.valid !== true){
+                        this.hand.showText("<p>Error</p><p>"+data.status.text+"</p>");
+                    }
+                });
+        }
     }
     compileMove(possibility) {
         let data = {

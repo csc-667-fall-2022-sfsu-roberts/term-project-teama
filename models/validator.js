@@ -207,12 +207,14 @@ class Validator {
             expectTock: false,
             fromSpot: this.board.getSpotFromID(propelMove.from_spot_id)
         };
-        folio.endSpot = this.board.traverse(fromSpot, distance, (spot)=>{
+        folio.endSpot = this.board.traverse(folio.fromSpot, distance, (spot)=>{
+            console.log("Traversing at "+spot.toString());
             if (spot.isBlocking(this.truth.player_index)){
                 if (spot.spotID == propelMove.to_spot_id) {
                     folio.expectTock = true;
                 } else {
-                    folio.blocking = spot;
+                    let blockingMarble = this.board.getMarbleOnSpot(spot);
+                    if (blockingMarble && blockingMarble.id !== propelMove.marble_id){ folio.blocking = spot;}
                 }
             }
         });
@@ -222,19 +224,20 @@ class Validator {
             this.truth.gameOver = this.board.checkWin(potential);
         }
         // Propel blocked
-        if (blocking !== null) {
-            let data = { spot_id: blocking.spotID, marble: this.board.getMarbleOnSpot(blocking).id };
+        if (folio.blocking !== null) {
+            let data = { spot_id: folio.blocking.spotID, marble: this.board.getMarbleOnSpot(folio.blocking).id };
             return this.setStatus(ValidationStatus.PropelBlocked, data);
         }
         // Propel inaccurate
-        if (endSpot.spotID !== propelMove.to_spot_id){
-            let data = { actual: endSpot.spotID, provided: propelMove.to_spot_id};
+        if (folio.endSpot.spotID !== propelMove.to_spot_id){
+            let data = { actual: folio.endSpot.spotID, provided: propelMove.to_spot_id};
             return this.setStatus(ValidationStatus.IncorrectPropelEnd, data);
         }
-        if (folio.expectTock == this.submission.moves.length == 2){
+        if (folio.expectTock == (this.submission.moves.length == 2)){
             if (folio.expectTock){
-                return this.validateTock(endSpot, this.submission.moves[1]);
+                return this.validateTock(folio.endSpot, this.submission.moves[1]);
             }
+            return true;
         } else {
             let data = { tockExpected: folio.expectTock, tockMove: this.submission.moves[1] };
             return this.setStatus(ValidationStatus.IncorrectTockMove, data);

@@ -61,7 +61,7 @@ class Spot {
         if (this.area == 0) {
             return { player: this.player, area: 2, index: 0 };
         } else if (this.area === 1) {
-            if (index === 4) {
+            if (this.index === 3) {
                 return null;
             }
             return { player: this.player, area: this.area, index: this.index + 1 };
@@ -81,22 +81,15 @@ class Spot {
         if (this.area == 0) {
             return null;
         } else if (this.area === 1) {
-            if (index === 0) {
-                let prevSection = player_index - 1;
-                if (prevSection < 0) {
-                    prevSection += 4;
-                }
+            if (this.index === 0) {
+                let prevSection = (player_index +3) %4;
                 return { player: prevSection, area: 2, index: 17 };
             }
             return { player: this.player, area: this.area, index: this.index - 1 };
         } else {
             let nextIndex = this.index - 1;
             if (nextIndex === -1) {
-                let nextSection = (this.player - 1);
-                if (nextSection < 0) { nextSection += 4; }
-                if (this.player === player_index) {
-                    return null;
-                }
+                let nextSection = (this.player+3)%4;
                 return { player: nextSection, area: 2, index: 17 };
             }
             return { player: this.player, area: 2, index: nextIndex };
@@ -182,7 +175,7 @@ class Board {
     }
     getPlayersMarbles() {
         return this.filterMarbles((marble, player, index, board) => {
-            if (player == board.localPlayer) { return true; }
+            if (player == board.player) { return true; }
             return false;
         });
     }
@@ -191,8 +184,8 @@ class Board {
         if (marblePlayer === -1) {
             return null;
         }
-        for (let marbleIndex = 0; marbleIndex < 4; marbleIndex++) {
-            let curMarble = this.marbles[marblePlayer][marbleIndex];
+        for (let marbleIndex = 0; marbleIndex < this.marbles.length; marbleIndex++) {
+            let curMarble = this.marbles[marbleIndex];
             if (spot.player == curMarble.spot.player) {
                 if (spot.area == curMarble.spot.area) {
                     if (spot.index == curMarble.spot.index) {
@@ -236,32 +229,40 @@ class Board {
         return homeCount == 4;
     }
     fromHomeToStart(spotFunction) {
-        let currentSpot = this.spots[this.localPlayer][1][3];
+        let currentSpot = this.spots[this.player][1][3];
+        let endSpot = this.spots[this.player][2][0];
         let cancelFlag = false;
+        let cancelNext = false;
         while (currentSpot != null && !cancelFlag) {
+            if (cancelNext){ cancelFlag = true; }
             cancelFlag = spotFunction(currentSpot);
-            let nextSpotSpecs = currentSpot.getPrevious();
+            let nextSpotSpecs = currentSpot.getPrevious(this.player);
             if (nextSpotSpecs == null) { currentSpot = null; }
             else {
                 currentSpot = this.getSpotFromSpecs(nextSpotSpecs);
+                if (currentSpot.spotID == endSpot.spotID){ cancelNext = true; }
             }
         }
     }
     traverse(fromSpotSpecs, amount, mapFunction) {
+        console.log("traverse ("+amount+"): ");
+        console.log(fromSpotSpecs);
         let spot = this.getSpot(fromSpotSpecs);
         mapFunction(spot);
         if (amount == 0) { return spot; }
         else if (amount > 0) {
             let nextSpot = spot.getNext(this.player);
             if (nextSpot === null) { return null; }
-            return this.traverse(nextSpot, amount - 1);
+            return this.traverse(nextSpot, amount - 1, mapFunction);
         } else {
-            return this.traverse(spot.getPrevious(this.player), amount + 1);
+            let nextSpot = spot.getPrevious(this.player);
+            if (nextSpot === null) { console.log("back4Spot was null"); return null; }
+            return this.traverse(nextSpot, amount + 1, mapFunction);
         }
     }
     getBoardBlockers() {
         let blockers = [];
-        let playerIndex = this.localPlayer;
+        let playerIndex = this.player;
         let count = 0;
         while (count < 4) {
             if (this.spots[playerIndex][2][8].marble > -1) {
@@ -278,13 +279,13 @@ class Board {
         return this.spots[player_index][2][0].marble == player_index;
     }
     getSpot(data) {
+        if (data === null){ return data; }
         let spot = this.spots[data.player][data.area][data.index];
-        console.log("Spot "+spot.toString());
+        console.log("getSpot "+spot.toString());
         return spot;
     }
     getSpotFromID(spotID) {
         let spotInfo = spotsByID[spotID];
-        console.log("Retrieving spot "+spotID+": ["+spotInfo[0]+","+spotInfo[1]+","+spotInfo[2]+"]");
         return this.getSpot({
             player: spotInfo[0], 
             area: spotInfo[1], 
@@ -318,7 +319,7 @@ class Strategy {
     constructor(board, card) {
         this.currentBoard = board;
         this.card = card;
-        this.player = this.currentBoard.localPlayer;
+        this.player = this.currentBoard.player;
         this.activeMarbles = this.currentBoard.getOnBoardMarbles();
         this.myMarbles = this.currentBoard.getPlayersMarbles();
         this.possibilities = [];

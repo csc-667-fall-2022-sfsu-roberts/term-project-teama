@@ -10,7 +10,7 @@ const { makeValidator } = require("../models/validator");
 router.get("/show/:id", async function (req, res, next) {
     let numPlayers = 4;
     let gameId = req.params.id;
-    console.log(req.game.state);
+    // console.log(req.game.state);
     if (req.game.state == 0) {
         res.redirect('/game/created/' + gameId);
     } else if (req.game.state == 2) {
@@ -89,7 +89,7 @@ router.get("/show/:id", async function (req, res, next) {
             attributes.hands = await dbQuery.countHands(gameId);
             attributes.curHand = await dbQuery.getHand(gameId, req.game.curPlayerIndex);
             attributes.marbles = await dbQuery.getMarbles(gameId);
-            console.log(attributes);
+            // console.log(attributes);
         }
         res.render("game", attributes);
     }
@@ -177,6 +177,7 @@ router.post("/state", async function (req, res, next) {
             gameID: req.body.game_id,
             user: req.user,
             userID: req.user.id,
+            numPlayers: 4
         };
         let game = await dbQuery.findGamesByGameId(data.gameID);
         if (game) {
@@ -192,10 +193,12 @@ router.post("/state", async function (req, res, next) {
             for (let playerIndex=0; playerIndex<gameusers.length; playerIndex++){
                 let player = gameusers[playerIndex];
                 const userinfo = await dbQuery.findUserById(player.player_id);
-                if (data.userId === userinfo.id) {
+                console.log("Checking game_player for id "+data.userID+": "+userinfo.id);
+                if (data.userID === userinfo.id) {
                     data.game.isPlayer = true;
                     data.game.curPlayerIndex = player.player_index;
                     data.user.gamePlayerId = player.id;
+                    data.curPlayer = player.player_index;
                     data.status = "player";
                 }
                 data.players[playerIndex] = {
