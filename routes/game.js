@@ -14,7 +14,7 @@ router.get("/show/:id", async function (req, res, next) {
     if (req.game.state == 0) {
         res.redirect('/game/created/' + gameId);
     } else if (req.game.state == 2) {
-        res.redirect('/game/summary' + gameId);
+        res.redirect('/game/summary/' + gameId);
     } else {
 
         let head = '<link rel="stylesheet" href="/stylesheets/cards.css">\n' +
@@ -142,20 +142,6 @@ router.post("/create", async function (req, res, next) {
 /* PAGE: /game/created/:id */
 router.get("/created/:id", notLoggedInUser, async function (req, res, next) {
     try {
-        /*
-        const gameInfo = findGamesByGameId(req.game.id);
-        if (gameInfo) {
-            if (gameInfo.state === 1){
-                if (userIsPlayingGame(req.game.id, req.user.id)){
-                    res.redirect(`/game/show/${req.game.id}`);
-                } else {
-                    res.redirect('/lobby');
-                }
-                
-            }
-        } 
-        */
-
         res.render("created", { user: req.user, game: req.game, players: req.players });
     } catch (err) {
         console.log(err)
@@ -262,7 +248,7 @@ router.post("/move", async function (req, res, next) {
                 // - - If so, edit the game table to complete the game
                 await dbQuery.endGameByWin(data.game_id, data.user_id);
                 // - - Send everyone to summary
-                socketIO.to(data.game_id).emit("endGame");
+                socketIO.to(data.game_id).emit("endGame", data.game_id);
             } else {
                 // If still playing...
                 let newTurn = (data.player_index+1) %4;

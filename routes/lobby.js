@@ -7,7 +7,7 @@ const dbQuery = require('../db/dbquery');
 /* PAGE: /lobby */
 router.get('/', notLoggedInUser, async function (req, res, next) {
     const user = req.user;
-    const {startedGames, normalGames} = await dbQuery.enOrStartedGames(user.id);
+    const {startedGames, normalGames, endedGames} = await dbQuery.enOrStartedGames(user.id);
     const {notEngagedGames, fullGames} = await dbQuery.notEnOrFullGames(user.id);
     for(let i = 0; i < normalGames.length; i++) {
         let creator = normalGames[i].game.creator;
@@ -24,7 +24,7 @@ router.get('/', notLoggedInUser, async function (req, res, next) {
     console.log('not-en-full:',fullGames);
    */
   
-    res.render('lobby', { user, startedGames, normalGames, notEngagedGames, fullGames });
+    res.render('lobby', { user, startedGames, normalGames, endedGames, notEngagedGames, fullGames });
 });
 
 /* API: /lobby/send 

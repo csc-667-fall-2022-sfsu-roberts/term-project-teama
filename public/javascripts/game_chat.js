@@ -22,8 +22,17 @@ socket.on('startTurn', (playerIndex) => {
     tockHistory.startTurn(playerIndex);
 });
 
-socket.on('endGame', () => {
+socket.on('endGame', (gameId) => {
     tockHistory.startTurn(playerIndex);
+    /*
+    console.log('end game');
+    fetch(`/game/summary/${gameId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "Application/json"
+        }
+    })
+    */
 });
 
 
@@ -84,4 +93,3 @@ function outputMessage(message) {
     div.appendChild(div2);
     document.querySelector('.game-chat-message').appendChild(div);
 }
-

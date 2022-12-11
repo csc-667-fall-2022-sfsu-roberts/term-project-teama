@@ -93,8 +93,18 @@ const endGameByConcession = (game_id)=>{
     return db.oneOrNone('UPDATE "games" SET "state"=2, "date_ended"=NOW() WHERE "id"=${game_id}', { game_id });
 };
 
-const endGameByWin = (game_id, user_id)=>{
-    return db.oneOrNone('UPDATE "games" SET "state"=2, "winner"=${user_id}, "date_ended"=NOW() WHERE "id"=${game_id}', { game_id, user_id });
+const endGameByWin = async (game_id, user_id)=>{
+    await db.oneOrNone('UPDATE "games" SET "state"=2, "winner"=${user_id}, "date_ended"=NOW() WHERE "id"=${game_id}', { game_id, user_id });
+    let players = await findAllUsersByGameId(game_id);
+    for(let i = 0; i < players.length; i++){
+        let id = players[i].player_id;
+        if(id === user_id){
+            await db.oneOrNone('UPDATE "users" SET "wins"="wins"+1 WHERE "id"=${id}', {id});
+        }else{
+            await db.oneOrNone('UPDATE "users" SET "loses"="loses"+1 WHERE "id"=${id}', {id});
+        }
+    } 
+    return;
 };
 
 const updateGameTurn = (game_id, turn, dealer) => {
@@ -306,10 +316,12 @@ const playersInGame = async (gameid) => {
 const enOrStartedGames = async (userid) => {
     let rs = {
         startedGames: [],
-        normalGames: []
+        normalGames: [],
+        endedGames: []
     };
     let m = 0;
     let n = 0;
+    let q = 0;
     let games = await findEnGames(userid);
     for (let i = 0; i < games.length; i++) {
         let num = (await numOfPlayers(games[i].id)).count;
@@ -322,7 +334,15 @@ const enOrStartedGames = async (userid) => {
                     players: await playersInGame(games[i].id)
                 };
                 m++;
-            } else {
+            } else if(games[i].state == 2){
+                rs.endedGames[q] = {
+                    game: games[i],
+                    numOfUsers: num,
+                    winner: (await findUserById(games[i].winner)).username,
+                    players: await playersInGame(games[i].id)
+                };
+                q++;
+            } else if(games[i].state == 0){
                 rs.normalGames[n] = {
                     game: games[i],
                     numOfUsers: num,
@@ -370,7 +390,7 @@ const notEnOrFullGames = async (userid) => {
 /* socket/initialization */
 const initRooms = async () => {
     let rooms = {};
-    let games = await findAllGames();
+    let games = await db.any('SELECT * FROM "games" WHERE state != 2 ORDER BY "id" DESC');;
     if (games) {
         for (let i = 0; i < games.length; i++) {
             let game = games[i];
@@ -397,8 +417,10 @@ const initRooms = async () => {
 };
 
 const deleteGame = (gameid) => {
-    db.any('DELETE FROM "game_players" WHERE "game_id"=${gameid}', { gameid });
-    db.any('DELETE FROM "games" WHERE "id"=${gameid}', { gameid });
+    db.any('DELETE FROM "game_players" WHERE "game_id"=${gameid}', { gameid })
+    .then(rs => {
+        db.any('DELETE FROM "games" WHERE "id"=${gameid}', { gameid });
+    })
     return;
 };
 

@@ -18,22 +18,31 @@
             </div><br>
             <div class="card">
                 <div class="card-body bg-light">
-                    <h5 class="card-title">Engaged Games</h5>
+                    <h5 class="card-title">Your Games</h5>
                 </div>
-                <div class="ms-2">
-                    <table class="engaged-game-list">
+                <div class="ms-2" style="height: 200px; overflow-y: scroll;">
+                    <table class="engaged-game-list table table-hover" style="table-layout: fixed;">
+                        <thead>
+                            <tr>
+                                <td class="text-center">Game name</td>
+                                <td class="text-center">Players</td>
+                                <td class="text-center"></td>
+                            </tr>
+                        </thead>
                         <tbody id="started-game">
                             {{#each startedGames}}
                             <tr id="game-info" class="engaged-game-info" data-gameid="{{this.game.id}}"
                                 data-gamename="{{this.game.name}}">
-                                <td>
-                                    <p id="game-name"> {{this.game.name}}: </p>
+                                <td class="align-middle text-center">
+                                    <a id="game-name" class="btn" href="/game/created/{{this.game.id}}" target="_blank">
+                                        {{this.game.name}} </a>
+                                    {{!-- <p id="game-name" class="mb-0"> {{this.game.name}}</p> --}}
                                 </td>
-                                <td>
-                                    <p id="player-number"> {{this.numOfUsers}}/4 </p>
+                                <td class="align-middle text-center">
+                                    <p id="player-number" class="mb-0"> {{this.numOfUsers}}</p>
                                 </td>
-                                <td>
-                                    <a href="/game/show/{{this.game.id}}" target="_blank" class="btn btn-primary my-3"
+                                <td class="align-middle text-center">
+                                    <a href="/game/show/{{this.game.id}}" target="_blank" class="btn btn-primary btn-xs"
                                         role="button" id="view-game-btn">View</a>
                                 </td>
                             </tr>
@@ -44,77 +53,50 @@
                             {{#each normalGames}}
                             <tr id="game-info" class="engaged-game-info" data-gameid="{{this.game.id}}"
                                 data-gamename="{{this.game.name}}">
-                                <td>
-                                    <p id="game-name"> {{this.game.name}}: </p>
+                                <td class="align-middle text-center">
+                                    <a id="game-name" class="btn" href="/game/created/{{this.game.id}}" target="_blank">
+                                        {{this.game.name}} </a>
+
+                                    {{!-- <p id="game-name" class="mb-0"> {{this.game.name}}</p> --}}
                                 </td>
-                                <td>
-                                    <p id="player-number"> {{this.numOfUsers}}/4 </p>
+                                <td class="align-middle text-center">
+                                    <p id="player-number" class="mb-0"> {{this.numOfUsers}}</p>
                                 </td>
 
-                                <td>
-                                    {{!-- <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3"
-                                        role="button" --}} {{!-- id="view-game-btn">View</a> --}}
-
-                                    <!-- Button trigger modal -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        id="viewGameDetails" data-bs-target="#gameDetails">
-                                        View Game Details
-                                    </button>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="gameDetails" tabindex="-1"
-                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalLabel">Game Details</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <h5>Table Name: {{this.game.name}}</h5>
-                                                    <h5>Players At This Table: {{this.numOfUsers}}/4</h5>
-                                                    {{#each this.players}}
-                                                    <div class="card d-flex flex-column mb-3">
-                                                        <div class="card-body d-flex align-content-start">
-                                                            <div class="player-left m-1 avatar avatar_{{user.avatar}}">
-                                                            </div>
-                                                            <div class="player-body">
-                                                                <div class="mb-2">
-                                                                    <span class="fs-5 ps-2">{{this.name}}</span>
-                                                                    {{#if this.iscreator}}
-                                                                    <small class="fs-6 ps-1">(table
-                                                                        administrator)</small>
-                                                                    {{/if}}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {{/each}}
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
                                 {{#if this.isCreator}}
-                                <td>
-                                    <button type="button" class="btn btn-primary" id="quit-game-btn"
+                                <td class="align-middle text-center">
+                                    <button type="button" class="btn btn-primary btn-xs" id="quit-game-btn"
                                         onclick="return quitBtn({{this.game.id}})">Quit</button>
-                                </td>
-                                <td>
-                                    <a href="/game/show/{{this.game.id}}" target="_blank" class="btn btn-primary my-3"
+
+                                    <a href="/game/show/{{this.game.id}}" target="_blank" class="btn btn-primary btn-xs"
                                         role="button" id="start-game-btn"
                                         onclick="return startBtn({{this.game.id}})">Start</a>
                                 </td>
                                 {{else}}
-                                <td>
-                                    <button type="button" class="btn btn-primary" id="quit-game-btn"
+                                <td class="align-middle text-center">
+                                    <button type="button" class="btn btn-primary btn-xs" id="quit-game-btn"
                                         onclick="return quitBtn({{this.game.id}})">Quit</button>
                                 </td>
                                 {{/if}}
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                        <tbody id="ended-game">
+                            {{#each endedGames}}
+                            <tr id="game-info" class="success" data-gameid="{{this.game.id}} "
+                                data-gamename="{{this.game.name}}">
+                                <td class="align-middle text-center">
+                                    <a id="game-name" class="btn" href="/game/show/{{this.game.id}}" target="_blank">
+                                        {{this.game.name}} </a>
+
+                                    {{!-- <p id="game-name" class="mb-0"> {{this.game.name}}</p> --}}
+                                </td>
+                                <td class="align-middle text-center">
+                                    <p id="player-number" class="mb-0"> {{this.numOfUsers}}</p>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <p id="game-winner" class="mb-0"> {{this.winner}}</p>
+                                </td>
                             </tr>
                             {{/each}}
                         </tbody>
@@ -123,13 +105,16 @@
             </div><br>
             <div class="card">
                 <div class="card-body bg-light">
-                    <h5 class="card-title">Not Engaged Games</h5>
+                    <h5 class="card-title">Available Games</h5>
                 </div>
-                <div class="ms-2">
-                    <table class="not-engaged-games-list">
+
+                <div class="ms-2" style="height: 200px; overflow-y: scroll;">
+                    <table class="not-engaged-games-list table table-hover" style="table-layout: fixed;">
                         <thead>
                             <tr>
-                                <th>Available Games</th>
+                                <td class="text-center font-weight-bold">Game name</td>
+                                <td class="text-center">Players</td>
+                                <td class="text-center"></td>
                             </tr>
                         </thead>
                         <tbody id="no-en-game">
@@ -137,123 +122,40 @@
                             {{#each notEngagedGames}}
                             <tr id="game-info" class="not-en-game-info" data-gameid="{{this.game.id}}"
                                 data-gamename="{{this.game.name}}">
-                                <td>
-                                    <p id="game-name"> {{this.game.name}}: </p>
+                                <td class="align-middle text-center">
+                                    <a id="game-name" class="btn" href="/game/created/{{this.game.id}}" target="_blank">
+                                        {{this.game.name}} </a>
+                                    {{!-- <p id="game-name" class="mb-0"> {{this.game.name}}</p> --}}
                                 </td>
-                                <td>
-                                    <p id="player-number"> {{this.numOfUsers}}/4 </p>
+                                <td class="align-middle text-center">
+                                    <p id="player-number" class="mb-0"> {{this.numOfUsers}}</p>
                                 </td>
-                                <td>
-                                    {{!-- <a href="/game/created/{{this.game.id}}" class="btn btn-primary my-3"
-                                        role="button" --}} {{!-- id="view-game-btn">View</a> --}}
 
-                                    <!-- Button trigger modal -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        id="viewGameDetails" data-bs-target="#gameDetails">
-                                        View Game Details
-                                    </button>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="gameDetails" tabindex="-1"
-                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalLabel">Game Details</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <h5>Table Name: {{this.game.name}}</h5>
-                                                    <h5>Players At This Table: {{this.numOfUsers}}/4</h5>
-                                                    {{#each this.players}}
-                                                    <div class="card d-flex flex-column mb-3">
-                                                        <div class="card-body d-flex align-content-start">
-                                                            <div class="player-left m-1 avatar avatar_{{user.avatar}}">
-                                                            </div>
-                                                            <div class="player-body">
-                                                                <div class="mb-2">
-                                                                    <span class="fs-5 ps-2">{{this.name}}</span>
-                                                                    {{#if this.iscreator}}
-                                                                    <small class="fs-6 ps-1">(table
-                                                                        administrator)</small>
-                                                                    {{/if}}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {{/each}}
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-primary" id="join-game-btn"
+                                <td class="align-middle text-center">
+                                    <button type="button" class="btn btn-primary btn-xs" id="join-game-btn"
                                         onclick="return joinBtn({{this.game.id}})">Join</button>
                                 </td>
                             </tr>
                             {{/each}}
                         </tbody>
-                        <thead>
-                            <tr>
-                                <th>Full Games</th>
-                            </tr>
-                        </thead>
                         <tbody id="full-game">
+                            {{!-- {{#each notEngagedGames as | notEngagedGames |}} --}}
                             {{#each fullGames}}
                             <tr id="game-info" class="full-game-info" data-gameid="{{this.game.id}}"
                                 data-gamename="{{this.game.name}}">
-                                <td>
-                                    <p id="game-name"> {{this.game.name}}: </p>
+                                <td class="align-middle text-center">
+                                    <a id="game-name" class="btn" href="/game/created/{{this.game.id}}" target="_blank">
+                                        {{this.game.name}} </a>
+
+                                    {{!-- <p id="game-name" class="mb-0"> {{this.game.name}}</p> --}}
                                 </td>
-                                <td>
-                                    <!-- Button trigger modal -->
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        id="viewGameDetails" data-bs-target="#gameDetails">
-                                        View Game Details
-                                    </button>
-                                    <!-- Modal -->
-                                    <div class="modal fade" id="gameDetails" tabindex="-1"
-                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalLabel">Game Details</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <h5>Table Name: {{this.game.name}}</h5>
-                                                    <h5>Players At This Table: {{this.numOfUsers}}/4</h5>
-                                                    {{#each this.players}}
-                                                    <div class="card d-flex flex-column mb-3">
-                                                        <div class="card-body d-flex align-content-start">
-                                                            <div class="player-left m-1 avatar avatar_{{user.avatar}}">
-                                                            </div>
-                                                            <div class="player-body">
-                                                                <div class="mb-2">
-                                                                    <span class="fs-5 ps-2">{{this.name}}</span>
-                                                                    {{#if this.iscreator}}
-                                                                    <small class="fs-6 ps-1">(table
-                                                                        administrator)</small>
-                                                                    {{/if}}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {{/each}}
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <td class="align-middle text-center">
+                                    <p id="player-number" class="mb-0"> {{this.numOfUsers}}</p>
+                                </td>
+
+                                <td class="align-middle text-center">
+                                    <button type="button" class="btn btn-primary btn-xs" id="join-game-btn"
+                                        disabled="disabled">Join</button>
                                 </td>
                             </tr>
                             {{/each}}
@@ -268,7 +170,7 @@
                     style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
                     <p class="mb-0 fw-bold">Lobby Live chat</p>
                 </div>
-                <div class="chat-message card-body" style="height: 500px; overflow-y: scroll;">
+                <div class="chat-message card-body" style="height: 575px; overflow-y: scroll;">
                 </div>
                 <div class="chat-form-container">
                     <form id="chat-form" class="form-outline">
@@ -283,6 +185,42 @@
         </div>
     </div>
 </main>
+
+{{!-- modal
+<div class="modal fade" id="gameDetails" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Game Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5>Table Name: {{this.game.name}}</h5>
+                <h5>Players At This Table: {{this.numOfUsers}}</h5>
+                {{#each this.players}}
+                <div class="card d-flex flex-column mb-3">
+                    <div class="card-body d-flex align-content-start">
+                        <div class="player-left m-1 avatar avatar_{{user.avatar}}">
+                        </div>
+                        <div class="player-body">
+                            <div class="mb-2">
+                                <span class="fs-5 ps-2">{{this.name}}</span>
+                                {{#if this.iscreator}}
+                                <small class="fs-6 ps-1">(table
+                                    administrator)</small>
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> --}}
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/lobby.js"></script>

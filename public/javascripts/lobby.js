@@ -118,7 +118,7 @@ socket.on('lobby-join-new-game', (data) => {
                 if (id == gameid) {
                     console.log('update playernum:', id, row)
                     let pNum = row.cells[1];
-                    pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
+                    pNum.innerHTML = `<p id="player-number" class="mb-0"> ${playerNumber} </p>`;
                 }
             })
         }
@@ -130,11 +130,13 @@ socket.on('start-game', ({ gameid, userid, creator, playerNumber }) => {
     document.querySelectorAll(".engaged-game-info").forEach(row => {
         if (row.dataset.gameid == gameid) {
             let pNum = row.cells[1];
-            pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
+            pNum.innerHTML = `<p id="player-number" class="mb-0"> ${playerNumber}</p>`;
             // if is creator, add start 
             if (userid == creator) {
-                let startBtn = row.insertCell(4);
-                startBtn.innerHTML = `<a href="/game/show/${gameid}" target="_blank" class="btn btn-primary my-3" role="button"
+                let startBtn = row.cells[2];
+                startBtn.innerHTML = `<button type="button" class="btn btn-primary btn-xs" id="quit-game-btn"
+                onclick="return quitBtn(${gameid})">Quit</button>
+                <a href="/game/show/${gameid}" target="_blank" class="btn btn-primary btn-xs" role="button"
     id="start-game-btn" onclick="return startBtn(${gameid})">Start</a>`;
             }
         }
@@ -165,17 +167,29 @@ socket.on('lobby-quit-game', (data) => {
             }
         })
         // enUser(update playernum, delete startBtn)
-        document.querySelectorAll(".engaged-game-info").forEach(row => {
-            if (row.dataset.gameid == gameid) {
-                let pNum = row.cells[1];
-                console.log('lobby-quit-game', pNum)
-                pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
-                if (row.cells[4]) {
-                    row.cells[4].remove();
+        if (curUserID == reqUser) {
+            document.querySelectorAll(".engaged-game-info").forEach(row => {
+                if (row.dataset.gameid == gameid) {
+                    console.log('QUIT, requser move from en to not-en', gameid);
+                    row.remove();
+                    addRowToNotEnGame(data);
                 }
-            }
-        })
-    } else {            
+            })
+        } else {
+            document.querySelectorAll(".engaged-game-info").forEach(row => {
+                if (row.dataset.gameid == gameid) {
+                    let pNum = row.cells[1];
+                    console.log('lobby-quit-game', pNum)
+                    pNum.innerHTML = `<p id="player-number" class="mb-0"> ${playerNumber}</p>`;
+                    if (row.cells[2]) {
+                        row.cells[2].innerHTML = `<button type="button" class="btn btn-primary btn-xs" id="quit-game-btn"
+                        onclick="return quitBtn(${data.gameid})">Quit</button>`;
+                    }
+                }
+            })
+        }
+
+    } else {
         // socket is reqUser => move game from en to not-en; others update palyernumber
         if (curUserID == reqUser) {
             document.querySelectorAll(".engaged-game-info").forEach(row => {
@@ -190,7 +204,7 @@ socket.on('lobby-quit-game', (data) => {
                 if (row.dataset.gameid == gameid) {
                     let pNum = row.cells[1];
                     console.log('lobby-quit-game', pNum);
-                    pNum.innerHTML = `<p id="player-number"> ${playerNumber}/4 </p>`;
+                    pNum.innerHTML = `<p id="player-number" class="mb-0"> ${playerNumber}</p>`;
                 }
             })
         }
@@ -223,14 +237,14 @@ socket.on('play-game', gameid => {
      * players=[id, username, avatar],
      * reqUser }
      */
-function viewGameDetailHTML(data) {
-    let { gameid, gamename, players, playerNumber } = data;
-    let html = `<button type="button" class="btn btn-primary" data-bs-toggle="modal"
-    id="viewGameDetails" data-bs-target="#gameDetails">
-    View Game Details
-    </button>`;
-    return html;
-}
+// function viewGameDetailHTML(data) {
+//     let { gameid, gamename, players, playerNumber } = data;
+//     let html = `<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+//     id="viewGameDetails" data-bs-target="#gameDetails">
+//     View Game Details
+//     </button>`;
+//     return html;
+// }
 
 function addRowToFullGame(data) {
     console.log('addRowToFullGame', data);
@@ -242,8 +256,16 @@ function addRowToFullGame(data) {
     newRow.setAttribute("data-gamename", `${gamename}`);
     let cell1 = newRow.insertCell(0);
     let cell2 = newRow.insertCell(1);
-    cell1.innerHTML = `<p id="game-name" data-gameid="${gameid}"> ${gamename}: </p>`;
-    cell2.innerHTML = viewGameDetailHTML(data);
+    let cell3 = newRow.insertCell(2);
+    cell1.setAttribute("class", "align-middle text-center");
+    cell2.setAttribute("class", "align-middle text-center");
+    cell3.setAttribute("class", "align-middle text-center");
+    // cell1.innerHTML = `<p id="game-name" data-gameid="${gameid}"> ${gamename}</p>`;
+    cell1.innerHTML = `<a id="game-name" class="btn" href="/game/created/${gameid}" target="_blank"> ${gamename} </a>`;
+    cell2.innerHTML = `<p id="player-number" class="mb-0"> ${data.playerNumber}</p>`
+    cell3.innerHTML = `<button type="button" class="btn btn-primary btn-xs" id="join-game-btn"
+    disabled="disabled">Join</button>`;
+
 }
 
 function addRowToNotEnGame(data) {
@@ -256,11 +278,15 @@ function addRowToNotEnGame(data) {
     let cell1 = row.insertCell(0);
     let cell2 = row.insertCell(1);
     let cell3 = row.insertCell(2);
-    let cell4 = row.insertCell(3);
-    cell1.innerHTML = `<p id="game-name"> ${data.gamename}: </p>`;
-    cell2.innerHTML = `<p id="player-number"> ${data.playerNumber}/4 </p>`;
-    cell3.innerHTML = viewGameDetailHTML(data);
-    cell4.innerHTML = `<button type="button" class="btn btn-primary" id="join-game-btn"
+    cell1.setAttribute("class", "align-middle text-center");
+    cell2.setAttribute("class", "align-middle text-center");
+    cell3.setAttribute("class", "align-middle text-center");
+    // let cell4 = row.insertCell(3);
+    // cell1.innerHTML = `<p id="game-name"> ${data.gamename}</p>`;
+    cell1.innerHTML = `<a id="game-name" class="btn" href="/game/created/${data.gameid}" target="_blank"> ${data.gamename} </a>`;
+    cell2.innerHTML = `<p id="player-number" class="mb-0"> ${data.playerNumber}</p>`;
+    // cell3.innerHTML = viewGameDetailHTML(data);
+    cell3.innerHTML = `<button type="button" class="btn btn-primary btn-xs" id="join-game-btn"
     onclick="return joinBtn(${data.gameid})">Join</button>`
 }
 
@@ -273,9 +299,13 @@ function addRowToStartedGame(data) {
     let cell1 = row.insertCell(0);
     let cell2 = row.insertCell(1);
     let cell3 = row.insertCell(2);
-    cell1.innerHTML = `<p id="game-name"> ${data.gamename}: </p>`;
-    cell2.innerHTML = `<p id="player-number"> 4/4 </p>`;
-    cell3.innerHTML = `<a href="/game/show/${data.gameid}" target="_blank" class="btn btn-primary my-3" role="button"
+    cell1.setAttribute("class", "align-middle text-center");
+    cell2.setAttribute("class", "align-middle text-center");
+    cell3.setAttribute("class", "align-middle text-center");
+    // cell1.innerHTML = `<p id="game-name"> ${data.gamename}</p>`;
+    cell1.innerHTML = `<a id="game-name" class="btn" href="/game/created/${data.gameid}" target="_blank"> ${data.gamename} </a>`;
+    cell2.innerHTML = `<p id="player-number" class="mb-0"> 4 </p>`;
+    cell3.innerHTML = `<a href="/game/show/${data.gameid}" target="_blank" class="btn btn-primary btn-xs" role="button"
     id="view-game-btn">View</a>`;
 }
 
@@ -289,11 +319,15 @@ function addRowToEnGame(data) {
     let cell1 = row.insertCell(0);
     let cell2 = row.insertCell(1);
     let cell3 = row.insertCell(2);
-    let cell4 = row.insertCell(3);
-    cell1.innerHTML = `<p id="game-name"> ${data.gamename}: </p>`;
-    cell2.innerHTML = `<p id="player-number"> ${data.playerNumber}/4 </p>`;
-    cell3.innerHTML = viewGameDetailHTML(data);
-    cell4.innerHTML = `<button type="button" class="btn btn-primary" id="quit-game-btn"
+    cell1.setAttribute("class", "align-middle text-center");
+    cell2.setAttribute("class", "align-middle text-center");
+    cell3.setAttribute("class", "align-middle text-center");
+    // let cell4 = row.insertCell(3);
+    // cell1.innerHTML = `<p id="game-name"> ${data.gamename}</p>`;
+    cell1.innerHTML = `<a id="game-name" class="btn" href="/game/created/${data.gameid}" target="_blank"> ${data.gamename} </a>`;
+    cell2.innerHTML = `<p id="player-number" class="mb-0"> ${data.playerNumber}</p>`;
+    // cell3.innerHTML = viewGameDetailHTML(data);
+    cell3.innerHTML = `<button type="button" class="btn btn-primary btn-xs" id="quit-game-btn"
     onclick="return quitBtn(${data.gameid})">Quit</button>`;
 }
 
