@@ -97,10 +97,10 @@ class Spot {
         if (start < end) { return this.spotID <= end && this.spotID >= start; }
         else { return this.spotID >= start || this.spotID <= end; }
     }
-    isBlocking(player_index) {
+    isBlocking(player_index, tocking = false) {
         if (this.marble > -1) {
             if (this.marble == player_index) { return true; }
-            if (this.index == 0 && this.player === this.marble) { return true; }
+            if (this.index == 0 && this.player === this.marble) { return !tocking; }
             if (this.index == 8) { return true; }
         } else {
             if (this.area !== 2 && this.player !== player_index) { return true; }
@@ -247,9 +247,17 @@ class Board {
             + '';
         return decoHTML;
     }
-    getHomePortalHTML(player_index){
-        let htmlString = '<div class="fakeTockSpot board_18" id="homePortal_' + (player_index) + '"';
+    getHomePortalProxyHTML(player_index){
+        let htmlString = '<div class="fakeTockSpot proxy_prev_17" id="homePortal_' + (player_index) + '"';
         htmlString += ' onclick="tockHistory.proxyClick('+( (player_index+3) %4)+')"></div>';
+        return htmlString;
+    }
+    getHomeChainProxyHTML(player_index){
+        let htmlString;
+        for (let proxyIndex = 0; proxyIndex < 4; proxyIndex++) {
+            htmlString += '<div class="fakeTockSpot proxy_home_'+proxyIndex+'" id="homeProxy_'+player_index+'_'+proxyIndex+'"';
+            htmlString += ' onclick="tockHistory.proxyClick('+( (player_index+1) %4)+', '+proxyIndex+')"></div>';
+        }
         return htmlString;
     }
     AttachDivs() {
@@ -274,7 +282,8 @@ class Board {
                 }
                 boardSpots += this.spots[playerIndex][2][spotIndex].getHTML();
             }
-            boardSpots += this.getHomePortalHTML(playerIndex);
+            boardSpots += this.getHomePortalProxyHTML(playerIndex);
+            boardSpots += this.getHomeChainProxyHTML(playerIndex);
 
             boardHTML += playerOpen + playerDeco
                 + startOpen + startSpots + closeDiv
@@ -284,7 +293,8 @@ class Board {
         }
         gbElement.innerHTML = boardHTML;
     }
-    getMarbleOnSpot(spot) {
+    getMarbleOnSpot(givenSpot) {
+        let spot = this.getSpotFromSpecs(givenSpot);
         let marblePlayer = spot.marble;
         if (marblePlayer === -1) {
             return null;
@@ -301,11 +311,14 @@ class Board {
         }
         return null;
     }
-    findStartSpace(player_index) {
+    findStartSpace(player_index, number_previously_tocked = 0) {
         let firstSpace = null;
+        let count = number_previously_tocked;
         this.spots[player_index][0].forEach((spot, index) => {
-            if (firstSpace == null && spot.marble === -1) {
-                firstSpace = spot;
+            if (firstSpace == null){
+                if (spot.marble === -1 && count-- == 0) {
+                    firstSpace = spot;
+                }
             }
         });
         return firstSpace;
@@ -316,8 +329,8 @@ class Board {
         let cancelFlag = false;
         let cancelNext = false;
         while (currentSpot != null && !cancelFlag) {
-            if (cancelNext) { cancelFlag = true; }
             cancelFlag = spotFunction(currentSpot);
+            if (cancelNext) { cancelFlag = true; }
             let nextSpotSpecs = currentSpot.getPrevious(this.localPlayer);
             if (nextSpotSpecs == null) { currentSpot = null; }
             else {
@@ -386,7 +399,7 @@ class CurrentHand {
     constructor(data, active) {
         this.cards = data;
         this.active = false;
-        if (this.cards) {
+        if (this.cards && this.cards.length > 0) {
             this.selected = this.cards.length - 1;
             this.active = active;
         }
@@ -394,7 +407,7 @@ class CurrentHand {
         this.text = document.getElementById("selectedCardText");
     }
     loadHTML() {
-        if (this.cards) {
+        if (this.cards && this.cards.length) {
             let handHTML = '<div class="hHand">\n';
             this.map((index, card) => {
                 let cardClasses = "tockCard ";
@@ -436,14 +449,16 @@ class CurrentHand {
     }
     getSelected() { return this.cards[this.selected]; }
     select(newSelection) {
-        let newCards = [];
-        let selectedCard;
-        this.map((index, card) => {
-            if (index == newSelection) { selectedCard = card; }
-            else { newCards.push(card); }
-        });
-        newCards.push(selectedCard);
-        this.cards = newCards;
+        if (this.cards !== null && this.cards.length > 0){
+            let newCards = [];
+            let selectedCard;
+            this.map((index, card) => {
+                if (index == newSelection) { selectedCard = card; }
+                else { newCards.push(card); }
+            });
+            newCards.push(selectedCard);
+            this.cards = newCards;
+        }
         this.loadHTML();
     }
     sortByValidity() {
@@ -581,7 +596,7 @@ class Strategy {
                 let hasSwitchMate = false;
                 this.activeMarbles.forEach((otherMarble, index) => {
                     if (marble.owner !== otherMarble.owner) {
-                        if (otherMarble.spot.index !== 7) {
+                        if (otherMarble.spot.index !== 8) {
                             hasSwitchMate = true;
                             this.addPossibility(MoveType.Switch, marble, this.getCurrentSpot(otherMarble.spot));
                         }
@@ -607,7 +622,7 @@ class Strategy {
     }
     validatePropel(spotSpecs, amount) {
         let spot = this.getCurrentSpot(spotSpecs);
-        if (spot.isBlocking(this.player)) {
+        if (spot === null || spot.isBlocking(this.player, amount == 0)) {
             return null;
         }
         if (amount == 0) { return spot; }
@@ -690,21 +705,74 @@ class Strategy {
             }
         });
     }
+    resetTheory(propelInfo) {
+        this.removeTheoryFromMarbleboard(propelInfo);
+        propelInfo.blocked = false;
+        propelInfo.currentSpace = propelInfo.startSpace;
+        propelInfo.actualDistance = 0;
+        propelInfo.unblockedSpaces = [];
+        this.possibilities[this.getMyMarbleIndex(propelInfo.marble.id)] = [];
+    }
+    placeTheoryOnMarbleboard(propelInfo){
+        if (propelInfo.selection !== -1){
+            let targetSpot = this.getMarbleboardSpot(propelInfo.unblockedSpaces[propelInfo.selection]);
+            targetSpot.setHighlight(Highlight.Possibility.Selected);
+        }
+    }
+    showTheoryOnCurrentBoard(propelInfo){
+        propelInfo.unblockedSpaces.forEach((piSpot, index)=>{
+            if (index !== propelInfo.selection){
+                let spot = this.getCurrentSpot(piSpot);
+                spot.setHighlight(Highlight.Possibility.Unselected);
+                spot.onClick = "tockHistory.selectPossibility(" + propelInfo.marbleIndex + "," + index + ");";
+            }
+        });
+        let spot = this.getCurrentSpot(propelInfo.startSpace);
+        spot.setHighlight(Highlight.Possibility.Unselected);
+        spot.onClick = "tockHistory.selectPossibility(" + propelInfo.marbleIndex + "," + (-1) + ");";
+    }
+    makeTheoryChoice(marble_index, selection){}
+    openTheoryMarble(marble_index){
+        this.selected.marble = marble_index;
+        this.currentBoard = this.marbleBoard.copy();
+        let propelInfo = this.theory.data[marble_index];
+        this.showTheoryOnCurrentBoard(propelInfo);
+        this.currentBoard.AttachDivs();
+        
+    }
+    removeTheoryFromMarbleboard(propelInfo){
+        if (propelInfo.selection !== -1){
+            let targetSpot = this.getMarbleboardSpot(propelInfo.unblockedSpaces[propelInfo.selection]);
+            let targetMarble = this.currentBoard.getMarbleOnSpot(targetSpot);
+            targetSpot.setHighlight(-1);
+            if (targetMarble !== null && targetMarble.owner == propelInfo.marble.owner){
+                targetSpot.setHighlight(Highlight.Marble.Unselected);
+                targetSpot.onClick = "tockHistory.selectMarble(" + marble.id + ");";
+            }
+        }
+    }
     updateTheory() {
         this.theory.data.forEach((propelInfo, index) => {
             if (propelInfo != null) {
-                propelInfo.blocked = false;
+                this.resetTheory(propelInfo);
                 while (this.canContinue(propelInfo)) {
                     let nextSpotSpecs = propelInfo.currentSpace.getNext(this.player);
-                    let nextSpot = this.getTheorySpot(nextSpotSpecs);
-                    if (this.isBlocked(propelInfo, nextSpot)) {
-                        propelInfo.blocked = true;
-                    } else {
-                        propelInfo.currentSpace = nextSpot;
-                        propelInfo.actualDistance++;
-                        propelInfo.unblockedSpaces.push(nextSpot);
-                        this.addPossibility(MoveType.Propel, propelInfo.marble, propelInfo.currentSpace);
-                    }
+                    if (nextSpotSpecs !== null){
+                        let nextSpot = this.getTheorySpot(nextSpotSpecs);
+                        if (this.isBlocked(propelInfo, nextSpot)) {
+                            propelInfo.blocked = true;
+                        } else {
+                            propelInfo.currentSpace = nextSpot;
+                            propelInfo.actualDistance++;
+                            propelInfo.unblockedSpaces.push(nextSpot);
+                            this.addPossibility(MoveType.Propel, propelInfo.marble, propelInfo.currentSpace);
+                        }
+                    } else { propelInfo.blocked = true; }
+                }
+                if (propelInfo.selection >= propelInfo.unblockedSpaces.length){
+                    propelInfo.selection = -1;
+                } else {
+                    this.placeTheoryOnMarbleboard(propelInfo);
                 }
             }
         });
@@ -766,7 +834,7 @@ class Strategy {
         let count = 0;
         this.theory.data.forEach((propelInfo, index) => {
             if (propelInfo != null) {
-                count += propelInfo.selected + 1;
+                count += propelInfo.selection + 1;
             }
         });
         return count;
@@ -774,18 +842,34 @@ class Strategy {
     getTheorySpot(spotSpecs) {
         return this.theoryBoard.spots[spotSpecs.player][spotSpecs.area][spotSpecs.index];
     }
+    getMarbleboardSpot(spotSpecs) {
+        return this.marbleBoard.spots[spotSpecs.player][spotSpecs.area][spotSpecs.index];
+    }
     compileTheory() {
         this.possibility = null;
         this.theory.data.forEach((propelInfo, index) => {
             if (propelInfo !== null) {
-                if (propelInfo.selected > -1) {
+                if (propelInfo.selection > -1) {
                     let currentIndex = 0;
                     let previousSpot = propelInfo.startSpace;
                     if (this.possibility == null) {
-                        this.possibility = this.copyPossibility(this.possibilities[propelInfo.marbleIndex][currentIndex++]);
+                        this.possibility = {
+                            card: this.card,
+                            moveType: MoveType.Propel,
+                            marble: propelInfo.marble,
+                            marbleIndex: this.getMyMarbleIndex(propelInfo.marble.id),
+                            sourceSpot: this.getCurrentSpot(propelInfo.marble.source),
+                            destinationSpot: propelInfo.unblockedSpaces[0],
+                            subMoves: [],
+                            toString: () => {
+                                return MoveType.asString(possibility.moveType) + ' Marble ' + possibility.marble.toString() + ' to ' + possibility.destinationSpot.toString();
+                            }
+                        };
+                        currentIndex = 1;
                         previousSpot = this.possibility.destinationSpot;
                     }
-                    while (currentIndex <= propelInfo.selected) {
+                    let tocks = [];
+                    while (currentIndex <= propelInfo.selection) {
                         let destination = propelInfo.unblockedSpaces[currentIndex];
                         this.possibility.subMoves.push({
                             moveType: MoveType.Propel,
@@ -793,7 +877,7 @@ class Strategy {
                             fromSpot: previousSpot,
                             toSpot: destination
                         });
-                        let tockSubMove = this.getTockSubmove(destination);
+                        let tockSubMove = this.getTockSubmove(destination, tocks);
                         if (tockSubMove !== null) {
                             this.possibility.subMoves.push(tockSubMove);
                         }
@@ -889,16 +973,19 @@ class Strategy {
         newPossibility.subMoves = [];
         return newPossibility;
     }
-    getTockSubmove(spot) {
+    getTockSubmove(spot, tocks = []) {
         let misplacedMarble = this.currentBoard.getMarbleOnSpot(spot);
         if (misplacedMarble !== null) {
-            let tockedDestination = this.currentBoard.findStartSpace(misplacedMarble.owner);
+            let playerTocks = tocks[misplacedMarble.owner];
+            if (playerTocks === undefined) { playerTocks = 0;}
+            let tockedDestination = this.currentBoard.findStartSpace(misplacedMarble.owner, playerTocks);
             let subMove = {
                 moveType: MoveType.Tock,
                 marble: misplacedMarble,
                 fromSpot: spot,
                 toSpot: tockedDestination
             };
+            tocks[misplacedMarble.owner] = playerTocks + 1;
             return subMove;
         }
         return null;
@@ -907,82 +994,96 @@ class Strategy {
         return this.validity;
     }
     selectMarble(marbleId) {
-        // Copy board and log click
-        this.setBoardCopy();
-        let marbleIndex = this.getMyMarbleIndex(marbleId);
-        let marble = this.myMarbles[marbleIndex];
-        let spot = this.getCurrentSpot(marble.spot);
-        console.log("Selected Marble " + marbleId + " @ Spot " + spot.toString());
+        if (this.theory){ this.openTheoryMarble(this.getMyMarbleIndex(marbleId));}
+        else {
+            // Copy board and log click
+            this.setBoardCopy();
+            let marbleIndex = this.getMyMarbleIndex(marbleId);
+            let marble = this.myMarbles[marbleIndex];
+            let spot = this.getCurrentSpot(marble.spot);
+            console.log("Selected Marble " + marbleId + " @ Spot " + spot.toString());
 
-        // Reset highlights if a marble was previously set
-        // - possibility highlights and interactions should be removed
-        // - marble highlight should be set to unselected
-        // - any possibility selection should be removed
-        if (this.selected.marble !== -1 && this.selected.marble !== marbleIndex) {
-            this.possibilities[this.selected.marble].forEach((possibility, index) => {
-                this.setPossibilityAsHidden(possibility);
-            });
-            this.selected.possibility = -1;
-            this.setMarbleAsUnselected(this.myMarbles[this.selected.marble]);
-
-        }
-
-        // Visually select marble and show that marbles possibilities
-        this.setMarbleAsSelected(marble);
-        this.possibilities[marbleIndex].forEach((possibility, pIndex) => {
-            console.log('Possibility ' + pIndex + ': ' + MoveType.asString(possibility.moveType) + ' to ' + possibility.destinationSpot.toString());
-            possibility.subMoves.forEach((subMove, index) => {
-                console.log('Sub-Move: Marble ' + subMove.marble.toString() + ' ' + MoveType.asString(subMove.moveType) + ' to ' + subMove.toSpot.toString());
-            });
-            this.setPossibilityAsUnselected(possibility);
-        });
-
-        // If incremental propel, check for current selection
-        if (this.theory) {
-            let selectedIndex = this.theory.data[marbleIndex].selection;
-            if (selectedIndex > -1) {
-                this.setPossibilityAsSelected(this.possibilities[marbleIndex][selectedIndex]);
-                this.selected.possibility = selectedIndex;
+            // Reset highlights if a marble was previously set
+            // - possibility highlights and interactions should be removed
+            // - marble highlight should be set to unselected
+            // - any possibility selection should be removed
+            if (this.selected.marble !== -1 && this.selected.marble !== marbleIndex) {
+                this.possibilities[this.selected.marble].forEach((possibility, index) => {
+                    this.setPossibilityAsHidden(possibility);
+                });
+                this.selected.possibility = -1;
+                this.setMarbleAsUnselected(this.myMarbles[this.selected.marble]);
             }
-        }
 
-        // Save our newly selected marble and display
-        this.selected.marble = marbleIndex;
-        this.currentBoard.AttachDivs();
+            // Visually select marble and show that marbles possibilities
+            this.setMarbleAsSelected(marble);
+            this.possibilities[marbleIndex].forEach((possibility, pIndex) => {
+                console.log('Possibility ' + pIndex + ': ' + MoveType.asString(possibility.moveType) + ' to ' + possibility.destinationSpot.toString());
+                possibility.subMoves.forEach((subMove, index) => {
+                    console.log('Sub-Move: Marble ' + subMove.marble.toString() + ' ' + MoveType.asString(subMove.moveType) + ' to ' + subMove.toSpot.toString());
+                });
+                this.setPossibilityAsUnselected(possibility);
+            });
+
+            // If incremental propel, check for current selection
+            if (this.theory) {
+                let selectedIndex = this.theory.data[marbleIndex].selection;
+                if (selectedIndex > -1) {
+                    this.setPossibilityAsSelected(this.possibilities[marbleIndex][selectedIndex]);
+                    this.selected.possibility = selectedIndex;
+                }
+            }
+
+            // Save our newly selected marble and display
+            this.selected.marble = marbleIndex;
+            this.currentBoard.AttachDivs();
+        }
     }
     selectTheory(marbleIndex, possibilityIndex) {
         let propelInfo = this.theory.data[marbleIndex];
-        if (propelInfo.selected > -1) {
-            let oldTheory = this.getTheorySpot(propelInfo.unblockedSpaces[propelInfo.selected]);
+        if (propelInfo.selection > -1) {
+            let oldTheory = this.getTheorySpot(propelInfo.unblockedSpaces[propelInfo.selection]);
             oldTheory.marble = -1;
         }
-        let newTheory = this.getTheorySpot(propelInfo.unblockedSpaces[possibilityIndex]);
-        newTheory.marble = propelInfo.marbleIndex;
+        this.removeTheoryFromMarbleboard(propelInfo);
+        let newTheory = this.getTheorySpot(propelInfo.startSpace);
+        if (possibilityIndex > -1) {
+            newTheory = this.getTheorySpot(propelInfo.unblockedSpaces[possibilityIndex]);
+        }
+        newTheory.marble = propelInfo.marble.ident;
         propelInfo.marble.spot.player = newTheory.player;
         propelInfo.marble.spot.area = newTheory.area;
         propelInfo.marble.spot.index = newTheory.index;
-        propelInfo.selected = possibilityIndex;
+        propelInfo.selection = possibilityIndex;
         this.updateTheory();
         this.possibility = null;
+        this.placeTheoryOnMarbleboard(propelInfo);
+        this.currentBoard = this.marbleBoard.copy();
+        this.currentBoard.AttachDivs();
     }
     selectPossibility(marbleIndex, possibilityIndex) {
-        // Copy board and log click
-        this.setBoardCopy();
-        let marble = this.myMarbles[marbleIndex];
-        let spot = this.getCurrentSpot(marble.spot);
-        let possibility = this.possibilities[marbleIndex][possibilityIndex];
-        console.log('Selected possibility: ' + possibility.toString());
-
-        // If another possibility was previously chosen, reset it
-        if (this.selected.possibility !== -1 && this.selected.possibility != possibilityIndex) {
-            this.setPossibilityAsUnselected(this.possibilities[marbleIndex][this.selected.possibility]);
-        }
-        this.setPossibilityAsSelected(possibility);
-        this.selected.possibility = possibilityIndex;
-        if (this.theory) {
+        if (this.theory){
             this.selectTheory(marbleIndex, possibilityIndex);
         }
-        this.currentBoard.AttachDivs();
+        else {
+            // Copy board and log click
+            this.setBoardCopy();
+            let marble = this.myMarbles[marbleIndex];
+            let spot = this.getCurrentSpot(marble.spot);
+            let possibility = this.possibilities[marbleIndex][possibilityIndex];
+            console.log('Selected possibility: ' + possibility.toString());
+
+            // If another possibility was previously chosen, reset it
+            if (this.selected.possibility !== -1 && this.selected.possibility != possibilityIndex) {
+                this.setPossibilityAsUnselected(this.possibilities[marbleIndex][this.selected.possibility]);
+            }
+            this.setPossibilityAsSelected(possibility);
+            this.selected.possibility = possibilityIndex;
+            if (this.theory) {
+                this.selectTheory(marbleIndex, possibilityIndex);
+            }
+            this.currentBoard.AttachDivs();
+        }
         return this.isReady();
     }
     isReady() {
@@ -1295,8 +1396,12 @@ class TockHistory {
     leaveEndedGame() {
         window.location.replace("/game/summary/" + this.gameState.gameID);
     }
-    proxyClick(player_index){
-        document.getElementById("spot_"+player_index+"_board_17").click();    
+    proxyClick(player_index, index=-1){
+        if (index == -1){
+            document.getElementById("spot_"+player_index+"_board_17").click();    
+        } else {
+            document.getElementById("spot_"+player_index+"_home_"+index).click();
+        }
     }
 }
 let tockHistory;

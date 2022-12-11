@@ -232,6 +232,10 @@ const setGameCardIndex = (id, index) => {
     return db.one('UPDATE game_cards SET index=${index} WHERE id=${id} RETURNING index', {id, index});
 };
 
+const resetGameCard = (id, index) => {
+    return db.one('UPDATE game_cards SET index=${index}, location_id=18 WHERE id=${id} RETURNING index', {id, index});
+};
+
 const getANewCard = (game_id, player_index) => {
     return db.one('UPDATE game_cards SET location_id=${player_index} WHERE id IN (SELECT id FROM game_cards WHERE location_id = 18 AND game_id = ${ game_id } ORDER BY index ASC FETCH FIRST 1 ROWS ONLY) RETURNING card_id', {player_index, game_id});
 };
@@ -419,20 +423,23 @@ const initialCards = (game_id) => {
 };
 
 const reshuffleCards = async (game_id) => {
+    console.log("Reshuffling...");
     let cardIDs = await getCardIDs(game_id);
     let cardIndices = shuffle();
-    cardIDs.forEach(async (cardId, index)=>{
-        await setGameCardIndex(cardId, index);
-    });
+    for (let cardIDIndex = 0; cardIDIndex < cardIDs.length; cardIDIndex++){
+        console.log("Card "+cardIDs[cardIDIndex].id+" placed at "+cardIndices[cardIDIndex]);
+        await resetGameCard(cardIDs[cardIDIndex].id, cardIndices[cardIDIndex]);
+    }
+    console.log("Done");
 }
 
 /* dbQuery.dealCardsToPlayer(game_id, player_index, handSize) */
 const HANDCARDS =
-    "UPDATE game_cards SET location_id = ${ player_index } WHERE id IN (SELECT id FROM game_cards WHERE location_id = 18 AND game_id = ${ game_id } ORDER BY index ASC OFFSET ${offset} FETCH FIRST ${handSize} ROWS ONLY)";
+    "UPDATE game_cards SET location_id = ${ player_index } WHERE id IN (SELECT id FROM game_cards WHERE location_id = 18 AND game_id = ${ game_id } ORDER BY index ASC FETCH FIRST ${handSize} ROWS ONLY)";
 
-const dealCardsToPlayer = (game_id, hand_size=5) => {
+const dealCardsToPlayer = async (game_id, hand_size=5) => {
     for (let player_index = 0; player_index < 4; player_index++) {
-        db.oneOrNone(HANDCARDS, { player_index, game_id, offset: 5 * player_index, handSize: hand_size });
+        await db.none(HANDCARDS, { player_index: player_index, game_id: game_id, handSize: hand_size });
     }
     return true;
 };

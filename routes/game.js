@@ -228,81 +228,93 @@ router.post("/state", async function (req, res, next) {
 */
 router.post("/move", async function (req, res, next) {
     console.log("Move reached");
-    let validator = makeValidator(req.body, req.user.id);
-    let isValid = await validator.validate();
-    if (isValid) {
-        console.log("Valid!");
-        let socketIO = req.app.io;
-        let data = validator.truth;
-        // Log the turn
-        let turnId = await dbQuery.logTurn(data.game_player.id, data.card_used.card_id);
-        console.log("logTurn");
-        // Discard the used card
-        await dbQuery.discardGameCards(data.card_used.id);
-        console.log("Discarded card "+data.card_used.id);
-        // Reorder the cards in hand
-        for ( let cardIndex=0; cardIndex < data.cardShifts.length; cardIndex++){
-            let card = data.cardShifts[cardIndex];
-            console.log("Moving card "+card.id+" to handIndex "+card.index);
-            await dbQuery.setGameCardIndex(card.id, card.index);
-        }
-        // Log the moves and move the marbles
-        for (let moveIndex = 0; moveIndex< data.moves.length; moveIndex++){
-            let move = data.moves[moveIndex];
-            console.log("Logging move and updating marbles for:  (turnID:"+turnId.id+")");
-            console.log(move);
-            await dbQuery.logMove(turnId.id, move.marble_id, move.from_spot_id, move.to_spot_id, move.movement_type);
-            console.log("Move logged...");
-            await dbQuery.updateMarbles(move.marble_id, move.to_spot_id);
-            console.log("Marbles moved.");
-        }
-        // Check for end game
-        if (data.gameOver) {
-            // - - If so, edit the game table to complete the game
-            await dbQuery.endGameByWin(data.game_id, data.user_id);
-            // - - Send everyone to summary
-            socketIO.to(data.game_id).emit("endGame");
-        } else {
-            // If still playing...
-            let newTurn = (data.player_index+1) %4;
-            let newDealer = data.game.dealer;
-            // Check for joker use,
-            if (data.card_used.value == 0) {
-                // - If so, deal another card and decrement turn
-                await dbQuery.getANewCard(data.game_id, data.player_index);
-                newTurn = data.player_index;
+    if (req.user){
+        let validator = makeValidator(req.body, req.user.id);
+        let isValid = await validator.validate();
+        if (isValid) {
+            console.log("Valid!");
+            let socketIO = req.app.io;
+            let data = validator.truth;
+            // Log the turn
+            let turnId = await dbQuery.logTurn(data.game_player.id, data.card_used.card_id);
+            console.log("logTurn");
+            // Discard the used card
+            await dbQuery.discardGameCards(data.card_used.id);
+            console.log("Discarded card "+data.card_used.id);
+            // Reorder the cards in hand
+            for ( let cardIndex=0; cardIndex < data.cardShifts.length; cardIndex++){
+                let card = data.cardShifts[cardIndex];
+                console.log("Moving card "+card.id+" to handIndex "+card.index);
+                await dbQuery.setGameCardIndex(card.id, card.index);
             }
-            // Check for number of cards in hand and who is dealer
-            console.log("Getting card counts...");
-            data.rawCardCounts = await dbQuery.countHands(data.game_id);
-            console.log("Deciphering...");
-            data.cardCounts = [];
-            data.rawCardCounts.forEach((location)=>{
-                data.cardCounts[location.location_id] = location.amount;
-            });
-            console.log("Done.");
-            if (data.game.dealer == data.player_index && data.cardCounts[data.player_index] == 0) {
-                let numberOfCardsToDeal = 4;
-                // - Check number of cards in draw
-                if (data.cardCounts[18] <= 2) {
-                    // - - If 2 or less, reshuffle the deck, 
-                    numberOfCardsToDeal = 5;
-                    await dbQuery.reshuffleCards(data.game_id);
-                    // - - Then increment dealer and set turn to (dealer +1)%4
-                    newDealer = (newDealer+1) %4;
-                    newTurn = (newDealer+1) %4;
+            // Log the moves and move the marbles
+            for (let moveIndex = 0; moveIndex< data.moves.length; moveIndex++){
+                let move = data.moves[moveIndex];
+                console.log("Logging move and updating marbles for:  (turnID:"+turnId.id+")");
+                console.log(move);
+                await dbQuery.logMove(turnId.id, move.marble_id, move.from_spot_id, move.to_spot_id, move.movement_type);
+                console.log("Move logged...");
+                await dbQuery.updateMarbles(move.marble_id, move.to_spot_id);
+                console.log("Marbles moved.");
+            }
+            // Check for end game
+            if (data.gameOver) {
+                // - - If so, edit the game table to complete the game
+                await dbQuery.endGameByWin(data.game_id, data.user_id);
+                // - - Send everyone to summary
+                socketIO.to(data.game_id).emit("endGame");
+            } else {
+                // If still playing...
+                let newTurn = (data.player_index+1) %4;
+                let newDealer = data.game.dealer;
+                // Check for joker use,
+                if (data.card_used.value == 0) {
+                    // - If so, deal another card and decrement turn
+                    await dbQuery.getANewCard(data.game_id, data.player_index);
+                    newTurn = data.player_index;
                 }
-                // - Deal hand of cards (5 if just shuffled, 4 otherwise)
-                await dbQuery.dealCardsToPlayer(data.game_id, numberOfCardsToDeal);
+                // Check for number of cards in hand and who is dealer
+                console.log("Getting card counts...");
+                data.rawCardCounts = await dbQuery.countHands(data.game_id);
+                console.log("Deciphering...");
+                data.cardCounts = [];
+                console.log("cardCounts:");
+                data.rawCardCounts.forEach((location)=>{
+                    console.log(location.location_id+": "+location.amount);
+                    data.cardCounts[location.location_id] = location.amount;
+                });
+                console.log("dealer: "+data.game.dealer);
+                console.log("player: "+data.player_index);
+                console.log("cardCount: "+data.cardCounts[data.player_index]);
+                if (data.game.dealer == data.player_index && data.cardCounts[data.player_index] === undefined) {
+                    console.log("Need to deal");
+                    let numberOfCardsToDeal = 4;
+                    // - Check number of cards in draw
+                    console.log("Draw Count: "+data.cardCounts[18]);
+                    if (data.cardCounts[18] === undefined || data.cardCounts[18] <= 2) {
+                        // - - If 2 or less, reshuffle the deck, 
+                        numberOfCardsToDeal = 5;
+                        console.log("Need to reshuffle");
+                        await dbQuery.reshuffleCards(data.game_id);
+                        // - - Then increment dealer and set turn to (dealer +1)%4
+                        newDealer = (newDealer+1) %4;
+                        newTurn = (newDealer+1) %4;
+                    }
+                    // - Deal hand of cards (5 if just shuffled, 4 otherwise)
+                    await dbQuery.dealCardsToPlayer(data.game_id, numberOfCardsToDeal);
+                    console.log("Dealing cards");
+                }
+                // Increment turn ( %4 ) and send trigger to new player.
+                console.log("Updating game "+data.game_id+" to "+newTurn+"|"+newDealer);
+                await dbQuery.updateGameTurn(data.game_id, newTurn, newDealer);
+                socketIO.to(data.game_id).emit("startTurn", newTurn);
             }
-            // Increment turn ( %4 ) and send trigger to new player.
-            console.log("Updating game "+data.game_id+" to "+newTurn+"|"+newDealer);
-            await dbQuery.updateGameTurn(data.game_id, newTurn, newDealer);
-            socketIO.to(data.game_id).emit("startTurn", newTurn);
         }
+        console.log("Sending Validator Status.");
+        res.json(validator.getStatus());
+    } else {
+        res.json({status: "Not Logged In."});
     }
-    console.log("Sending Validator Status.");
-    res.json(validator.getStatus());
 })
 
 /* PAGE: /game/concede/:id */

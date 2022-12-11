@@ -47,10 +47,10 @@ class Spot {
         if (start < end) { return this.spotID <= end && this.spotID >= start; }
         else { return this.spotID >= start || this.spotID <= end; }
     }
-    isBlocking(player_index) {
+    isBlocking(player_index, with_tock = false) {
         if (this.marble > -1) {
             if (this.marble == player_index) { return true; }
-            if (this.index == 0 && this.player === this.marble) { return true; }
+            if (this.index == 0 && this.player === this.marble) { return !with_tock; }
             if (this.index == 8) { return true; }
         } else {
             if (this.area !== 2 && this.player !== player_index) { return true; }
@@ -234,19 +234,19 @@ class Board {
         let cancelFlag = false;
         let cancelNext = false;
         while (currentSpot != null && !cancelFlag) {
-            if (cancelNext){ cancelFlag = true; }
             cancelFlag = spotFunction(currentSpot);
+            if (cancelNext){ cancelFlag = true; }
             let nextSpotSpecs = currentSpot.getPrevious(this.player);
             if (nextSpotSpecs == null) { currentSpot = null; }
             else {
-                currentSpot = this.getSpotFromSpecs(nextSpotSpecs);
+                currentSpot = this.getSpot(nextSpotSpecs);
                 if (currentSpot.spotID == endSpot.spotID){ cancelNext = true; }
             }
         }
     }
     traverse(fromSpotSpecs, amount, mapFunction) {
-        console.log("traverse ("+amount+"): ");
-        console.log(fromSpotSpecs);
+        // console.log("traverse ("+amount+"): ");
+        // console.log(fromSpotSpecs);
         let spot = this.getSpot(fromSpotSpecs);
         mapFunction(spot);
         if (amount == 0) { return spot; }
@@ -281,7 +281,7 @@ class Board {
     getSpot(data) {
         if (data === null){ return data; }
         let spot = this.spots[data.player][data.area][data.index];
-        console.log("getSpot "+spot.toString());
+        // console.log("getSpot "+spot.toString());
         return spot;
     }
     getSpotFromID(spotID) {
@@ -403,7 +403,7 @@ class Strategy {
     }
     validatePropel(spotSpecs, amount) {
         let spot = this.getCurrentSpot(spotSpecs);
-        if (spot.isBlocking(this.player)) {
+        if (spot === null || spot.isBlocking(this.player, amount == 0)) {
             return null;
         }
         if (amount == 0) { return spot; }
@@ -564,7 +564,7 @@ class WasteValidator {
         this.strategies = [];
         this.canWaste = true;
         this.possibilities = [];
-        console.log(this.hand);
+        // console.log(this.hand);
         this.hand.forEach((card) => {
             let curStrat;
             if (this.strategies[card.value]) {

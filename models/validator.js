@@ -209,15 +209,13 @@ class Validator {
         };
         folio.endSpot = this.board.traverse(folio.fromSpot, distance, (spot)=>{
             console.log("Traversing at "+spot.toString());
-            if (spot.isBlocking(this.truth.player_index)){
-                if (spot.spotID == propelMove.to_spot_id) {
-                    folio.expectTock = true;
-                } else {
-                    let blockingMarble = this.board.getMarbleOnSpot(spot);
-                    if (blockingMarble && blockingMarble.id !== propelMove.marble_id){ folio.blocking = spot;}
-                }
+            let tock = spot.spotID == propelMove.to_spot_id;
+            if (spot.isBlocking(this.truth.player_index, tock)){
+                let blockingMarble = this.board.getMarbleOnSpot(spot);
+                if (blockingMarble && blockingMarble.id !== propelMove.marble_id){ folio.blocking = spot;}
             }
         });
+        folio.expectTock = folio.endSpot.marble > -1;
         if (folio.endSpot.area == 1) {
             let potential = [];
             potential[propelMove.marble_id] = propelMove.to_spot_id;
@@ -391,6 +389,15 @@ class Validator {
                     return this.setStatus(ValidationStatus.InvalidMarbleLocation, { marble_id: marble_id, startRelation: startRelation, endRelation: endRelation});
                 }
             }
+            let folio = {
+                marble_id: marble_id,
+                start: this.inc.start_spot_id[marble_id],
+                end: this.inc.end_spot_id[marble_id]
+            };
+            folio.startDeciphered = this.inc.flow.from[folio.start];
+            folio.endDeciphered = this.inc.flow.from[folio.end];
+            folio.length = folio.end - folio.start;
+            console.log("Validate INC: Marble "+folio.marble_id+" ["+folio.startDeciphered+"("+folio.start+"),"+folio.endDeciphered+"("+folio.end+")]: "+folio.length);
             count += this.inc.end_spot_id[marble_id] - this.inc.start_spot_id[marble_id];
             previousMarbleID = marble_id;
         });
