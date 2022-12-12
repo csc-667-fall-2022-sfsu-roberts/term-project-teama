@@ -121,6 +121,7 @@ router.get("/summary/:id", async function (req, res, next) {
             win = true;
         }
     }
+    console.log('request user', user, 'is concede player', isConcedePlayer, 'concede playername', playername);
     res.render("summary", { title: "Tock", game: game, concede: concede, isConcedePlayer: isConcedePlayer, playername: playername, win: win, user: user, rankings: rank });
 });
 
@@ -318,14 +319,19 @@ router.post("/move", async function (req, res, next) {
 })
 
 /* PAGE: /game/concede/:id */
-router.get("/concede/:id", notLoggedInUser, async function (req, res, next) {
-    console.log("Hit concede { game_id: %i, user_id: %i", req.game.id, req.user.id);
+router.post("/concede", notLoggedInUser, async function (req, res, next) {
+    const {gameId} = req.body;
+    console.log("Hit concede { game_id: %i, user_id: %i", gameId, req.user.id);
     try {
-        await dbQuery.setPlayerAsConceded(req.game.id, req.user.id);
-        await dbQuery.endGameByConcession(req.game.id);
-        let socketIO = req.app.io;
-        socketIO.emit("endGame", req.game.id);
-        res.redirect("/game/summary/" + req.game.id);
+        await dbQuery.setPlayerAsConceded(gameId, req.user.id);
+        await dbQuery.endGameByConcession(gameId);
+        // let socketIO = req.app.io;
+
+        // socketIO.to(req.game.id).emit("endGame", req.game.id);
+        res.json({
+            code: 1,
+        })
+        
     } catch (err) {
         console.log(err)
     }

@@ -26,6 +26,29 @@ socket.on('endGame', (gameId) => {
     tockHistory.endGame();
 });
 
+function concedeGame(gameId) {
+    fetch(`/game/concede`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "Application/json"
+        },
+        body: JSON.stringify({
+            gameId: gameId
+        })
+    })
+        .then(response => response.json())
+        .then(json => {
+            if (json.code === 1) {
+                socket.emit('sendEndGame', gameId);
+                setTimeout(function () {
+                    window.location.href = `/game/summary/${gameId}`;
+                }, 100)
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        })
+}
 
 // Message submit
 gameChatForm.addEventListener('submit', (e) => {
@@ -40,7 +63,7 @@ gameChatForm.addEventListener('submit', (e) => {
     }
 
     // Emit message to server
-    socket.emit('gameChatMessage', ({msg, gameId}));
+    socket.emit('gameChatMessage', ({ msg, gameId }));
 
     // Clear input
     e.target.elements.msg.value = '';
@@ -49,7 +72,7 @@ gameChatForm.addEventListener('submit', (e) => {
 
 // System Message submit
 sysMsgTestBtn.addEventListener('click', () => {
-    socket.emit('sysMsg', ({sysMsg, gameId}));
+    socket.emit('sysMsg', ({ sysMsg, gameId }));
 })
 
 // Output message to DOM
