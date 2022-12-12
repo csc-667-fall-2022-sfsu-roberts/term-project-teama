@@ -364,7 +364,7 @@ class Strategy {
             if (marble.spot.area > 0) {
                 let marbleSpot = this.getCurrentSpot(marble.spot);
                 let nextSpot = marbleSpot.getPrevious(this.player);
-                let validPropel = this.validatePropel(nextSpot, propelAmount + 1);
+                let validPropel = this.validatePropel(nextSpot, -3);
                 if (validPropel !== null) {
                     this.addPossibility(MoveType.Propel, marble, validPropel);
                 }
