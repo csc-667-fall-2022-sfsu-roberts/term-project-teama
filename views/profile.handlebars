@@ -45,246 +45,177 @@
 
 {{> navbar}}
 
-{{!-- <div class="container-fluid">
-  <div class="row">
-    <h1>Profile Page</h1>
-    <h2>#{{user.id}}:{{user.name}}</h2>
-    <div class="column left">
-      <img class="border border-dark rounded-circle img-thumbnail"
-        src="https://portalsf.surge.sh/static/Icons/grossedCat.png" alt="" />
-    </div>
-    <div class="column right">
-      <h2>Email: {{user.email}}</h2>
-      <h2>Password:</h2>
-      <h2>Member since: {{user.createdAt }} </h2>
-      <h2>Wins/Losses:{{user.wins}}/{{user.losses}}</h2>
-
-    </div>
-    <div class="stats">
-      <div id="accordion">
-        <div class="card">
-          <div class="card-header" id="headingOne">
-            <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
-                aria-controls="collapseOne">
-                🏆 Trophies & Achievements 🏆
-              </button>
-            </h5>
-          </div>
-        </div>
-        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-          <div class="card-body">
-            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon
-            officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3
-            wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et.
-            Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan
-            excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt
-            you probably haven't heard of them accusamus labore sustainable VHS.
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header" id="headingTwo">
-            <h5 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true"
-                aria-controls="collapseTwo">
-                📜 Match History 📜
-              </button>
-            </h5>
-          </div>
-        </div>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-          <div class="card-body">
-            Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon
-            officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3
-            wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et.
-            Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan
-            excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt
-            you probably haven't heard of them accusamus labore sustainable VHS.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div> --}}
-
-
-<section style="background-color: #eee;">
+<section >
   <div class="row mx-5">
-    <div class="col-lg-4 my-5">
+    <div class="col-lg-6 my-4 offset-lg-3">
       <div class="card mb-4">
         <div class="card-body text-center">
           <img class="m-1 avatar avatar_{{user.avatar}}" style="">
           <h5 class="my-3">{{user.username}}</h5>
           <div class="editAvatar">
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
- Change your avatar! 
-</button>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+              Change your avatar!
+            </button>
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-              <!--Insert Avatar Gallery-->
-          <p class="my-3">Change Your Avater</p>
-          <form id="avatarForm" action="/users/profile" method="post">
-            <input type="radio" id="0" name="avatar" value="0">
-            <label for="0">
-              <div class="avatar avatar_0"></div>
-            </label>
+            <!-- Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Change Your Avatar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <!--Insert Avatar Gallery-->
+                    <p class="my-3">Change Your Avater</p>
+                    <form id="avatarForm" action="/users/profile" method="post">
+                      <input type="radio" id="0" name="avatar" value="0">
+                      <label for="0">
+                        <div class="avatar avatar_0"></div>
+                      </label>
 
-            <input type="radio" id="1" name="avatar" value="1">
-            <label for="1">
-              <div class="avatar avatar_1"></div>
-            </label>
+                      <input type="radio" id="1" name="avatar" value="1">
+                      <label for="1">
+                        <div class="avatar avatar_1"></div>
+                      </label>
 
-            <input type="radio" id="2" name="avatar" value="2">
-            <label for="2">
-              <div class="avatar avatar_2"></div>
-            </label>
+                      <input type="radio" id="2" name="avatar" value="2">
+                      <label for="2">
+                        <div class="avatar avatar_2"></div>
+                      </label>
 
-            <input type="radio" id="3" name="avatar" value="3">
-            <label for="3">
-              <div class="avatar avatar_3"></div>
-            </label><br><br>
+                      <input type="radio" id="3" name="avatar" value="3">
+                      <label for="3">
+                        <div class="avatar avatar_3"></div>
+                      </label><br><br>
 
-            <input type="radio" id="4" name="avatar" value="4">
-            <label for="4">
-              <div class="avatar avatar_4"></div>
-            </label>
+                      <input type="radio" id="4" name="avatar" value="4">
+                      <label for="4">
+                        <div class="avatar avatar_4"></div>
+                      </label>
 
-            <input type="radio" id="5" name="avatar" value="5">
-            <label for="5">
-              <div class="avatar avatar_5"></div>
-            </label>
+                      <input type="radio" id="5" name="avatar" value="5">
+                      <label for="5">
+                        <div class="avatar avatar_5"></div>
+                      </label>
 
-            <input type="radio" id="6" name="avatar" value="6">
-            <label for="6">
-              <div class="avatar avatar_6"></div>
-            </label>
+                      <input type="radio" id="6" name="avatar" value="6">
+                      <label for="6">
+                        <div class="avatar avatar_6"></div>
+                      </label>
 
-            <input type="radio" id="7" name="avatar" value="7">
-            <label for="7">
-              <div class="avatar avatar_7"></div>
-            </label><br><br>
+                      <input type="radio" id="7" name="avatar" value="7">
+                      <label for="7">
+                        <div class="avatar avatar_7"></div>
+                      </label><br><br>
 
-            <input type="radio" id="8" name="avatar" value="8">
-            <label for="8">
-              <div class="avatar avatar_8"></div>
-            </label>
+                      <input type="radio" id="8" name="avatar" value="8">
+                      <label for="8">
+                        <div class="avatar avatar_8"></div>
+                      </label>
 
-            <input type="radio" id="9" name="avatar" value="9">
-            <label for="9">
-              <div class="avatar avatar_9"></div>
-            </label>
+                      <input type="radio" id="9" name="avatar" value="9">
+                      <label for="9">
+                        <div class="avatar avatar_9"></div>
+                      </label>
 
-            <input type="radio" id="10" name="avatar" value="10">
-            <label for="10">
-              <div class="avatar avatar_10"></div>
-            </label>
+                      <input type="radio" id="10" name="avatar" value="10">
+                      <label for="10">
+                        <div class="avatar avatar_10"></div>
+                      </label>
 
-            <input type="radio" id="11" name="avatar" value="11">
-            <label for="11">
-              <div class="avatar avatar_11"></div>
-            </label><br><br>
+                      <input type="radio" id="11" name="avatar" value="11">
+                      <label for="11">
+                        <div class="avatar avatar_11"></div>
+                      </label><br><br>
 
-            <input type="radio" id="12" name="avatar" value="12">
-            <label for="12">
-              <div class="avatar avatar_12"></div>
-            </label>
+                      <input type="radio" id="12" name="avatar" value="12">
+                      <label for="12">
+                        <div class="avatar avatar_12"></div>
+                      </label>
 
-            <input type="radio" id="13" name="avatar" value="13">
-            <label for="13">
-              <div class="avatar avatar_13"></div>
-            </label>
+                      <input type="radio" id="13" name="avatar" value="13">
+                      <label for="13">
+                        <div class="avatar avatar_13"></div>
+                      </label>
 
-            <input type="radio" id="14" name="avatar" value="14">
-            <label for="14">
-              <div class="avatar avatar_14"></div>
-            </label>
+                      <input type="radio" id="14" name="avatar" value="14">
+                      <label for="14">
+                        <div class="avatar avatar_14"></div>
+                      </label>
 
-            <input type="radio" id="15" name="avatar" value="15">
-            <label for="15">
-              <div class="avatar avatar_15"></div>
-            </label><br><br>
+                      <input type="radio" id="15" name="avatar" value="15">
+                      <label for="15">
+                        <div class="avatar avatar_15"></div>
+                      </label><br><br>
 
-            <input type="radio" id="16" name="avatar" value="16">
-            <label for="16">
-              <div class="avatar avatar_16"></div>
-            </label>
+                      <input type="radio" id="16" name="avatar" value="16">
+                      <label for="16">
+                        <div class="avatar avatar_16"></div>
+                      </label>
 
-            <input type="radio" id="17" name="avatar" value="17">
-            <label for="17">
-              <div class="avatar avatar_17"></div>
-            </label>
+                      <input type="radio" id="17" name="avatar" value="17">
+                      <label for="17">
+                        <div class="avatar avatar_17"></div>
+                      </label>
 
-            <input type="radio" id="18" name="avatar" value="18">
-            <label for="18">
-              <div class="avatar avatar_18"></div>
-            </label>
+                      <input type="radio" id="18" name="avatar" value="18">
+                      <label for="18">
+                        <div class="avatar avatar_18"></div>
+                      </label>
 
-            <input type="radio" id="19" name="avatar" value="19">
-            <label for="19">
-              <div class="avatar avatar_19"></div>
-            </label><br><br>
+                      <input type="radio" id="19" name="avatar" value="19">
+                      <label for="19">
+                        <div class="avatar avatar_19"></div>
+                      </label><br><br>
 
-            <input type="radio" id="20" name="avatar" value="20">
-            <label for="20">
-              <div class="avatar avatar_20"></div>
-            </label>
+                      <input type="radio" id="20" name="avatar" value="20">
+                      <label for="20">
+                        <div class="avatar avatar_20"></div>
+                      </label>
 
-            <input type="radio" id="21" name="avatar" value="21">
-            <label for="21">
-              <div class="avatar avatar_21"></div>
-            </label>
+                      <input type="radio" id="21" name="avatar" value="21">
+                      <label for="21">
+                        <div class="avatar avatar_21"></div>
+                      </label>
 
-            <input type="radio" id="22" name="avatar" value="22">
-            <label for="22">
-              <div class="avatar avatar_22"></div>
-            </label>
+                      <input type="radio" id="22" name="avatar" value="22">
+                      <label for="22">
+                        <div class="avatar avatar_22"></div>
+                      </label>
 
-            <input type="radio" id="23" name="avatar" value="23">
-            <label for="23">
-              <div class="avatar avatar_23"></div>
-            </label><br><br>
+                      <input type="radio" id="23" name="avatar" value="23">
+                      <label for="23">
+                        <div class="avatar avatar_23"></div>
+                      </label><br><br>
 
-            <input type="radio" id="24" name="avatar" value="24">
-            <label for="24">
-              <div class="avatar avatar_24"></div>
-            </label>
+                      <input type="radio" id="24" name="avatar" value="24">
+                      <label for="24">
+                        <div class="avatar avatar_24"></div>
+                      </label>
 
-            <input type="radio" id="25" name="avatar" value="25">
-            <label for="25">
-              <div class="avatar avatar_25"></div>
-            </label>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" value="Submit" class="btn btn-primary">Save changes</>
-      </div>
-      </form>
+                      <input type="radio" id="25" name="avatar" value="25">
+                      <label for="25">
+                        <div class="avatar avatar_25"></div>
+                      </label>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" value="Submit" class="btn btn-primary">Save changes</>
+                  </div>
+                  </form>
 
-    </div>
-  </div>
-</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="card mb-4 mb-lg-0">
-        <div class="card-body p-0">
-          <p>Extra information can be showed here</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-lg-8 ">
       <div class="card  my-5">
         <div class="card-body">
           <div class="row">
@@ -316,40 +247,6 @@
           <hr>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-6">
-          <div class="card mb-4 mb-md-0">
-            <div class="card-body">
-              <p class="mb-4"> 🏆 Trophies & Achievements 🏆</p>
-              <hr>
-              <div class="card-body">
-                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf
-                moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.
-                Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda
-                shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea
-                proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim
-                aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card mb-4 mb-md-0">
-            <div class="card-body">
-              <p class="mb-4"> 📜 Match History 📜</p>
-              <hr>
-              <div class="card-body">
-                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf
-                moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.
-                Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda
-                shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea
-                proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim
-                aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
   </div>
@@ -377,4 +274,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
   integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 --}}
-

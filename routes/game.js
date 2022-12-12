@@ -307,8 +307,8 @@ router.post("/move", async function (req, res, next) {
 router.get("/concede/:id", notLoggedInUser, async function (req, res, next) {
     console.log("Hit concede { game_id: %i, user_id: %i", req.game.id, req.user.id);
     try {
-        dbQuery.setPlayerAsConceded(req.game.id, req.user.id);
-        dbQuery.endGameByConcession(req.game.id);
+        await dbQuery.setPlayerAsConceded(req.game.id, req.user.id);
+        await dbQuery.endGameByConcession(req.game.id);
         let socketIO = req.app.io;
         socketIO.to(req.game.id).emit("endGame", req.game.id);
         res.redirect("/game/summary/" + req.game.id);
