@@ -40,9 +40,7 @@ function concedeGame(gameId) {
         .then(json => {
             if (json.code === 1) {
                 socket.emit('sendEndGame', gameId);
-                setTimeout(function () {
-                    window.location.href = `/game/summary/${gameId}`;
-                }, 100)
+                window.location.href = `/game/summary/${gameId}`;
             }
         })
         .catch(error => {
