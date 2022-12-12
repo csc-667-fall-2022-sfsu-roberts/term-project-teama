@@ -1408,7 +1408,7 @@ class TockHistory {
             this.canWaste = false;
             this.setConfirm();
             let text = "A player has conceded the game.";
-            if (this.winner === null) {
+            if (this.winner !== null) {
                 text = this.gameState.players[this.winner].name + " has won the game!";
             }
             this.hand.showText(text);
