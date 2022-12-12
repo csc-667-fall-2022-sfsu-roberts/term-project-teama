@@ -1407,7 +1407,11 @@ class TockHistory {
         this.startTurn().then(()=>{
             this.canWaste = false;
             this.setConfirm();
-            this.hand.showText(this.gameState.players[this.winner].name + " has won the game!");
+            let text = "A player has conceded the game.";
+            if (this.winner) {
+                text = this.gameState.players[this.winner].name + " has won the game!";
+            }
+            this.hand.showText(text);
             document.getElementById("endGame").hidden = false;
         });
     }
