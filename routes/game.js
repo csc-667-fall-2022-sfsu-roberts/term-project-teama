@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const dbQuery = require("../db/dbquery");
 const { notLoggedInUser } = require('../config/authenticated');
-const { request } = require("express");
 const { makeValidator } = require("../models/validator");
 /* Game */
 
@@ -103,11 +102,26 @@ router.get("/summary/:id", async function (req, res, next) {
     const gameUser = await dbQuery.findUserByGameUserId(id, user.id);
     const rank = await dbQuery.getRanking();
     let win = false;
-    let concede = gameUser.has_conceded;
-    if (game.winner === user.id) {
-        win = true;
+    let concede = false;
+    let isConcedePlayer = false;
+    let playername;
+    if (!game.winner) {
+        concede = true;
+        let game_players = await dbQuery.findPlayersByGameId(id);
+        for (let i = 0; i < game_players.length; i++) {
+            if (game_players[i].has_conceded) {
+                if (game_players[i].player_id === user.id) {
+                    isConcedePlayer = true;
+                }
+                playername = (await dbQuery.findUserById(game_players[i].player_id)).username;
+            }
+        }
+    }else{
+        if (game.winner === user.id) {
+            win = true;
+        }
     }
-    res.render("summary", { title: "Tock", game: game, concede: concede, win: win, user: user, rankings: rank });
+    res.render("summary", { title: "Tock", game: game, concede: concede, isConcedePlayer: isConcedePlayer, playername: playername, win: win, user: user, rankings: rank });
 });
 
 /* PAGE: /game/rules */
@@ -155,8 +169,8 @@ router.post("/state", async function (req, res, next) {
     console.log("State reached");
     console.log("Request Data: ");
     console.log(req.body);
-    if (req.user == undefined){
-        res.json({ status: "illegal", message: "Please sign in."})
+    if (req.user == undefined) {
+        res.json({ status: "illegal", message: "Please sign in." })
     } else {
         let data = {
             status: "spectator",
@@ -176,10 +190,10 @@ router.post("/state", async function (req, res, next) {
             };
             let gameusers = await dbQuery.findAllUsersByGameId(data.gameID);
             data.players = [];
-            for (let playerIndex=0; playerIndex<gameusers.length; playerIndex++){
+            for (let playerIndex = 0; playerIndex < gameusers.length; playerIndex++) {
                 let player = gameusers[playerIndex];
                 const userinfo = await dbQuery.findUserById(player.player_id);
-                console.log("Checking game_player for id "+data.userID+": "+userinfo.id);
+                console.log("Checking game_player for id " + data.userID + ": " + userinfo.id);
                 if (data.userID === userinfo.id) {
                     data.game.isPlayer = true;
                     data.game.curPlayerIndex = player.player_index;
@@ -214,7 +228,7 @@ router.post("/state", async function (req, res, next) {
 */
 router.post("/move", async function (req, res, next) {
     console.log("Move reached");
-    if (req.user){
+    if (req.user) {
         let validator = makeValidator(req.body, req.user.id);
         let isValid = await validator.validate();
         if (isValid) {
@@ -226,17 +240,17 @@ router.post("/move", async function (req, res, next) {
             console.log("logTurn");
             // Discard the used card
             await dbQuery.discardGameCards(data.card_used.id);
-            console.log("Discarded card "+data.card_used.id);
+            console.log("Discarded card " + data.card_used.id);
             // Reorder the cards in hand
-            for ( let cardIndex=0; cardIndex < data.cardShifts.length; cardIndex++){
+            for (let cardIndex = 0; cardIndex < data.cardShifts.length; cardIndex++) {
                 let card = data.cardShifts[cardIndex];
-                console.log("Moving card "+card.id+" to handIndex "+card.index);
+                console.log("Moving card " + card.id + " to handIndex " + card.index);
                 await dbQuery.setGameCardIndex(card.id, card.index);
             }
             // Log the moves and move the marbles
-            for (let moveIndex = 0; moveIndex< data.moves.length; moveIndex++){
+            for (let moveIndex = 0; moveIndex < data.moves.length; moveIndex++) {
                 let move = data.moves[moveIndex];
-                console.log("Logging move and updating marbles for:  (turnID:"+turnId.id+")");
+                console.log("Logging move and updating marbles for:  (turnID:" + turnId.id + ")");
                 console.log(move);
                 await dbQuery.logMove(turnId.id, move.marble_id, move.from_spot_id, move.to_spot_id, move.movement_type);
                 console.log("Move logged...");
@@ -251,7 +265,7 @@ router.post("/move", async function (req, res, next) {
                 socketIO.to(data.game_id).emit("endGame", data.game_id);
             } else {
                 // If still playing...
-                let newTurn = (data.player_index+1) %4;
+                let newTurn = (data.player_index + 1) % 4;
                 let newDealer = data.game.dealer;
                 // Check for joker use,
                 if (data.card_used.value == 0) {
@@ -265,33 +279,33 @@ router.post("/move", async function (req, res, next) {
                 console.log("Deciphering...");
                 data.cardCounts = [];
                 console.log("cardCounts:");
-                data.rawCardCounts.forEach((location)=>{
-                    console.log(location.location_id+": "+location.amount);
+                data.rawCardCounts.forEach((location) => {
+                    console.log(location.location_id + ": " + location.amount);
                     data.cardCounts[location.location_id] = location.amount;
                 });
-                console.log("dealer: "+data.game.dealer);
-                console.log("player: "+data.player_index);
-                console.log("cardCount: "+data.cardCounts[data.player_index]);
+                console.log("dealer: " + data.game.dealer);
+                console.log("player: " + data.player_index);
+                console.log("cardCount: " + data.cardCounts[data.player_index]);
                 if (data.game.dealer == data.player_index && data.cardCounts[data.player_index] === undefined) {
                     console.log("Need to deal");
                     let numberOfCardsToDeal = 4;
                     // - Check number of cards in draw
-                    console.log("Draw Count: "+data.cardCounts[18]);
+                    console.log("Draw Count: " + data.cardCounts[18]);
                     if (data.cardCounts[18] === undefined || data.cardCounts[18] <= 2) {
                         // - - If 2 or less, reshuffle the deck, 
                         numberOfCardsToDeal = 5;
                         console.log("Need to reshuffle");
                         await dbQuery.reshuffleCards(data.game_id);
                         // - - Then increment dealer and set turn to (dealer +1)%4
-                        newDealer = (newDealer+1) %4;
-                        newTurn = (newDealer+1) %4;
+                        newDealer = (newDealer + 1) % 4;
+                        newTurn = (newDealer + 1) % 4;
                     }
                     // - Deal hand of cards (5 if just shuffled, 4 otherwise)
                     await dbQuery.dealCardsToPlayer(data.game_id, numberOfCardsToDeal);
                     console.log("Dealing cards");
                 }
                 // Increment turn ( %4 ) and send trigger to new player.
-                console.log("Updating game "+data.game_id+" to "+newTurn+"|"+newDealer);
+                console.log("Updating game " + data.game_id + " to " + newTurn + "|" + newDealer);
                 await dbQuery.updateGameTurn(data.game_id, newTurn, newDealer);
                 socketIO.to(data.game_id).emit("startTurn", newTurn);
             }
@@ -299,7 +313,7 @@ router.post("/move", async function (req, res, next) {
         console.log("Sending Validator Status.");
         res.json(validator.getStatus());
     } else {
-        res.json({status: "Not Logged In."});
+        res.json({ status: "Not Logged In." });
     }
 })
 
@@ -310,7 +324,7 @@ router.get("/concede/:id", notLoggedInUser, async function (req, res, next) {
         await dbQuery.setPlayerAsConceded(req.game.id, req.user.id);
         await dbQuery.endGameByConcession(req.game.id);
         let socketIO = req.app.io;
-        socketIO.to(req.game.id).emit("endGame", req.game.id);
+        socketIO.emit("endGame", req.game.id);
         res.redirect("/game/summary/" + req.game.id);
     } catch (err) {
         console.log(err)

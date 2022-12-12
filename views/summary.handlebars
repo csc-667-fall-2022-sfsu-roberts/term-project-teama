@@ -23,8 +23,13 @@
         </div>
         <div class="card-body">
             {{#if concede}}
+            {{#if isConcedePlayer}}
             <h5 class="card-title">
                 Sorry!<BR>You have conceded the game!</h5><BR>
+                {{else}}
+                <h5 class="card-title">
+                Sorry!<BR>{{playername}} have conceded the game!</h5><BR>
+                {{/if}}
             {{else}}
                 {{#if win}}
                 <h5 class="card-title">

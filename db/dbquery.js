@@ -162,6 +162,10 @@ const findGameIdByUserId = (userid) => {
     return db.any('SELECT "game_id" FROM "game_players" WHERE "player_id"=${userid}', { userid })
 };
 
+const findPlayersByGameId = (gameid) => {
+    return db.any('SELECT * FROM "game_players" WHERE "game_id"=${gameid}', { gameid });
+}
+
 const findGamePlayer = (game_id, user_id) => {
     return db.oneOrNone('SELECT * FROM "game_players" WHERE "game_id"=${game_id} AND "player_id"=${user_id}', { game_id, user_id });
 };
@@ -504,6 +508,7 @@ module.exports = {
     deleteGame,
     initRooms,
     getRanking,
+    findPlayersByGameId,
     findGamePlayer,
     countHands,
     getHand,
