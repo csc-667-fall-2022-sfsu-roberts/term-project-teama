@@ -23,7 +23,7 @@ socket.on('startTurn', (playerIndex) => {
 });
 
 socket.on('endGame', (gameId) => {
-    tockHistory.startTurn(playerIndex);
+    tockHistory.endGame();
     /*
     console.log('end game');
     fetch(`/game/summary/${gameId}`, {

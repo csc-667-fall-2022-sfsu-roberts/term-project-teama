@@ -334,7 +334,7 @@ const enOrStartedGames = async (userid) => {
                     players: await playersInGame(games[i].id)
                 };
                 m++;
-            } else if(games[i].state == 2){
+            } else if(games[i].state == 2 && games[i].winner !== null){
                 rs.endedGames[q] = {
                     game: games[i],
                     numOfUsers: num,

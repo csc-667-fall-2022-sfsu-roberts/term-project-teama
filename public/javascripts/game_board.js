@@ -584,7 +584,7 @@ class Strategy {
             this.initializeTheory();
             this.updateTheory();
             this.theory.data.forEach((propelInfo, index) => {
-                if (propelInfo != null) {
+                if (propelInfo != null && propelInfo.actualDistance > 0) {
                     this.setMarbleAsUnselected(this.myMarbles[index]);
                 }
             });
@@ -657,7 +657,7 @@ class Strategy {
         this.validity = totalDistance >= 7;
         return this.validity;
     }
-    isBlocked(propelInfo, nextSpace) {
+    isBlocked(propelInfo, nextSpace, tocking = false) {
         let spot = nextSpace;
         let marble = propelInfo.marble;
         if (spot.id == propelInfo.currentSpace.id) { return true; }
@@ -666,7 +666,7 @@ class Strategy {
                 return false;
             }
             if (spot.marble > 3) { return true; }
-            if (spot.index == 0 && spot.player === spot.marble) { return true; }
+            if (spot.index == 0 && spot.player === spot.marble) { return !tocking; }
             if (spot.index == 8) { return true; }
         } else {
             if (spot.area !== 2 && spot.player !== this.player) { return true; }
@@ -759,7 +759,7 @@ class Strategy {
                     let nextSpotSpecs = propelInfo.currentSpace.getNext(this.player);
                     if (nextSpotSpecs !== null){
                         let nextSpot = this.getTheorySpot(nextSpotSpecs);
-                        if (this.isBlocked(propelInfo, nextSpot)) {
+                        if (this.isBlocked(propelInfo, nextSpot, true)) {
                             propelInfo.blocked = true;
                         } else {
                             propelInfo.currentSpace = nextSpot;
@@ -1208,6 +1208,7 @@ class TockHistory {
         let marb_player_2 = [];
         let marb_player_3 = [];
         let newMarbles = [marb_player_0, marb_player_1, marb_player_2, marb_player_3];
+        let homeMarbles = [];
         for (let marbIndex = 0; marbIndex < this.gameState.marbles.length; marbIndex++) {
             let currentMarble = this.gameState.marbles[marbIndex];
             let currentSpot = this.startBoard.getSpotFromID(currentMarble.current_spot);
@@ -1224,7 +1225,19 @@ class TockHistory {
                 }
             }
             newMarbles[currentMarble.player_index].push(marbleData);
+            if (currentSpot.area === 1) { 
+                let prevNum = homeMarbles[currentMarble.player_index];
+                if (prevNum === undefined) { prevNum = 0; }
+                homeMarbles[currentMarble.player_index] = prevNum+1;
+            }
         }
+        let winner = null;
+        homeMarbles.forEach((marbleCount, player_index)=>{
+            if (marbleCount == 4) {
+                winner = player_index;
+            }
+        });
+        this.winner = winner;
         this.startBoard.placeMarbles(newMarbles);
     }
     parseOpponents() {
@@ -1383,7 +1396,7 @@ class TockHistory {
     }
     startTurn() {
         let data = { game_id: this.gameState.gameID };
-        sendPost("/game/state", data)
+        return sendPost("/game/state", data)
             .then((data) => {
                 console.log(data);
                 this.update(data);
@@ -1391,7 +1404,12 @@ class TockHistory {
 
     }
     endGame() {
-        document.getElementById("endGame").hidden = false;
+        this.startTurn().then(()=>{
+            this.canWaste = false;
+            this.setConfirm();
+            this.hand.showText(this.gameState.players[this.winner].name + " has won the game!");
+            document.getElementById("endGame").hidden = false;
+        });
     }
     leaveEndedGame() {
         window.location.replace("/game/summary/" + this.gameState.gameID);
