@@ -64,7 +64,7 @@ const init = (httpServer, app) => {
         socket.on('game-page', async (gameId) => {
             console.log(`${username} logged in game page`);
             socket.join(gameId);
-            io.emit("gameMessage", formatMessage(1, botName, `Hi, ${username}! Welcom to Tock!`));
+            io.emit("gameMessage", formatMessage(1, botName, `${username} has joined this game!`));
         });
 
         // Listen for game chat message
