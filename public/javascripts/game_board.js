@@ -1,4 +1,3 @@
-
 const gameContainerID = "gameContainer";
 let cbSetting = false;
 let debug = false;
@@ -583,11 +582,6 @@ class Strategy {
         if (this.is7AValidCard()) {
             this.initializeTheory();
             this.updateTheory();
-            this.theory.data.forEach((propelInfo, index) => {
-                if (propelInfo != null && propelInfo.actualDistance > 0) {
-                    this.setMarbleAsUnselected(this.myMarbles[index]);
-                }
-            });
         }
     }
     makeSwitch() {
@@ -731,7 +725,15 @@ class Strategy {
         spot.setHighlight(Highlight.Possibility.Unselected);
         spot.onClick = "tockHistory.selectPossibility(" + propelInfo.marbleIndex + "," + (-1) + ");";
     }
-    makeTheoryChoice(marble_index, selection){}
+    moveTheoryMarble(marble_id, to_spot_id){
+        let marble = this.theoryBoard.filterMarbles((curMarble)=>{ return curMarble.id == marble_id; })[0];
+        let fromSpot = this.getTheorySpot(marble.spot);
+        let toSpot = this.theoryBoard.getSpotFromID(to_spot_id);
+        fromSpot.marble = -1;
+        toSpot.marble = marble.owner;
+        marble.spot = toSpot;
+        return toSpot;
+    }
     openTheoryMarble(marble_index){
         this.selected.marble = marble_index;
         this.currentBoard = this.marbleBoard.copy();
@@ -740,6 +742,18 @@ class Strategy {
         this.currentBoard.AttachDivs();
         
     }
+    setTheoryMarbleSelectable(propelInfo){ 
+        let spot = this.marbleBoard.getSpotFromSpecs(propelInfo.marble.source);
+        let highlight = -1;
+        let onClick = null;
+        if (propelInfo.actualDistance > 0){
+            highlight = Highlight.Marble.Unselected;
+            onClick = "tockHistory.selectMarble(" + propelInfo.marble.id + ");";
+            this.setMarbleAsUnselected(propelInfo.marble);
+        }
+        spot.highlight = highlight;
+        spot.onClick = onClick;
+    }
     removeTheoryFromMarbleboard(propelInfo){
         if (propelInfo.selection !== -1){
             let targetSpot = this.getMarbleboardSpot(propelInfo.unblockedSpaces[propelInfo.selection]);
@@ -747,7 +761,7 @@ class Strategy {
             targetSpot.setHighlight(-1);
             if (targetMarble !== null && targetMarble.owner == propelInfo.marble.owner){
                 targetSpot.setHighlight(Highlight.Marble.Unselected);
-                targetSpot.onClick = "tockHistory.selectMarble(" + marble.id + ");";
+                targetSpot.onClick = "tockHistory.selectMarble(" + propelInfo.marble.id + ");";
             }
         }
     }
@@ -774,6 +788,7 @@ class Strategy {
                 } else {
                     this.placeTheoryOnMarbleboard(propelInfo);
                 }
+                this.setTheoryMarbleSelectable(propelInfo);
             }
         });
     }
@@ -922,7 +937,7 @@ class Strategy {
             spot.onClick = "tockHistory.selectPossibility(" + possibility.marbleIndex + "," + possibility.possibilityIndex + ");";
         });
     }
-    setPossibilityAsHidden(marble) {
+    setPossibilityAsHidden(possibility) {
         this.onPossibilitySpot(possibility, (spot, possibility) => {
             spot.setHighlight(-1);
             spot.onClick = null;
@@ -975,7 +990,7 @@ class Strategy {
     }
     getTockSubmove(spot, tocks = []) {
         let misplacedMarble = this.currentBoard.getMarbleOnSpot(spot);
-        if (misplacedMarble !== null) {
+        if (misplacedMarble !== null && misplacedMarble.owner !== this.player) {
             let playerTocks = tocks[misplacedMarble.owner];
             if (playerTocks === undefined) { playerTocks = 0;}
             let tockedDestination = this.currentBoard.findStartSpace(misplacedMarble.owner, playerTocks);
@@ -1041,19 +1056,12 @@ class Strategy {
     }
     selectTheory(marbleIndex, possibilityIndex) {
         let propelInfo = this.theory.data[marbleIndex];
-        if (propelInfo.selection > -1) {
-            let oldTheory = this.getTheorySpot(propelInfo.unblockedSpaces[propelInfo.selection]);
-            oldTheory.marble = -1;
-        }
         this.removeTheoryFromMarbleboard(propelInfo);
         let newTheory = this.getTheorySpot(propelInfo.startSpace);
         if (possibilityIndex > -1) {
             newTheory = this.getTheorySpot(propelInfo.unblockedSpaces[possibilityIndex]);
         }
-        newTheory.marble = propelInfo.marble.ident;
-        propelInfo.marble.spot.player = newTheory.player;
-        propelInfo.marble.spot.area = newTheory.area;
-        propelInfo.marble.spot.index = newTheory.index;
+        propelInfo.marble.spot = this.moveTheoryMarble(propelInfo.marble.id, newTheory.spotID);
         propelInfo.selection = possibilityIndex;
         this.updateTheory();
         this.possibility = null;

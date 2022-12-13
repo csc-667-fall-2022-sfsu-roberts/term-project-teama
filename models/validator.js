@@ -193,7 +193,8 @@ class Validator {
                 default: return this.validateMoves() && (this.validatePropel(this.truth.card_used.value));
             }
         }
-        console.log("Something went wrong.");
+        console.log("Invalid data or access.");
+        return false;
     }
     validatePropel(distance){
         // check mvoementType
